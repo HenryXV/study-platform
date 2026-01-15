@@ -1,17 +1,30 @@
 {
-  "name": "temp_app",
+  "name": "study-platform",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "@types/pg": "^8.16.0",
+    "@types/prismjs": "^1.26.5",
+    "ai": "^6.0.34",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.3",
+    "lucide-react": "^0.562.0",
     "next": "16.1.1",
+    "pg": "^8.17.0",
+    "prismjs": "^1.30.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-simple-code-editor": "^0.14.1",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -20,7 +33,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "prisma": "^7.2.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
