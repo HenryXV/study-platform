@@ -10,11 +10,13 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@types/pg": "^8.16.0",
     "@types/prismjs": "^1.26.5",
     "ai": "^6.0.34",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
@@ -26,6 +28,7 @@
     "react-dom": "19.2.3",
     "react-resizable-panels": "^4.4.1",
     "react-simple-code-editor": "^0.14.1",
+    "recharts": "^3.6.0",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.3.5"
   },

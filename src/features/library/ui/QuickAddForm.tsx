@@ -43,14 +43,6 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                     <h3 className="text-lg font-medium text-zinc-100 mb-1">Quick Add</h3>
                     <p className="text-sm text-zinc-400">Capture raw notes for later processing.</p>
                 </div>
-                <Button
-                    onClick={handleSubmit}
-                    disabled={isPending || !content.trim()}
-                    isLoading={isPending}
-                    size="sm"
-                >
-                    Save Note
-                </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -63,14 +55,24 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                     autoFocus
                 />
 
-                <div className="flex items-center justify-between pt-2 h-6">
-                    <div className="flex items-center justify-end flex-1 pl-4">
+                <div className="flex items-center justify-between pt-2">
+                    <div className="flex-1">
                         {message && (
                             <span className={`text-sm ${message.type === 'success' ? 'text-emerald-400' : 'text-red-400'} animate-pulse`}>
                                 {message.text}
                             </span>
                         )}
                     </div>
+                    <Button
+                        type="submit"
+                        disabled={isPending || !content.trim()}
+                        isLoading={isPending}
+                        size="sm"
+                        title={!content.trim() ? "Enter some text to save" : "Save Note"}
+                        className="disabled:cursor-not-allowed"
+                    >
+                        Save Note
+                    </Button>
                 </div>
             </form>
         </div>

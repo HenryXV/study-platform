@@ -11,13 +11,13 @@ export const DAILY_OPTIONS: MenuOption[] = [
     {
         title: "Maintenance",
         duration: "15 min",
-        questionCount: 12,
+        questionCount: 15,
         type: "standard"
     },
     {
         title: "Deep Flow",
         duration: "60 min",
-        questionCount: 45,
+        questionCount: 50,
         type: "deep"
     },
     {

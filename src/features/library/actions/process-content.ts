@@ -21,6 +21,8 @@ export async function processContent(sourceId: string) {
             model: 'google/gemini-2.0-flash-lite',
             output: Output.object({
                 schema: z.object({
+                    suggestedSubject: z.string().describe("The single best broad category (e.g. 'Computer Science', 'History')"),
+                    suggestedTopics: z.array(z.string()).describe("Specific topics or tags (e.g. 'React', 'Hooks')"),
                     units: z.array(z.object({
                         title: z.string().describe("The concept title"),
                         type: z.enum(['TEXT', 'CODE']).describe("CODE if it involves programming syntax, TEXT for theory"),
@@ -32,7 +34,8 @@ export async function processContent(sourceId: string) {
             }),
             prompt: `
         You are a strict teacher. Analyze the following text. 
-        Split it into atomic study concepts (flashcards).
+        Determine the single best Subject Category and a list of specific Topics.
+        Then, split it into atomic study concepts (flashcards).
         
         Rules:
         - If you see code examples, create a CODE unit with the snippet.
@@ -53,25 +56,61 @@ export async function processContent(sourceId: string) {
         }
 
         const count = await prisma.$transaction(async (tx) => {
+            // Handle Subject
+            const subject = await tx.subject.upsert({
+                where: { name: output.suggestedSubject },
+                update: {},
+                create: {
+                    name: output.suggestedSubject,
+                    color: "bg-blue-100 text-blue-800", // Default color
+                },
+            });
+
+            // Handle Topics
+            const topics = [];
+            for (const topicName of output.suggestedTopics) {
+                const topic = await tx.topic.upsert({
+                    where: {
+                        name_subjectId: {
+                            name: topicName,
+                            subjectId: subject.id
+                        }
+                    },
+                    update: {},
+                    create: {
+                        name: topicName,
+                        subjectId: subject.id,
+                    },
+                });
+                topics.push(topic);
+            }
+
             let createdCount = 0;
 
             for (const unit of output.units) {
                 // Create the Study Unit
-                const studyUnit = await tx.studyUnit.create({
+                await tx.studyUnit.create({
                     data: {
                         sourceId: source.id,
                         type: unit.type,
                         content: unit.title, // Using title as the main identifier for the Unit list
+                        // Questions are now generated separately on demand
                     },
                 });
 
                 createdCount++;
             }
 
-            // Mark source as processed
+            // Mark source as processed and link taxonomy
             await tx.contentSource.update({
                 where: { id: source.id },
-                data: { status: 'PROCESSED' },
+                data: {
+                    status: 'PROCESSED',
+                    subjectId: subject.id,
+                    topics: {
+                        connect: topics.map(t => ({ id: t.id }))
+                    }
+                },
             });
 
             return createdCount;

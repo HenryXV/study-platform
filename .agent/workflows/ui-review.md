@@ -8,7 +8,7 @@ This workflow performs a comprehensive audit of the visual and interactive layer
 
 ## Phase 1: Interaction & A11y
 @designer.md
-**Goal:** Ensure the app is usable by everyone. Verify compliance with `vercel-design-guidelines`
+**Goal:** Ensure the app is usable by everyone. Verify compliance with `web-design-guidelines`
 
 1.  **Keyboard Nav:** Can you `Tab` through all interactive elements? Are focus rings visible?
 2.  **Semantic HTML:** Are buttons `<button>`? Are links `<a>`? Are headings `h1-h6` in order?

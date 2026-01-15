@@ -86,26 +86,42 @@ export function StudySession({
             )}
 
             {/* Header */}
-            <div className="w-full mb-8 flex justify-between items-center text-sm text-zinc-500 font-mono">
-                <div className="flex items-center gap-3">
-                    <span>Active Session</span>
-                    <span className={`px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold ${mode === 'deep' ? 'bg-orange-950/30 text-orange-400 border border-orange-900/30' :
-                        mode === 'crisis' ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/30' :
-                            'bg-zinc-800 text-zinc-400 border border-zinc-700'
-                        }`}>
-                        Mode: {mode}
-                    </span>
+            <div className="w-full mb-8 flex justify-between items-start text-sm text-zinc-500 font-mono">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                        <span>Active Session</span>
+                        <span className={`px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold ${mode === 'deep' ? 'bg-orange-950/30 text-orange-400 border border-orange-900/30' :
+                            mode === 'crisis' ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/30' :
+                                'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                            }`}>
+                            Mode: {mode}
+                        </span>
+                    </div>
+                    {/* Taxonomy Tags */}
+                    {(currentCard.subject || (currentCard.topics && currentCard.topics.length > 0)) && (
+                        <div className="flex items-center gap-2 mt-1">
+                            {currentCard.subject && (
+                                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase ${currentCard.subject.color}`}>
+                                    {currentCard.subject.name}
+                                </span>
+                            )}
+                            {currentCard.topics?.map((topic, i) => (
+                                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                                    #{topic.name}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
                 <span>Card {currentIndex + 1} of {initialCards.length}</span>
             </div>
 
             {/* Card Arena */}
-            <div className="w-full flex-1 flex flex-col relative perspective-1000 mb-8">
+            <div className="w-full flex-1 flex flex-col relative mb-8">
                 <div className={`
           relative w-full flex-1 flex flex-col items-center justify-center p-12
           bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl
           transition-all duration-300
-          ${isFlipped ? 'border-indigo-900/30 bg-indigo-950/5' : 'border-zinc-800'}
         `}>
                     <div className="flex-1 flex items-center justify-center p-4">
                         {currentCard.type === 'CODE' ? (

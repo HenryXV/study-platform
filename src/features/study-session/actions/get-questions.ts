@@ -16,6 +16,14 @@ export async function getQuestionsForSession(mode: string): Promise<FlashCard[]>
         const questions = await prisma.question.findMany({
             take: limit,
             orderBy: { nextReviewDate: 'asc' },
+            include: {
+                subject: {
+                    select: { name: true, color: true }
+                },
+                topics: {
+                    select: { name: true }
+                }
+            }
         });
 
         // 3. Map to UI Model
@@ -45,7 +53,9 @@ export async function getQuestionsForSession(mode: string): Promise<FlashCard[]>
                 codeSnippet: codeSnippet,
                 options: options,
                 expected: data.answer, // For code cards comparison
-                explanation: explanation
+                explanation: explanation,
+                subject: q.subject || undefined,
+                topics: q.topics || []
             };
         }).map(card => ({
             ...card,

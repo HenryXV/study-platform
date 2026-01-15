@@ -32,6 +32,10 @@ model ContentSource {
   updatedAt DateTime     @updatedAt
 
   units StudyUnit[]
+
+  subjectId String?
+  subject   Subject? @relation(fields: [subjectId], references: [id])
+  topics    Topic[]
 }
 
 model StudyUnit {
@@ -45,6 +49,30 @@ model StudyUnit {
   questions Question[]
 
   @@index([sourceId])
+}
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String // Stores a hex code or tailwind class
+  createdAt DateTime @default(now())
+
+  topics    Topic[]
+  sources   ContentSource[]
+  questions Question[]
+}
+
+model Topic {
+  id        String @id @default(cuid())
+  name      String
+  subjectId String
+
+  subject   Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  sources   ContentSource[]
+  questions Question[]
+
+  @@unique([name, subjectId])
+  @@index([subjectId])
 }
 
 model Question {
@@ -62,7 +90,10 @@ model Question {
 
   createdAt DateTime @default(now())
 
-  unit StudyUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unit      StudyUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  subject   Subject?  @relation(fields: [subjectId], references: [id])
+  subjectId String?
+  topics    Topic[]
 
   @@index([unitId])
 }

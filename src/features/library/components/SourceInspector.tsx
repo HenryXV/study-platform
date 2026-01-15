@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Panel, Group, Separator } from 'react-resizable-panels';
 import { processContent } from '../actions/process-content';
 import { deleteUnit } from '../actions/delete-unit';
-import { UnitQuestionsList } from './UnitQuestionsList';
-import { Trash2, GripVertical, ChevronLeft, AlertCircle, Loader2, ChevronDown, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { GeneratedUnitsList } from './GeneratedUnitsList';
+import { Button } from '@/shared/ui/Button';
 
 interface SourceInspectorProps {
     source: {
@@ -28,8 +27,18 @@ export function SourceInspector({ source }: SourceInspectorProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [result, setResult] = useState<{ success: boolean; message?: string; count?: number } | null>(null);
-    const [confirmingId, setConfirmingId] = useState<string | null>(null);
     const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
+
+    // Simple responsive check (could be moved to a hook)
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Hydration-safe resize observer
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 1024); // lg breakpoint
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const toggleUnit = (unitId: string) => {
         const newSet = new Set(expandedUnits);
@@ -41,19 +50,9 @@ export function SourceInspector({ source }: SourceInspectorProps) {
         setExpandedUnits(newSet);
     };
 
-    const handleDelete = (id: string) => {
-        if (confirmingId === id) {
-            // Confirmed execute
-            startTransition(async () => {
-                await deleteUnit(id);
-                setConfirmingId(null);
-                router.refresh();
-            });
-        } else {
-            // First click
-            setConfirmingId(id);
-            setTimeout(() => setConfirmingId(null), 3000); // Reset after 3s
-        }
+    const handleDelete = async (id: string) => {
+        await deleteUnit(id);
+        router.refresh();
     };
 
     const handleProcess = () => {
@@ -72,17 +71,15 @@ export function SourceInspector({ source }: SourceInspectorProps) {
     // Note: The parent container MUST manage the height (e.g., flex-1)
     return (
         <div className="flex-1 w-full flex flex-col bg-zinc-950 text-zinc-200 overflow-hidden min-h-0">
-
-
             {/* Split Sreen Panels */}
-            <div className="flex-1 min-h-0">
-                <Group orientation="horizontal">
+            <div className="flex-1 min-h-0 flex flex-col">
+                <Group orientation={isMobile ? 'vertical' : 'horizontal'}>
 
                     {/* Left Panel: Raw Source */}
-                    <Panel defaultSize={50} minSize={20} className="flex flex-col">
+                    <Panel defaultSize={50} minSize={20} className="flex flex-col border-b lg:border-b-0 lg:border-r border-zinc-900">
                         <div className="h-10 border-b border-zinc-900 bg-zinc-900/40 flex items-center px-4 shrink-0 justify-between">
                             <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider">Raw Source</span>
-                            <span className="text-[10px] font-mono text-zinc-700">{source.bodyText.length} chars</span>
+                            <span className="text-[10px] font-mono text-zinc-500">{source.bodyText.length} chars</span>
                         </div>
                         <div className="flex-1 overflow-auto custom-scrollbar p-6 bg-zinc-950">
                             <pre className="font-mono text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed max-w-none">
@@ -91,8 +88,8 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                         </div>
                     </Panel>
 
-                    <Separator className="w-1 bg-zinc-900 hover:bg-indigo-600 transition-colors flex items-center justify-center group active:bg-indigo-500">
-                        <div className="h-8 w-1 bg-zinc-700 rounded-full group-hover:bg-white transition-colors" />
+                    <Separator className="w-px bg-zinc-900 hover:bg-indigo-600 transition-colors flex items-center justify-center group active:bg-indigo-500 data-[orientation=vertical]:h-px data-[orientation=vertical]:w-full">
+                        <div className="h-8 w-1 data-[orientation=vertical]:h-1 data-[orientation=vertical]:w-8 bg-zinc-800 rounded-full group-hover:bg-white transition-colors" />
                     </Separator>
 
                     {/* Right Panel: Extraction View */}
@@ -110,13 +107,14 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                                         Process this content to generate study flashcards and code snippets.
                                     </p>
 
-                                    <button
+                                    <Button
                                         onClick={handleProcess}
                                         disabled={isPending}
-                                        className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg disabled:opacity-50 transition-all"
+                                        className="w-full"
+                                        isLoading={isPending}
                                     >
-                                        {isPending ? 'Processing...' : 'Analyze & Atomize'}
-                                    </button>
+                                        Analyze & Atomize
+                                    </Button>
                                     {result && !result.success && (
                                         <p className="mt-4 text-red-400 text-sm">{result.message}</p>
                                     )}
@@ -125,61 +123,12 @@ export function SourceInspector({ source }: SourceInspectorProps) {
 
                             {/* List View */}
                             {source.units && source.units.length > 0 && (
-                                <div className="space-y-3">
-                                    {source.units.map((unit) => (
-                                        <div key={unit.id} className="group bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-all shadow-sm overflow-hidden">
-                                            {/* Header / Main Content */}
-                                            <div className="p-4 flex items-start justify-between gap-3 cursor-pointer" onClick={() => toggleUnit(unit.id)}>
-                                                <div className="flex flex-col gap-2 overflow-hidden flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <button className="text-zinc-500 hover:text-zinc-300">
-                                                            {expandedUnits.has(unit.id) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                                                        </button>
-                                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${unit.type === 'CODE'
-                                                            ? 'bg-purple-950/40 text-purple-400 border border-purple-900/40'
-                                                            : 'bg-blue-950/40 text-blue-400 border border-blue-900/40'
-                                                            }`}>
-                                                            {unit.type}
-                                                        </span>
-                                                        <span className="text-xs text-zinc-600 font-mono select-none">ID: {unit.id.slice(-4)}</span>
-                                                    </div>
-                                                    <p className="text-sm text-zinc-200 font-medium leading-normal pl-6">
-                                                        {unit.content}
-                                                    </p>
-                                                </div>
-
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDelete(unit.id);
-                                                    }}
-                                                    disabled={isPending}
-                                                    className={`p-1.5 rounded transition-all flex items-center gap-2 ${confirmingId === unit.id
-                                                        ? 'opacity-100 bg-red-950/50 text-red-400 hover:bg-red-900/50'
-                                                        : 'opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 hover:bg-zinc-800'
-                                                        }`}
-                                                    title={confirmingId === unit.id ? "Click to Confirm Deletion" : "Delete Unit"}
-                                                >
-                                                    {confirmingId === unit.id ? (
-                                                        <span className="text-[10px] font-bold uppercase tracking-wider px-1">Confirm?</span>
-                                                    ) : (
-                                                        <Trash2 size={14} />
-                                                    )}
-                                                </button>
-                                            </div>
-
-                                            {/* Expanded Questions Area */}
-                                            {expandedUnits.has(unit.id) && (
-                                                <div className="border-t border-zinc-900 bg-zinc-950/30 p-4 pt-2">
-                                                    <UnitQuestionsList unitId={unit.id} questions={unit.questions || []} />
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-
-                                    {/* Bottom Padding */}
-                                    <div className="h-20" />
-                                </div>
+                                <GeneratedUnitsList
+                                    units={source.units}
+                                    expandedUnits={expandedUnits}
+                                    onToggle={toggleUnit}
+                                    onDelete={handleDelete}
+                                />
                             )}
                         </div>
                     </Panel>

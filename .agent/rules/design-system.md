@@ -7,3 +7,6 @@ trigger: always_on
 - Text: text-zinc-50 (Primary), text-zinc-400 (Secondary)
 - Fonts: 'Inter' (UI), 'JetBrains Mono' (Data/Code)
 - Borders: border border-zinc-800 rounded-md
+
+** CRITICAL **
+Prioritize working with components in @src/shared/ui

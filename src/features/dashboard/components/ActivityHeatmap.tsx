@@ -7,15 +7,16 @@ interface ActivityHeatmapProps {
 
 export function ActivityHeatmap({ data, streak }: ActivityHeatmapProps) {
     return (
-        <div className="w-full max-w-6xl mx-auto mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="w-full h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 h-full flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent opacity-50"></div>
 
                 {/* Streak Counter */}
-                <div className="flex flex-col items-center md:items-start">
-                    <span className="text-zinc-500 text-xs font-mono uppercase tracking-wider mb-1">Current Streak</span>
+                <div className="flex flex-col items-center md:items-start z-10">
+                    <span className="text-zinc-500 text-xs font-mono uppercase tracking-wider mb-1">Weekly Consistency</span>
                     <div className="flex items-baseline gap-2">
                         <span className="text-4xl font-bold text-zinc-100">{streak}</span>
-                        <span className="text-sm text-zinc-400 font-medium">days</span>
+                        <span className="text-sm text-zinc-400 font-medium">day streak</span>
                     </div>
                 </div>
 
@@ -23,15 +24,15 @@ export function ActivityHeatmap({ data, streak }: ActivityHeatmapProps) {
                 <div className="hidden md:block w-px h-12 bg-zinc-800"></div>
 
                 {/* Heatmap Grid */}
-                <div className="flex flex-col gap-2 w-full md:w-auto">
+                <div className="flex flex-col gap-2 w-full md:w-auto z-10">
                     <span className="text-zinc-500 text-[10px] font-mono uppercase tracking-wider text-center md:text-left">Last 7 Days</span>
                     <div className="flex items-center justify-center md:justify-start gap-2">
                         {data.map((day) => (
                             <div key={day.date} className="flex flex-col items-center gap-2 group cursor-default">
                                 <div
                                     className={`w-10 h-10 rounded-md border transition-all duration-300 relative ${day.count > 0
-                                            ? 'bg-emerald-500/20 border-emerald-500/40 shadow shadow-emerald-900/20 group-hover:scale-105'
-                                            : 'bg-zinc-800/50 border-zinc-800 hover:border-zinc-700'
+                                        ? 'bg-emerald-500/20 border-emerald-500/40 shadow shadow-emerald-900/20 group-hover:scale-105'
+                                        : 'bg-zinc-800/50 border-zinc-800 hover:border-zinc-700'
                                         }`}
                                     title={`${day.count} items on ${day.label}`}
                                 >

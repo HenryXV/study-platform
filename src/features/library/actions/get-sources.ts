@@ -7,6 +7,8 @@ export type LibraryItem = {
     title: string;
     status: 'UNPROCESSED' | 'PROCESSED';
     createdAt: Date;
+    subject: { name: string; color: string } | null;
+    topics: { name: string }[];
     _count: {
         units: number;
     };
@@ -21,6 +23,12 @@ export async function getSources(): Promise<LibraryItem[]> {
                 title: true,
                 status: true,
                 createdAt: true,
+                subject: {
+                    select: { name: true, color: true }
+                },
+                topics: {
+                    select: { name: true }
+                },
                 _count: {
                     select: { units: true }
                 }

@@ -18,7 +18,7 @@ export function DashboardMenu() {
 }
 
 function MenuCard({ option }: { option: MenuOption }) {
-    const baseStyles = "relative group p-6 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between h-48 select-none block";
+    const baseStyles = "relative group p-6 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between h-48 select-none block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
 
     const typeStyles = {
         standard: "bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50",
@@ -56,8 +56,8 @@ function MenuCard({ option }: { option: MenuOption }) {
             <div className="flex items-end justify-between">
                 <div className="flex flex-col">
                     <span className={`text-3xl font-bold ${option.type === 'standard' ? 'text-zinc-700 group-hover:text-zinc-600' :
-                            option.type === 'deep' ? 'text-orange-900 group-hover:text-orange-800' :
-                                'text-emerald-900 group-hover:text-emerald-800'
+                        option.type === 'deep' ? 'text-orange-900 group-hover:text-orange-800' :
+                            'text-emerald-900 group-hover:text-emerald-800'
                         } transition-colors`}>
                         {option.questionCount}
                     </span>

@@ -1,11 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Editor from 'react-simple-code-editor';
-import Prism from 'prismjs';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-python';
-import 'prismjs/themes/prism-tomorrow.css';
+import Editor from '@monaco-editor/react';
 import { ExplanationReveal } from './ExplanationReveal';
 
 interface CodeCardProps {
@@ -28,28 +24,30 @@ export function CodeCard({ question, initialCode = '', expectedAnswer = '', isFl
 
             {!isFlipped ? (
                 /* FRONT: Input Area */
-                <div className="w-full flex-1 flex flex-col min-h-[300px]"> {/* Added min-height */}
+                <div className="w-full flex-1 flex flex-col min-h-[300px]">
                     <label className="block text-xs uppercase tracking-wider text-green-400 mb-2 font-mono">
                         Terminal Input
                     </label>
-                    <div className="flex-1 border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 shadow-inner focus-within:ring-1 focus-within:ring-green-900/50 focus-within:border-green-500/50 transition-all relative">
-                        <div className="absolute inset-0 overflow-auto custom-scrollbar">
-                            <Editor
-                                value={userCode}
-                                onValueChange={setUserCode}
-                                highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
-                                padding={16}
-                                className="font-mono text-sm min-h-full"
-                                style={{
-                                    fontFamily: '"JetBrains Mono", monospace',
-                                    fontSize: 14,
-                                    backgroundColor: 'transparent',
-                                    color: '#f8f8f2',
-                                    minHeight: '100%'
-                                }}
-                                textareaClassName="focus:outline-none"
-                            />
-                        </div>
+                    <div className="flex-1 border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 relative min-h-[300px] flex flex-col">
+                        <Editor
+                            height="300px"
+                            defaultLanguage="javascript"
+                            theme="vs-dark"
+                            value={userCode}
+                            onChange={(value) => setUserCode(value || '')}
+                            options={{
+                                minimap: { enabled: false },
+                                fontSize: 14,
+                                fontFamily: '"JetBrains Mono", monospace',
+                                scrollBeyondLastLine: false,
+                                automaticLayout: true,
+                                renderLineHighlight: 'none',
+                                contextmenu: false,
+                                padding: { top: 16, bottom: 16 },
+                                readOnly: false,
+                                domReadOnly: false
+                            }}
+                        />
                     </div>
                 </div>
             ) : (

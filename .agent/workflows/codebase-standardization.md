@@ -17,7 +17,7 @@ This workflow performs a comprehensive health check on the project architecture 
 
 ## Phase 2: Performance Audit
 @builder.md
-**Goal:** Verify compliance with `react-best-practices`.
+**Goal:** Verify compliance with `vercel-react-best-practices`.
 
 1.  **Waterfall Check:** Scan `src` for nested `await` calls in components. Suggest `Promise.all`.
 2.  **Client Boundaries:** Scan for `"use client"`. Are they leaf nodes? Are they minimizing the payload?

@@ -23,4 +23,6 @@ export interface FlashCard {
     codeSnippet?: string;
     expected?: string;
     explanation?: string;
+    subject?: { name: string; color: string };
+    topics?: { name: string }[];
 }
