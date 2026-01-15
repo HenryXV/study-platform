@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { generateQuestionsForUnit } from '../actions/generate-questions';
-import { Loader2, Plus, BrainCircuit, Check, Trash2, X } from 'lucide-react';
+import { Loader2, Plus, BrainCircuit, Check, Trash2, X, Edit2 } from 'lucide-react';
 import { QuestionData } from '@/features/study-session/data/flash-cards';
 import { deleteQuestion } from '../actions/delete-question';
 import { useRouter } from 'next/navigation';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
+import { QuestionSupervisor } from './QuestionSupervisor';
+import { EditableQuestion } from '@/features/library/schemas/question-generator';
+import { updateQuestions } from '../actions/update-questions';
+import { toast } from 'sonner';
 
 interface Question {
     id: string;
@@ -24,6 +27,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions }: UnitQ
 
     // State
     const [isGenerating, setIsGenerating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
 
     // Deletion State
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -31,11 +35,15 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions }: UnitQ
     const [isDeleting, setIsDeleting] = useState(false);
 
 
-    const handleGenerate = async () => {
-        setIsGenerating(true);
-        await generateQuestionsForUnit(unitId);
-        setIsGenerating(false);
-        router.refresh(); // Force re-fetch
+    const handleEditCommit = async (questions: EditableQuestion[], deletedIds: string[]) => {
+        const result = await updateQuestions(questions, deletedIds);
+        if (result.success) {
+            toast.success("Questions updated successfully");
+            setIsEditing(false);
+            router.refresh();
+        } else {
+            toast.error(result.message || "Failed to update questions");
+        }
     };
 
     const handleDeleteClick = (questionId: string) => {
@@ -78,7 +86,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions }: UnitQ
                                 <div className="flex items-center gap-2">
                                     <Badge
                                         variant="outline"
-                                        className={`text-[10px] font-bold px-1 rounded uppercase tracking-wider ${q.type === 'MULTI_CHOICE' ? 'text-cyan-400 bg-cyan-950/30' :
+                                        className={`text-xs font-bold px-1 rounded uppercase tracking-wider ${q.type === 'MULTI_CHOICE' ? 'text-cyan-400 bg-cyan-950/30' :
                                             q.type === 'SNIPPET' ? 'text-pink-400 bg-pink-950/30' :
                                                 'text-amber-400 bg-amber-950/30'
                                             }`}
@@ -92,6 +100,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions }: UnitQ
                                     onClick={() => handleDeleteClick(q.id)}
                                     className="opacity-0 group-hover:opacity-100 h-6 w-6 hover:bg-red-950/30 text-zinc-500 hover:text-red-400 transition-all absolute right-2 top-2"
                                     title="Delete question"
+                                    aria-label="Delete question"
                                 >
                                     <X className="w-3 h-3" />
                                 </Button>
@@ -102,16 +111,35 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions }: UnitQ
                 </div>
             )}
 
-            <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                className="flex items-center gap-2 text-xs font-medium text-indigo-400 hover:text-indigo-300 disabled:opacity-50 transition-colors pl-0 hover:bg-transparent"
-            >
-                {isGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <BrainCircuit className="w-3 h-3" />}
-                {initialQuestions.length === 0 ? "Generate Quiz Questions" : "Generate More"}
-            </Button>
+            <div className="flex items-center gap-2">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
+                >
+                    <Edit2 className="w-3 h-3" />
+                    {initialQuestions.length === 0 ? "Add Questions" : "Edit Questions"}
+                </Button>
+            </div>
+
+            {isEditing && (
+                <QuestionSupervisor
+                    initialQuestions={initialQuestions.map(q => ({
+                        id: q.id,
+                        type: q.type === 'MULTI_CHOICE' ? 'MULTIPLE_CHOICE' : (q.type === 'SNIPPET' ? 'CODE' : 'OPEN'),
+                        questionText: q.data.question,
+                        correctAnswer: q.data.answer,
+                        // @ts-ignore - options/explanation might not exist on all QuestionData types but DB field is JSON.
+                        options: (q.data as any).options,
+                        // @ts-ignore
+                        explanation: (q.data as any).explanation || '',
+                        topics: [] // We normally need to fetch topics to show them.
+                    }))}
+                    onCancel={() => setIsEditing(false)}
+                    onCommit={handleEditCommit}
+                />
+            )}
         </div>
     );
 }

@@ -1,24 +1,16 @@
 'use server';
 
 import { generateText, Output } from 'ai';
-import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { ResultSchema, Question } from '@/features/library/schemas/question-generator';
 
-const QuestionSchema = z.object({
-    questionText: z.string(),
-    type: z.enum(['MULTIPLE_CHOICE', 'OPEN', 'CODE']),
-    correctAnswer: z.string(),
-    options: z.array(z.string()).optional(),
-    explanation: z.string()
-});
-
-const ResultSchema = z.object({
-    questions: z.array(QuestionSchema)
-});
-
-export async function generateQuestionsForUnit(unitId: string) {
+export async function generateQuestionsPreview(
+    unitId: string,
+    unitContent: string,
+    unitType: 'TEXT' | 'CODE'
+): Promise<{ success: boolean; questions?: Question[]; message?: string }> {
     try {
+        // MATCHING LOGIC FROM generate-questions.ts
         const unit = await prisma.studyUnit.findUnique({
             where: { id: unitId },
             include: {
@@ -63,33 +55,16 @@ export async function generateQuestionsForUnit(unitId: string) {
             throw new Error("Failed to generate structure");
         }
 
-        // Save to DB using transaction to handle relations
-        await prisma.$transaction(async (tx) => {
-            for (const q of output.questions) {
-                await tx.question.create({
-                    data: {
-                        unitId: unit.id,
-                        type: q.type === 'CODE' ? 'SNIPPET' : (q.type === 'MULTIPLE_CHOICE' ? 'MULTI_CHOICE' : 'OPEN'),
-                        subjectId: unit.source.subjectId,
-                        topics: {
-                            connect: unit.source.topics.map(t => ({ id: t.id }))
-                        },
-                        data: {
-                            question: q.questionText,
-                            answer: q.correctAnswer,
-                            options: q.options || [],
-                            explanation: q.explanation
-                        }
-                    }
-                });
-            }
-        });
+        // Return questions with default topics mapped to their names if not generated
+        const questionsWithTopics = output.questions.map(q => ({
+            ...q,
+            topics: q.topics && q.topics.length > 0 ? q.topics : unit.source.topics.map(t => t.name)
+        }));
 
-        revalidatePath('/');
-        return { success: true, count: output.questions.length };
+        return { success: true, questions: questionsWithTopics };
 
     } catch (error) {
-        console.error("Question Generation Failed:", error);
-        return { success: false, message: "AI Error" };
+        console.error("Question Preview Generation Failed:", error);
+        return { success: false, message: "AI Error during preview generation" };
     }
 }

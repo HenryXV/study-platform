@@ -3,9 +3,11 @@
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Panel, Group, Separator } from 'react-resizable-panels';
-import { processContent } from '../actions/process-content';
+import { analyzeContentPreview } from '../actions/analyze-content';
+import { commitContent } from '../actions/commit-content';
 import { deleteUnit } from '../actions/delete-unit';
 import { GeneratedUnitsList } from './GeneratedUnitsList';
+import { DraftSupervisor, ApprovedDraftData } from './DraftSupervisor';
 import { Button } from '@/shared/ui/Button';
 
 interface SourceInspectorProps {
@@ -26,7 +28,10 @@ interface SourceInspectorProps {
 export function SourceInspector({ source }: SourceInspectorProps) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
-    const [result, setResult] = useState<{ success: boolean; message?: string; count?: number } | null>(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // Workflow State
+    const [draftData, setDraftData] = useState<ApprovedDraftData | null>(null);
     const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
 
     // Simple responsive check (could be moved to a hook)
@@ -55,15 +60,44 @@ export function SourceInspector({ source }: SourceInspectorProps) {
         router.refresh();
     };
 
-    const handleProcess = () => {
-        setResult(null);
-        startTransition(async () => {
-            const res = await processContent(source.id);
-            if (res.success) {
-                setResult({ success: true, count: res.count });
-                router.refresh();
+    // Step 1: Analyze (Preview)
+    const handleAnalyze = async () => {
+        setIsAnalyzing(true);
+        try {
+            const res = await analyzeContentPreview(source.id);
+            if (res.success && res.data) {
+                // Transform the raw AI output into the Draft structure (checking types)
+                // The AI SDK output is already validated by Zod in the action, 
+                // but we cast it here for TS convenience in the UI component
+                const raw = res.data;
+
+                // Map to ensure it fits DraftUnit interface if strictly needed, 
+                // though it matches the Zod schema 1:1 currently.
+                const draft: ApprovedDraftData = {
+                    suggestedSubject: raw.suggestedSubject,
+                    suggestedTopics: raw.suggestedTopics,
+                    units: raw.units.map((u: any) => ({
+                        title: u.title,
+                        type: u.type as 'TEXT' | 'CODE',
+                    }))
+                };
+                setDraftData(draft);
             } else {
-                setResult({ success: false, message: res.message });
+                // Handle error (maybe toast in future)
+                console.error("Analysis failed");
+            }
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    // Step 2: Commit (Save)
+    const handleCommit = (data: ApprovedDraftData) => {
+        startTransition(async () => {
+            const res = await commitContent(source.id, data);
+            if (res.success) {
+                setDraftData(null); // Clear draft mode
+                router.refresh();   // Show real data
             }
         });
     };
@@ -78,8 +112,8 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                     {/* Left Panel: Raw Source */}
                     <Panel defaultSize={50} minSize={20} className="flex flex-col border-b lg:border-b-0 lg:border-r border-zinc-900">
                         <div className="h-10 border-b border-zinc-900 bg-zinc-900/40 flex items-center px-4 shrink-0 justify-between">
-                            <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider">Raw Source</span>
-                            <span className="text-[10px] font-mono text-zinc-500">{source.bodyText.length} chars</span>
+                            <span className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider">Raw Source</span>
+                            <span className="text-xs font-mono text-zinc-500">{source.bodyText.length} chars</span>
                         </div>
                         <div className="flex-1 overflow-auto custom-scrollbar p-6 bg-zinc-950">
                             <pre className="font-mono text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed max-w-none">
@@ -88,47 +122,58 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                         </div>
                     </Panel>
 
-                    <Separator className="w-px bg-zinc-900 hover:bg-indigo-600 transition-colors flex items-center justify-center group active:bg-indigo-500 data-[orientation=vertical]:h-px data-[orientation=vertical]:w-full">
-                        <div className="h-8 w-1 data-[orientation=vertical]:h-1 data-[orientation=vertical]:w-8 bg-zinc-800 rounded-full group-hover:bg-white transition-colors" />
+                    <Separator className="w-px bg-zinc-900 hover:bg-indigo-600 transition-colors flex items-center justify-center group active:bg-indigo-500 data-[orientation=vertical]:h-px data-[orientation=vertical]:w-full focus-visible:bg-indigo-500 outline-none">
+                        <div className="h-8 w-1 data-[orientation=vertical]:h-1 data-[orientation=vertical]:w-8 bg-zinc-800 rounded-full group-hover:bg-white transition-colors group-active:bg-white group-focus-visible:bg-white" />
                     </Separator>
 
-                    {/* Right Panel: Extraction View */}
+                    {/* Right Panel: Extraction/Supervisor View */}
                     <Panel defaultSize={50} minSize={20} className="flex flex-col">
                         <div className="h-10 border-b border-zinc-900 bg-zinc-900/40 flex items-center px-4 shrink-0">
-                            <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider">Atomic Units</span>
+                            <span className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider">
+                                {draftData ? 'Supervisor Mode' : 'Atomic Units'}
+                            </span>
                         </div>
 
                         <div className="flex-1 overflow-auto custom-scrollbar bg-zinc-950/50 p-6 relative">
-                            {/* Empty / Processor State */}
-                            {(!source.units || source.units.length === 0) && (
-                                <div className="max-w-md mx-auto mt-20 p-6 border border-zinc-800 rounded-xl bg-zinc-900/50 text-center">
-                                    <h3 className="text-lg font-medium text-zinc-100 mb-2">No Units Extracted</h3>
-                                    <p className="text-sm text-zinc-400 mb-6">
-                                        Process this content to generate study flashcards and code snippets.
-                                    </p>
 
-                                    <Button
-                                        onClick={handleProcess}
-                                        disabled={isPending}
-                                        className="w-full"
-                                        isLoading={isPending}
-                                    >
-                                        Analyze & Atomize
-                                    </Button>
-                                    {result && !result.success && (
-                                        <p className="mt-4 text-red-400 text-sm">{result.message}</p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* List View */}
-                            {source.units && source.units.length > 0 && (
-                                <GeneratedUnitsList
-                                    units={source.units}
-                                    expandedUnits={expandedUnits}
-                                    onToggle={toggleUnit}
-                                    onDelete={handleDelete}
+                            {/* State 1: Draft Supervisor (Reviewing AI Output) */}
+                            {draftData ? (
+                                <DraftSupervisor
+                                    initialData={draftData}
+                                    onCancel={() => setDraftData(null)}
+                                    onCommit={handleCommit}
                                 />
+                            ) : (
+                                <>
+                                    {/* State 2: Empty / Unprocessed */}
+                                    {(!source.units || source.units.length === 0) && (
+                                        <div className="max-w-md mx-auto mt-20 p-6 border border-zinc-800 rounded-xl bg-zinc-900/50 text-center">
+                                            <h3 className="text-lg font-medium text-zinc-100 mb-2">No Units Extracted</h3>
+                                            <p className="text-sm text-zinc-400 mb-6">
+                                                Process this content to generate study flashcards and code snippets.
+                                            </p>
+
+                                            <Button
+                                                onClick={handleAnalyze}
+                                                disabled={isAnalyzing}
+                                                className="w-full"
+                                                isLoading={isAnalyzing}
+                                            >
+                                                Analyze & Atomize
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {/* State 3: View Processed Units */}
+                                    {source.units && source.units.length > 0 && (
+                                        <GeneratedUnitsList
+                                            units={source.units}
+                                            expandedUnits={expandedUnits}
+                                            onToggle={toggleUnit}
+                                            onDelete={handleDelete}
+                                        />
+                                    )}
+                                </>
                             )}
                         </div>
                     </Panel>

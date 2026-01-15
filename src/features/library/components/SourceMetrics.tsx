@@ -40,7 +40,7 @@ export function SourceMetrics({ source }: SourceMetricsProps) {
                     ? 'bg-emerald-950/20 border-emerald-900/40 text-emerald-400'
                     : 'bg-amber-950/20 border-amber-900/40 text-amber-400'
                     }`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${source.status === 'PROCESSED' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full ${source.status === 'PROCESSED' ? 'bg-emerald-500 motion-safe:animate-pulse' : 'bg-amber-500'}`} />
                     {source.status === 'PROCESSED' ? 'Processed' : 'Draft'}
                 </div>
 
@@ -48,16 +48,16 @@ export function SourceMetrics({ source }: SourceMetricsProps) {
 
                 {/* Stats */}
                 <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">
-                    <div className="flex items-center gap-2" title="Total Units">
-                        <FileText className="w-4 h-4 text-zinc-600" />
+                    <div className="flex items-center gap-2" title="Total Units" aria-label={`${unitCount} total units`}>
+                        <FileText className="w-4 h-4 text-zinc-600" aria-hidden="true" />
                         <span><span className="text-zinc-200">{unitCount}</span> Units</span>
                     </div>
-                    <div className="flex items-center gap-2" title="Code Snippets">
-                        <Code2 className="w-4 h-4 text-indigo-500" />
+                    <div className="flex items-center gap-2" title="Code Snippets" aria-label={`${codeUnits} code snippets`}>
+                        <Code2 className="w-4 h-4 text-indigo-500" aria-hidden="true" />
                         <span><span className="text-indigo-300">{codeUnits}</span> Code</span>
                     </div>
-                    <div className="flex items-center gap-2 hidden lg:flex" title="Reading Time">
-                        <Clock className="w-4 h-4 text-zinc-600" />
+                    <div className="flex items-center gap-2 hidden lg:flex" title="Reading Time" aria-label={`Reading time: ${readTime} minutes`}>
+                        <Clock className="w-4 h-4 text-zinc-600" aria-hidden="true" />
                         <span>{readTime} min</span>
                     </div>
                 </div>
