@@ -2,8 +2,13 @@
 
 import { useState, useTransition } from 'react';
 import { saveRawContent } from '../actions/save-content';
+import { Button } from '@/shared/ui/Button';
 
-export function QuickAddForm() {
+interface QuickAddFormProps {
+    onSuccess?: () => void;
+}
+
+export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
     const [content, setContent] = useState('');
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -21,7 +26,10 @@ export function QuickAddForm() {
                 setContent('');
                 setMessage({ type: 'success', text: 'Saved!' });
                 // Clear success message after 3 seconds
-                setTimeout(() => setMessage(null), 3000);
+                setTimeout(() => {
+                    setMessage(null);
+                    onSuccess?.();
+                }, 1000);
             } else {
                 setMessage({ type: 'error', text: result.message });
             }
@@ -30,9 +38,19 @@ export function QuickAddForm() {
 
     return (
         <div className="w-full max-w-2xl mx-auto p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <div className="mb-4">
-                <h3 className="text-lg font-medium text-zinc-100 mb-1">Quick Add</h3>
-                <p className="text-sm text-zinc-400">Capture raw notes for later processing.</p>
+            <div className="mb-4 flex items-start justify-between">
+                <div>
+                    <h3 className="text-lg font-medium text-zinc-100 mb-1">Quick Add</h3>
+                    <p className="text-sm text-zinc-400">Capture raw notes for later processing.</p>
+                </div>
+                <Button
+                    onClick={handleSubmit}
+                    disabled={isPending || !content.trim()}
+                    isLoading={isPending}
+                    size="sm"
+                >
+                    Save Note
+                </Button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -42,24 +60,17 @@ export function QuickAddForm() {
                     placeholder="Paste text, code, or ideas here..."
                     className="w-full h-48 p-4 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 resize-none font-mono text-sm"
                     disabled={isPending}
+                    autoFocus
                 />
 
-                <div className="flex items-center justify-between">
-                    <div className="h-6 flex items-center gap-4">
+                <div className="flex items-center justify-between pt-2 h-6">
+                    <div className="flex items-center justify-end flex-1 pl-4">
                         {message && (
                             <span className={`text-sm ${message.type === 'success' ? 'text-emerald-400' : 'text-red-400'} animate-pulse`}>
                                 {message.text}
                             </span>
                         )}
                     </div>
-
-                    <button
-                        type="submit"
-                        disabled={isPending || !content.trim()}
-                        className="px-4 py-2 bg-zinc-100 text-zinc-900 font-medium rounded-md hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        {isPending ? 'Saving...' : 'Save Note'}
-                    </button>
                 </div>
             </form>
         </div>

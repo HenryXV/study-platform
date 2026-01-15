@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/shared/ui/Button';
 import { CodeCard } from '../components/CodeCard';
+import { MultipleChoiceCard } from '../components/MultipleChoiceCard';
 import { logStudyActivity } from '@/features/dashboard/actions/log-activity';
-import { FlashCard } from '../data/mock-cards';
+import { FlashCard } from '../data/flash-cards';
 import { Flame } from 'lucide-react';
 
 function CompletionView({ count }: { count: number }) {
@@ -92,12 +93,12 @@ export function StudySession({
             {/* Card Arena */}
             <div className="w-full flex-1 flex flex-col relative perspective-1000 mb-8">
                 <div className={`
-          relative w-full flex-1 flex flex-col items-center justify-center p-12 
+          relative w-full flex-1 flex flex-col items-center justify-center p-12
           bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl
           transition-all duration-300
           ${isFlipped ? 'border-indigo-900/30 bg-indigo-950/5' : 'border-zinc-800'}
         `}>
-                    <div className="text-center space-y-6 w-full">
+                    <div className="flex-1 flex items-center justify-center p-4">
                         {currentCard.type === 'CODE' ? (
                             <CodeCard
                                 question={currentCard.question}
@@ -105,8 +106,18 @@ export function StudySession({
                                 expectedAnswer={currentCard.answer}
                                 isFlipped={isFlipped}
                             />
+                        ) : currentCard.type === 'MULTI_CHOICE' ? (
+                            <MultipleChoiceCard
+                                question={currentCard.question}
+                                options={currentCard.options || []}
+                                correctAnswer={currentCard.answer}
+                                isFlipped={isFlipped}
+                                onAnswer={(selected) => {
+                                    setIsFlipped(true);
+                                }}
+                            />
                         ) : (
-                            // STANDARD CARD UI (Existing logic moved here)
+                            // STANDARD CARD UI
                             !isFlipped ? (
                                 // FRONT
                                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -117,7 +128,7 @@ export function StudySession({
                             ) : (
                                 // BACK
                                 <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                    <span className="text-xs uppercase tracking-widest text-indigo-400 font-semibold">Answer</span>
+                                    <span className="text-xs uppercase tracking-widest text-green-400 font-semibold">Expected Answer</span>
                                     <div className="text-xl md:text-2xl text-zinc-100 font-medium">
                                         {currentCard.answer}
                                     </div>
@@ -167,6 +178,6 @@ export function StudySession({
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

@@ -55,10 +55,13 @@ function MenuCard({ option }: { option: MenuOption }) {
 
             <div className="flex items-end justify-between">
                 <div className="flex flex-col">
-                    <span className={`text-3xl font-bold ${option.type === 'standard' ? 'text-zinc-700 group-hover:text-zinc-600' : 'opacity-40 group-hover:opacity-60'} transition-opacity`}>
+                    <span className={`text-3xl font-bold ${option.type === 'standard' ? 'text-zinc-700 group-hover:text-zinc-600' :
+                            option.type === 'deep' ? 'text-orange-900 group-hover:text-orange-800' :
+                                'text-emerald-900 group-hover:text-emerald-800'
+                        } transition-colors`}>
                         {option.questionCount}
                     </span>
-                    <span className={`text-xs uppercase tracking-wider font-mono ${option.type === 'standard' ? 'text-zinc-500' : 'opacity-30'}`}>
+                    <span className={`text-xs uppercase tracking-wider font-mono ${option.type === 'standard' ? 'text-zinc-500' : 'opacity-70'} group-hover:opacity-100 transition-opacity`}>
                         Questions
                     </span>
                 </div>

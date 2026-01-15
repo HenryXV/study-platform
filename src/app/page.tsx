@@ -2,6 +2,8 @@ import { DashboardMenu } from '@/features/dashboard/ui/DashboardMenu';
 import { QuickAddForm } from '@/features/library/ui/QuickAddForm';
 import { ActivityHeatmap } from '@/features/dashboard/components/ActivityHeatmap';
 import { getWeeklyMetrics } from '@/features/dashboard/actions/get-metrics';
+import Link from 'next/link';
+import { Library } from 'lucide-react';
 
 export default async function Page() {
   const { days, streak } = await getWeeklyMetrics();
@@ -16,6 +18,11 @@ export default async function Page() {
       <ActivityHeatmap data={days} streak={streak} />
 
       <DashboardMenu />
+
+      <Link href="/library" className="flex items-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors text-sm font-medium">
+        <Library className="w-4 h-4" />
+        View Full Library Archive
+      </Link>
 
       <QuickAddForm />
     </main>

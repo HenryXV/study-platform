@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { FlashCard, CardType } from '../data/mock-cards'; // Re-using types
+import { FlashCard, CardType, QuestionData } from '../data/flash-cards'; // Re-using types
 
 export async function getQuestionsForSession(mode: string): Promise<FlashCard[]> {
     try {
@@ -22,11 +22,17 @@ export async function getQuestionsForSession(mode: string): Promise<FlashCard[]>
         // We need to parse the JSON 'data' field safely.
 
         return questions.map(q => {
-            const data = q.data as any; // Type assertion since it's Json in DB
+            const data = q.data as unknown as QuestionData; // Safer cast than any
 
             // Map Prisma Type to UI Type
             let uiType: CardType = 'TEXT';
             if (q.type === 'SNIPPET') uiType = 'CODE';
+            if (q.type === 'MULTI_CHOICE') uiType = 'MULTI_CHOICE';
+
+            // Safe extraction of codeSnippet
+            // We know if type is SNIPPET/CODE, data *should* be QuestionSnippet
+            const codeSnippet = 'codeSnippet' in data ? data.codeSnippet : undefined;
+            const options = 'options' in data ? data.options : undefined;
 
             // Construct FlashCard
             return {
@@ -34,7 +40,8 @@ export async function getQuestionsForSession(mode: string): Promise<FlashCard[]>
                 type: uiType,
                 question: data.question || "Unknown Question",
                 answer: data.answer || "No answer provided",
-                codeSnippet: data.codeSnippet,
+                codeSnippet: codeSnippet,
+                options: options,
                 expected: data.answer // For code cards comparison
             };
         }).map(card => ({

@@ -65,19 +65,6 @@ export async function processContent(sourceId: string) {
                     },
                 });
 
-                // Create the Question (Flashcard) for this unit
-                await tx.question.create({
-                    data: {
-                        unitId: studyUnit.id,
-                        type: unit.type === 'CODE' ? 'SNIPPET' : 'MULTI_CHOICE', // Defaulting for now
-                        data: {
-                            question: unit.content,
-                            answer: unit.answer,
-                            codeSnippet: unit.codeSnippet,
-                        },
-                    },
-                });
-
                 createdCount++;
             }
 
