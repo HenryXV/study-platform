@@ -1,4 +1,4 @@
-export type CardType = 'TEXT' | 'CODE' | 'MULTI_CHOICE';
+export type CardType = 'TEXT' | 'CODE' | 'MULTI_CHOICE' | 'OPEN';
 
 export interface QuestionSnippet {
     question: string;
@@ -22,4 +22,5 @@ export interface FlashCard {
     options?: string[];
     codeSnippet?: string;
     expected?: string;
+    explanation?: string;
 }

@@ -48,11 +48,19 @@ model StudyUnit {
 }
 
 model Question {
-  id        String       @id @default(cuid())
-  unitId    String
-  type      QuestionType
-  data      Json
-  createdAt DateTime     @default(now())
+  id     String       @id @default(cuid())
+  unitId String
+  type   QuestionType
+  data   Json
+
+  // SRS Fields
+  lastReviewed   DateTime?
+  nextReviewDate DateTime  @default(now())
+  interval       Int       @default(0)
+  easeFactor     Float     @default(2.5)
+  streak         Int       @default(0)
+
+  createdAt DateTime @default(now())
 
   unit StudyUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
 
@@ -84,6 +92,7 @@ enum QuestionType {
   MULTI_CHOICE
   SNIPPET
   CLOZE
+  OPEN
 }
 
 model StudyLog {

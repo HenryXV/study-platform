@@ -6,15 +6,17 @@ import Prism from 'prismjs';
 import 'prismjs/components/prism-javascript';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism-tomorrow.css';
+import { ExplanationReveal } from './ExplanationReveal';
 
 interface CodeCardProps {
     question: string;
     initialCode?: string;
     expectedAnswer?: string;
     isFlipped: boolean;
+    explanation?: string;
 }
 
-export function CodeCard({ question, initialCode = '', expectedAnswer = '', isFlipped }: CodeCardProps) {
+export function CodeCard({ question, initialCode = '', expectedAnswer = '', isFlipped, explanation }: CodeCardProps) {
     const [userCode, setUserCode] = useState(initialCode);
 
     return (
@@ -52,20 +54,23 @@ export function CodeCard({ question, initialCode = '', expectedAnswer = '', isFl
                 </div>
             ) : (
                 /* BACK: Comparison View */
-                <div className="w-full flex-1 grid grid-rows-2 gap-4">
-                    <div className="space-y-1">
-                        <span className="text-xs uppercase tracking-wider text-zinc-500 font-mono">Your Solution</span>
-                        <div className="w-full bg-zinc-950 p-3 rounded-lg border border-zinc-800 font-mono text-sm text-zinc-300 overflow-x-auto whitespace-pre-wrap custom-scrollbar">
-                            {userCode || <span className="text-zinc-700 italic">// No code provided</span>}
+                <div className="w-full h-full flex flex-col">
+                    <div className="flex-1 grid grid-rows-2 gap-4">
+                        <div className="space-y-1">
+                            <span className="text-xs uppercase tracking-wider text-zinc-500 font-mono">Your Solution</span>
+                            <div className="w-full bg-zinc-950 p-3 rounded-lg border border-zinc-800 font-mono text-sm text-zinc-300 overflow-x-auto whitespace-pre-wrap custom-scrollbar">
+                                {userCode || <span className="text-zinc-700 italic">// No code provided</span>}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="space-y-1">
-                        <span className="text-xs uppercase tracking-wider text-green-400 font-mono">Expected Answer</span>
-                        <div className="w-full bg-zinc-950 p-3 rounded-lg border border-green-900/30 font-mono text-sm text-green-400 overflow-x-auto whitespace-pre-wrap custom-scrollbar">
-                            {expectedAnswer}
+                        <div className="space-y-1">
+                            <span className="text-xs uppercase tracking-wider text-green-400 font-mono">Expected Answer</span>
+                            <div className="w-full bg-zinc-950 p-3 rounded-lg border border-green-900/30 font-mono text-sm text-green-400 overflow-x-auto whitespace-pre-wrap custom-scrollbar">
+                                {expectedAnswer}
+                            </div>
                         </div>
                     </div>
+                    <ExplanationReveal explanation={explanation} />
                 </div>
             )}
         </div>

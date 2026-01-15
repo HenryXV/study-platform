@@ -53,7 +53,7 @@ export async function generateQuestionsForUnit(unitId: string) {
         await prisma.question.createMany({
             data: output.questions.map(q => ({
                 unitId: unit.id,
-                type: q.type === 'CODE' ? 'SNIPPET' : (q.type === 'MULTIPLE_CHOICE' ? 'MULTI_CHOICE' : 'CLOZE'), // Mapping to our DB Enum
+                type: q.type === 'CODE' ? 'SNIPPET' : (q.type === 'MULTIPLE_CHOICE' ? 'MULTI_CHOICE' : 'OPEN'), // Mapping to our DB Enum
                 data: {
                     question: q.questionText,
                     answer: q.correctAnswer,

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Check, X } from 'lucide-react';
+import { ExplanationReveal } from './ExplanationReveal';
 
 interface MultipleChoiceCardProps {
     question: string;
@@ -10,6 +11,7 @@ interface MultipleChoiceCardProps {
     correctAnswer: string;
     isFlipped: boolean;
     onAnswer: (selected: string) => void;
+    explanation?: string;
 }
 
 export function MultipleChoiceCard({
@@ -17,7 +19,8 @@ export function MultipleChoiceCard({
     options,
     correctAnswer,
     isFlipped,
-    onAnswer
+    onAnswer,
+    explanation
 }: MultipleChoiceCardProps) {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
@@ -85,11 +88,12 @@ export function MultipleChoiceCard({
 
             {isFlipped && (
                 <div className="text-center animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <p className="text-zinc-500 text-sm">
+                    <p className="text-zinc-500 text-sm mb-4">
                         {selectedOption === correctAnswer
                             ? "Correct! Well done."
                             : "Incorrect. Review the answer above."}
                     </p>
+                    <ExplanationReveal explanation={explanation} />
                 </div>
             )}
         </div>

@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/shared/ui/Button';
 import { CodeCard } from '../components/CodeCard';
 import { MultipleChoiceCard } from '../components/MultipleChoiceCard';
+import { OpenEndedCard } from '../components/OpenEndedCard';
+import { ExplanationReveal } from '../components/ExplanationReveal';
 import { logStudyActivity } from '@/features/dashboard/actions/log-activity';
+import { submitReview } from '../actions/submit-review';
 import { FlashCard } from '../data/flash-cards';
 import { Flame } from 'lucide-react';
 
@@ -54,7 +57,12 @@ export function StudySession({
 
     const currentCard = initialCards[currentIndex];
 
-    const handleNext = () => {
+    const handleNext = (rating: 'FORGOT' | 'HARD' | 'EASY') => {
+        // Fire and forget - Optimistic UI
+        submitReview(currentCard.id, rating).catch(err => {
+            console.error("Failed to submit review", err);
+        });
+
         setIsFlipped(false);
         setCurrentIndex((prev) => prev + 1);
     };
@@ -67,6 +75,7 @@ export function StudySession({
 
     return (
         <div className="w-full max-w-2xl mx-auto p-6 flex flex-col items-center min-h-[600px] relative">
+            {/* ... (Crisis Banner and Header - no changes needed) ... */}
 
             {/* Crisis Banner */}
             {mode === 'crisis' && (
@@ -105,6 +114,7 @@ export function StudySession({
                                 initialCode={currentCard.codeSnippet}
                                 expectedAnswer={currentCard.answer}
                                 isFlipped={isFlipped}
+                                explanation={currentCard.explanation}
                             />
                         ) : currentCard.type === 'MULTI_CHOICE' ? (
                             <MultipleChoiceCard
@@ -115,6 +125,15 @@ export function StudySession({
                                 onAnswer={(selected) => {
                                     setIsFlipped(true);
                                 }}
+                                explanation={currentCard.explanation}
+                            />
+                        ) : currentCard.type === 'OPEN' ? (
+                            <OpenEndedCard
+                                question={currentCard.question}
+                                modelAnswer={currentCard.answer}
+                                isFlipped={isFlipped}
+                                onFlip={() => setIsFlipped(true)}
+                                explanation={currentCard.explanation}
                             />
                         ) : (
                             // STANDARD CARD UI
@@ -132,6 +151,7 @@ export function StudySession({
                                     <div className="text-xl md:text-2xl text-zinc-100 font-medium">
                                         {currentCard.answer}
                                     </div>
+                                    <ExplanationReveal explanation={currentCard.explanation} />
                                 </div>
                             )
                         )}
@@ -152,28 +172,25 @@ export function StudySession({
                 ) : (
                     <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
                         <Button
-                            onClick={handleNext}
+                            onClick={() => handleNext('FORGOT')}
                             variant="danger"
                             className="h-auto py-3 flex-col"
                         >
                             Forgot
-                            <span className="block text-xs opacity-60 mt-1">1m</span>
                         </Button>
                         <Button
-                            onClick={handleNext}
+                            onClick={() => handleNext('HARD')}
                             variant="outline"
                             className="h-auto py-3 flex-col bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300"
                         >
                             Hard
-                            <span className="block text-xs opacity-60 mt-1">5m</span>
                         </Button>
                         <Button
-                            onClick={handleNext}
+                            onClick={() => handleNext('EASY')}
                             variant="success"
                             className="h-auto py-3 flex-col"
                         >
                             Easy
-                            <span className="block text-xs opacity-60 mt-1">1d</span>
                         </Button>
                     </div>
                 )}

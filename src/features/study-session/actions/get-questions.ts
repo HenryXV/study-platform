@@ -15,7 +15,7 @@ export async function getQuestionsForSession(mode: string): Promise<FlashCard[]>
         // TODO: Implement SRS or Random Sampling
         const questions = await prisma.question.findMany({
             take: limit,
-            orderBy: { createdAt: 'desc' },
+            orderBy: { nextReviewDate: 'asc' },
         });
 
         // 3. Map to UI Model
@@ -28,11 +28,13 @@ export async function getQuestionsForSession(mode: string): Promise<FlashCard[]>
             let uiType: CardType = 'TEXT';
             if (q.type === 'SNIPPET') uiType = 'CODE';
             if (q.type === 'MULTI_CHOICE') uiType = 'MULTI_CHOICE';
+            if (q.type === 'OPEN') uiType = 'OPEN';
 
             // Safe extraction of codeSnippet
             // We know if type is SNIPPET/CODE, data *should* be QuestionSnippet
             const codeSnippet = 'codeSnippet' in data ? data.codeSnippet : undefined;
             const options = 'options' in data ? data.options : undefined;
+            const explanation = 'explanation' in data ? (data.explanation as string) : undefined;
 
             // Construct FlashCard
             return {
@@ -42,7 +44,8 @@ export async function getQuestionsForSession(mode: string): Promise<FlashCard[]>
                 answer: data.answer || "No answer provided",
                 codeSnippet: codeSnippet,
                 options: options,
-                expected: data.answer // For code cards comparison
+                expected: data.answer, // For code cards comparison
+                explanation: explanation
             };
         }).map(card => ({
             ...card,
