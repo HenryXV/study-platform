@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -16,16 +17,13 @@ export async function logStudyActivity(itemsCount: number) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        const user = await getCurrentUser();
         // Upsert logic: simple check if exists for today or create new
-        // Since we don't have user auth yet, we'll assume a single 'demo-user' or purely date-based for now.
-        // If we want to support multiple sessions per day, we should probably update the existing record or create multiple and sum them.
-        // Let's UPDATE if exists, CREATE if not.
-
         // Check for existing log for TODAY
         const existingLog = await prisma.studyLog.findFirst({
             where: {
                 date: today,
-                userId: 'demo-user' // Hardcoded for single-user MVP
+                userId: user.id
             }
         });
 
@@ -37,7 +35,7 @@ export async function logStudyActivity(itemsCount: number) {
         } else {
             await prisma.studyLog.create({
                 data: {
-                    userId: 'demo-user',
+                    userId: user.id,
                     date: today,
                     itemsReviewed: itemsCount
                 }

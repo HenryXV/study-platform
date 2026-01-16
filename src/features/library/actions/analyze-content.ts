@@ -4,8 +4,22 @@ import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { CuidSchema } from '@/lib/validation';
+import { ratelimit } from '@/lib/ratelimit';
+import { requireUser } from '@/lib/auth';
 
 export async function analyzeContentPreview(sourceId: string) {
+    let userId: string;
+    try {
+        userId = await requireUser();
+    } catch {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const { success } = await ratelimit.limit(userId);
+    if (!success) {
+        throw new Error("Rate limit exceeded. Try again later.");
+    }
+
     const idResult = CuidSchema.safeParse(sourceId);
     if (!idResult.success) {
         return { success: false, message: 'Invalid source ID format' };
@@ -13,8 +27,11 @@ export async function analyzeContentPreview(sourceId: string) {
 
     try {
         // 1. Fetch the raw content
-        const source = await prisma.contentSource.findUnique({
-            where: { id: sourceId },
+        const source = await prisma.contentSource.findFirst({
+            where: {
+                id: sourceId,
+                userId
+            },
         });
 
         if (!source || !source.bodyText) {

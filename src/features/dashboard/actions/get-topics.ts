@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { CuidSchema } from '@/lib/validation';
 import { z } from 'zod';
+import { requireUser } from '@/lib/auth';
 
 interface TopicData {
     id: string;
@@ -21,9 +22,12 @@ export async function getTopics(subjectIds?: string[]): Promise<TopicData[]> {
     }
 
     try {
-        const where = parseResult.data?.length
-            ? { subjectId: { in: parseResult.data } }
-            : {};
+        const userId = await requireUser();
+
+        const where = {
+            userId,
+            ...(parseResult.data?.length ? { subjectId: { in: parseResult.data } } : {})
+        };
 
         const topics = await prisma.topic.findMany({
             where,

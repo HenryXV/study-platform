@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { FlashCard, CardType } from '@/features/study-session/data/flash-cards';
 import { QuestionType } from '@/app/generated/prisma/enums';
+import { requireUser } from '@/lib/auth';
 
 interface OvertimeQuestionResponse {
     success: boolean;
@@ -29,12 +30,15 @@ export async function getOvertimeQuestions(
     limit: number = 10
 ): Promise<OvertimeQuestionResponse> {
     try {
+        const userId = await requireUser();
+
         const now = new Date();
 
         // 1. Priority: Due Reviews
         // nextReviewDate <= now AND lastReviewed != null
         const dueQuestions = await prisma.question.findMany({
             where: {
+                userId,
                 id: { notIn: excludeIds },
                 lastReviewed: { not: null },
                 nextReviewDate: { lte: now },
@@ -59,6 +63,7 @@ export async function getOvertimeQuestions(
         if (remainingLimit > 0) {
             const newQuestions = await prisma.question.findMany({
                 where: {
+                    userId,
                     id: { notIn: Array.from(currentIds) },
                     lastReviewed: null,
                 },

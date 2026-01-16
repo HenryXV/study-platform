@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/auth';
 import { subDays, format, startOfDay } from 'date-fns';
 import { calculateStreak } from '@/lib/streak-calculator';
 
@@ -27,16 +28,18 @@ export async function getWeeklyMetrics() {
     // Build a Map for O(1) day lookups
     const dayMap = new Map(days.map(d => [startOfDay(new Date(d.date)).toISOString(), d]));
 
+    const user = await getCurrentUser();
+
     // Fetch logs and calculate streak in parallel (eliminates waterfall)
     const [logs, streakLogs] = await Promise.all([
         prisma.studyLog.findMany({
             where: {
-                userId: 'demo-user',
+                userId: user.id,
                 date: { gte: subDays(today, 6) }
             }
         }),
         prisma.studyLog.findMany({
-            where: { userId: 'demo-user', itemsReviewed: { gt: 0 } },
+            where: { userId: user.id, itemsReviewed: { gt: 0 } },
             orderBy: { date: 'desc' },
             select: { date: true }
         })

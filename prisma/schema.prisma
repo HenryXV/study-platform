@@ -36,6 +36,10 @@ model ContentSource {
   subjectId String?
   subject   Subject? @relation(fields: [subjectId], references: [id])
   topics    Topic[]
+
+  userId String
+
+  @@index([userId])
 }
 
 model StudyUnit {
@@ -53,13 +57,18 @@ model StudyUnit {
 
 model Subject {
   id        String   @id @default(cuid())
-  name      String   @unique
+  // name      String   @unique // REMOVED global unique
+  name      String
   color     String // Stores a hex code or tailwind class
   createdAt DateTime @default(now())
 
   topics    Topic[]
   sources   ContentSource[]
   questions Question[]
+
+  userId String
+
+  @@unique([name, userId])
 }
 
 model Topic {
@@ -71,7 +80,9 @@ model Topic {
   sources   ContentSource[]
   questions Question[]
 
-  @@unique([name, subjectId])
+  userId String
+
+  @@unique([name, subjectId, userId])
   @@index([subjectId])
 }
 
@@ -95,7 +106,10 @@ model Question {
   subjectId String?
   topics    Topic[]
 
+  userId String
+
   @@index([unitId])
+  @@index([userId])
 }
 
 model StudySession {

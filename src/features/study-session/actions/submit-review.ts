@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { calculateNextReview } from '@/lib/srs-algorithm';
+import { requireUser } from '@/lib/auth';
 
 const submitReviewSchema = z.object({
     questionId: z.string().cuid(),
@@ -16,9 +17,11 @@ export async function submitReview(questionId: string, rating: 'FORGOT' | 'HARD'
         throw new Error('Invalid input');
     }
 
-    // 2. Fetch current question state
-    const question = await prisma.question.findUnique({
-        where: { id: questionId },
+    const userId = await requireUser();
+
+    // 2. Fetch current question state with ownership check
+    const question = await prisma.question.findFirst({
+        where: { id: questionId, userId },
         select: {
             interval: true,
             easeFactor: true,
@@ -27,7 +30,7 @@ export async function submitReview(questionId: string, rating: 'FORGOT' | 'HARD'
     });
 
     if (!question) {
-        throw new Error('Question not found');
+        throw new Error('Question not found or unauthorized');
     }
 
     // 3. Calculate next review using SM-2 algorithm
@@ -40,9 +43,9 @@ export async function submitReview(questionId: string, rating: 'FORGOT' | 'HARD'
         }
     );
 
-    // 4. Update Database
+    // 4. Update Database with ownership check
     const updatedQuestion = await prisma.question.update({
-        where: { id: questionId },
+        where: { id: questionId, userId },
         data: {
             interval,
             easeFactor,

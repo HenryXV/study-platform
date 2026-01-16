@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 
 export type LibraryItem = {
     id: string;
@@ -14,9 +15,28 @@ export type LibraryItem = {
     };
 };
 
-export async function getSources(): Promise<LibraryItem[]> {
+export async function getSources(query?: string): Promise<LibraryItem[]> {
     try {
+        const userId = await requireUser();
+
         const sources = await prisma.contentSource.findMany({
+            where: {
+                userId,
+                ...(query
+                    ? {
+                        OR: [
+                            { title: { contains: query, mode: 'insensitive' } },
+                            { bodyText: { contains: query, mode: 'insensitive' } },
+                            {
+                                subject: {
+                                    name: { contains: query, mode: 'insensitive' },
+                                },
+                            },
+                        ],
+                    }
+                    : {}
+                )
+            },
             orderBy: { createdAt: 'desc' },
             select: {
                 id: true,
@@ -24,20 +44,20 @@ export async function getSources(): Promise<LibraryItem[]> {
                 status: true,
                 createdAt: true,
                 subject: {
-                    select: { name: true, color: true }
+                    select: { name: true, color: true },
                 },
                 topics: {
-                    select: { name: true }
+                    select: { name: true },
                 },
                 _count: {
-                    select: { units: true }
-                }
-            }
+                    select: { units: true },
+                },
+            },
         });
 
         return sources;
     } catch (error) {
-        console.error("Failed to fetch sources:", error);
+        console.error('Failed to fetch sources:', error);
         return [];
     }
 }

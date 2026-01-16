@@ -4,8 +4,9 @@ import { prisma } from '@/lib/prisma';
 import { FlashCard, CardType, QuestionData } from '../data/flash-cards';
 import { LimitSchema, QuestionFiltersSchema } from '@/lib/validation';
 import { calculateSystemizerScore } from '@/lib/srs-algorithm';
+import { requireUser } from '@/lib/auth';
 
-type StudyMode = 'crisis' | 'deep' | 'maintenance' | 'custom';
+type StudyMode = 'crisis' | 'deep' | 'maintenance' | 'custom' | 'cram';
 
 interface QuestionFilters {
     subjectIds?: string[];
@@ -29,11 +30,13 @@ export async function getQuestions(
     const mode: StudyMode = validatedFilters.mode ?? 'maintenance';
 
     try {
+        const userId = await requireUser();
+
         const now = new Date();
         const fetchLimit = limitResult.data * 3;
 
         // Build dynamic where clause based on filters
-        const baseWhere: Record<string, unknown> = {};
+        const baseWhere: Record<string, unknown> = { userId };
 
         if (validatedFilters.subjectIds?.length) {
             baseWhere.subjectId = { in: validatedFilters.subjectIds };
@@ -41,6 +44,24 @@ export async function getQuestions(
 
         if (validatedFilters.topicIds?.length) {
             baseWhere.topics = { some: { id: { in: validatedFilters.topicIds } } };
+        }
+
+        // CRAM MODE: Target specific subjects, sort by due date (Next Review ASC)
+        // Intention: "Cram" implies studying what's due or coming up soon for a specific subject.
+        if (mode === 'cram') {
+            const cramQuestions = await prisma.question.findMany({
+                where: baseWhere,
+                take: fetchLimit,
+                orderBy: { nextReviewDate: 'asc' }, // Prioritize urgent/overdue
+                include: {
+                    subject: { select: { name: true, color: true } },
+                    topics: { select: { name: true } }
+                }
+            });
+
+            // Map and return directly, no extra scoring needed for cramming
+            const sliced = cramQuestions.slice(0, limitResult.data);
+            return sliced.map(q => mapQuestionToFlashCard(q, false));
         }
 
         // CUSTOM MODE: Bypass overdue logic, fetch any matching cards with random shuffle
@@ -54,8 +75,12 @@ export async function getQuestions(
                 }
             });
 
-            // Shuffle randomly
-            const shuffled = customQuestions.sort(() => Math.random() - 0.5);
+            // Fisher-Yates shuffle for unbiased randomization
+            const shuffled = [...customQuestions];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
             const sliced = shuffled.slice(0, limitResult.data);
 
             return sliced.map(q => mapQuestionToFlashCard(q, false));

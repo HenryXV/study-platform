@@ -5,6 +5,7 @@ import { QuestionSchema, EditableQuestion } from '@/features/library/schemas/que
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { CuidSchema } from '@/lib/validation';
+import { requireUser } from '@/lib/auth';
 
 const DeletedIdsSchema = z.array(CuidSchema);
 
@@ -25,6 +26,8 @@ export async function updateQuestions(questions: EditableQuestion[], deletedIds:
     if (questionsToUpdate.length === 0 && deletedIds.length === 0) {
         return { success: false, message: "No questions to update or delete" };
     }
+
+    const userId = await requireUser();
 
     try {
         await prisma.$transaction(async (tx) => {
@@ -62,14 +65,16 @@ export async function updateQuestions(questions: EditableQuestion[], deletedIds:
                             set: [], // Clear current relationships for this question
                             connectOrCreate: q.topics.map(t => ({
                                 where: {
-                                    name_subjectId: {
+                                    name_subjectId_userId: {
                                         name: t,
-                                        subjectId: current.subjectId!
+                                        subjectId: current.subjectId!,
+                                        userId
                                     }
                                 },
                                 create: {
                                     name: t,
-                                    subjectId: current.subjectId!
+                                    subjectId: current.subjectId!,
+                                    userId
                                 }
                             }))
                         } : undefined

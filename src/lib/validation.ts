@@ -14,7 +14,7 @@ export const ContentInputSchema = z.object({
 });
 
 // Study mode enum (extended with 'custom' for flexible sessions)
-export const StudyModeSchema = z.enum(['crisis', 'deep', 'maintenance', 'custom']);
+export const StudyModeSchema = z.enum(['crisis', 'deep', 'maintenance', 'custom', 'cram']);
 
 // Limit with bounds
 export const LimitSchema = z.number().int().min(1).max(100);

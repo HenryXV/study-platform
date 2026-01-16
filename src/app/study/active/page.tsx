@@ -7,7 +7,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function Page(props: { searchParams: SearchParams }) {
     const searchParams = await props.searchParams;
-    const mode = (searchParams.mode as 'crisis' | 'deep' | 'maintenance' | 'custom') || 'maintenance';
+    const mode = (searchParams.mode as 'crisis' | 'deep' | 'maintenance' | 'custom' | 'cram') || 'maintenance';
 
     // Determine Limit
     let limit = 15;
@@ -23,9 +23,12 @@ export default async function Page(props: { searchParams: SearchParams }) {
     }
 
     // Parse subject and topic IDs
-    const subjectIds = typeof searchParams.subjects === 'string'
-        ? searchParams.subjects.split(',').filter(Boolean)
-        : undefined;
+    // Support both 'subjects' (comma-separated) and 'subjectId' (single)
+    const rawSubjects = typeof searchParams.subjects === 'string' ? searchParams.subjects.split(',') : [];
+    if (typeof searchParams.subjectId === 'string') {
+        rawSubjects.push(searchParams.subjectId);
+    }
+    const subjectIds = rawSubjects.filter(Boolean);
 
     const topicIds = typeof searchParams.topics === 'string'
         ? searchParams.topics.split(',').filter(Boolean)

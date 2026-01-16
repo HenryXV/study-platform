@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { ApprovedDraftData } from '../components/DraftSupervisor';
 import { CuidSchema } from '@/lib/validation';
 import { z } from 'zod';
+import { requireUser } from '@/lib/auth';
 
 const DraftUnitSchema = z.object({
     title: z.string().min(1).max(500),
@@ -29,14 +30,22 @@ export async function commitContent(sourceId: string, data: ApprovedDraftData) {
     }
 
     try {
+        const userId = await requireUser();
+
         const count = await prisma.$transaction(async (tx) => {
             // 1. Handle Subject
             const subject = await tx.subject.upsert({
-                where: { name: data.suggestedSubject },
+                where: {
+                    name_userId: {
+                        name: data.suggestedSubject,
+                        userId
+                    }
+                },
                 update: {},
                 create: {
                     name: data.suggestedSubject,
                     color: "bg-blue-100 text-blue-800", // Default color, will be fixed by UI logic later
+                    userId,
                 },
             });
 
@@ -45,15 +54,17 @@ export async function commitContent(sourceId: string, data: ApprovedDraftData) {
             for (const topicName of data.suggestedTopics) {
                 const topic = await tx.topic.upsert({
                     where: {
-                        name_subjectId: {
+                        name_subjectId_userId: {
                             name: topicName,
-                            subjectId: subject.id
+                            subjectId: subject.id,
+                            userId
                         }
                     },
                     update: {},
                     create: {
                         name: topicName,
                         subjectId: subject.id,
+                        userId
                     },
                 });
                 topics.push(topic);

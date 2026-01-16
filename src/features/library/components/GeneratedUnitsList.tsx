@@ -63,7 +63,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete }:
                 toast.error(result.message || "Failed to generate questions");
             }
         } catch (error) {
-            toast.error("An error occurred starting generation");
+            toast.error(error instanceof Error ? error.message : "An error occurred starting generation");
         } finally {
             setIsGeneratingId(null);
         }

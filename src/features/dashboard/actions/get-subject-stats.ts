@@ -1,15 +1,21 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 
 export interface SubjectStat {
+    subjectId: string;
     subject: string;
     mastery: number;
     total: number;
 }
 
 export async function getSubjectStats(): Promise<SubjectStat[]> {
+    const userId = await requireUser().catch(() => null);
+    if (!userId) return [];
+
     const subjects = await prisma.subject.findMany({
+        where: { userId },
         include: {
             questions: {
                 select: {
@@ -23,6 +29,7 @@ export async function getSubjectStats(): Promise<SubjectStat[]> {
         const total = subject.questions.length;
         if (total === 0) {
             return {
+                subjectId: subject.id,
                 subject: subject.name,
                 mastery: 0,
                 total: 0,
@@ -49,6 +56,7 @@ export async function getSubjectStats(): Promise<SubjectStat[]> {
         if (mastery > 100) mastery = 100;
 
         return {
+            subjectId: subject.id,
             subject: subject.name,
             mastery: Math.round(mastery),
             total,

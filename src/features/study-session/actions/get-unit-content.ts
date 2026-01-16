@@ -2,16 +2,27 @@
 
 import { prisma } from '@/lib/prisma';
 import { CuidSchema } from '@/lib/validation';
+import { requireUser } from '@/lib/auth';
 
 export async function getUnitContent(unitId: string) {
+    let userId: string;
+    try {
+        userId = await requireUser();
+    } catch {
+        return { success: false, error: 'Unauthorized' };
+    }
+
     const idResult = CuidSchema.safeParse(unitId);
     if (!idResult.success) {
         return { success: false, error: 'Invalid unit ID format' };
     }
 
     try {
-        const unit = await prisma.studyUnit.findUnique({
-            where: { id: unitId },
+        const unit = await prisma.studyUnit.findFirst({
+            where: {
+                id: unitId,
+                source: { userId }
+            },
             select: {
                 // content: true, // We want the full source text now
                 source: {

@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 
 interface SubjectData {
     id: string;
@@ -10,7 +11,10 @@ interface SubjectData {
 
 export async function getSubjects(): Promise<SubjectData[]> {
     try {
+        const userId = await requireUser();
+
         const subjects = await prisma.subject.findMany({
+            where: { userId },
             select: {
                 id: true,
                 name: true,

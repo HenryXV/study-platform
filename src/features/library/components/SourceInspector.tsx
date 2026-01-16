@@ -9,6 +9,7 @@ import { deleteUnit } from '../actions/delete-unit';
 import { GeneratedUnitsList } from './GeneratedUnitsList';
 import { DraftSupervisor, ApprovedDraftData } from './DraftSupervisor';
 import { Button } from '@/shared/ui/Button';
+import { toast } from 'sonner';
 
 interface SourceInspectorProps {
     source: {
@@ -83,9 +84,11 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                 };
                 setDraftData(draft);
             } else {
-                // Handle error (maybe toast in future)
+                toast.error(res.message || "Analysis failed");
                 console.error("Analysis failed");
             }
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "An error occurred during analysis");
         } finally {
             setIsAnalyzing(false);
         }

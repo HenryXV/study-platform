@@ -46,6 +46,14 @@ export function StudySession({
                 </div>
             )}
 
+            {/* Cram Mode Banner */}
+            {mode === 'cram' && (
+                <div className="absolute -top-12 left-0 right-0 bg-blue-950/30 border border-blue-900/50 text-blue-200 px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium animate-in slide-in-from-top-4">
+                    <Flame className="w-4 h-4 text-blue-500" />
+                    <span>Targeted Study: {currentCard.subject?.name || 'General Review'}</span>
+                </div>
+            )}
+
             {/* Header */}
             <div className="w-full mb-8 flex justify-between items-start text-sm text-zinc-500 font-mono">
                 <div className="flex flex-col gap-2">
@@ -53,7 +61,8 @@ export function StudySession({
                         <span>Active Session</span>
                         <span className={`px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold ${mode === 'deep' ? 'bg-orange-950/30 text-orange-400 border border-orange-900/30' :
                             mode === 'crisis' ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/30' :
-                                'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                                mode === 'cram' ? 'bg-blue-950/30 text-blue-400 border border-blue-900/30' :
+                                    'bg-zinc-800 text-zinc-400 border border-zinc-700'
                             }`}>
                             Mode: {mode}
                         </span>

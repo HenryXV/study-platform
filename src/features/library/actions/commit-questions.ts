@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { Question, QuestionSchema } from '@/features/library/schemas/question-generator';
 import { z } from 'zod';
 import { CuidSchema } from '@/lib/validation';
+import { requireUser } from '@/lib/auth';
 
 export async function commitQuestions(unitId: string, questions: Question[]) {
     // 1. Validate Input
@@ -33,24 +34,29 @@ export async function commitQuestions(unitId: string, questions: Question[]) {
     }
 
     try {
+        const userId = await requireUser();
+
         await prisma.$transaction(async (tx) => {
             for (const q of validQuestions) {
                 await tx.question.create({
                     data: {
+                        userId,
                         unitId: unit.id,
                         type: q.type === 'CODE' ? 'SNIPPET' : (q.type === 'MULTIPLE_CHOICE' ? 'MULTI_CHOICE' : 'OPEN'),
                         subjectId: unit.source.subjectId,
                         topics: (unit.source.subjectId && q.topics?.length) ? {
                             connectOrCreate: q.topics.map(topicName => ({
                                 where: {
-                                    name_subjectId: {
+                                    name_subjectId_userId: {
                                         name: topicName,
-                                        subjectId: unit.source.subjectId!
+                                        subjectId: unit.source.subjectId!,
+                                        userId
                                     }
                                 },
                                 create: {
                                     name: topicName,
-                                    subjectId: unit.source.subjectId!
+                                    subjectId: unit.source.subjectId!,
+                                    userId
                                 }
                             }))
                         } : undefined,

@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { CuidSchema } from '@/lib/validation';
+import { requireUser } from '@/lib/auth';
 
 export async function deleteUnit(unitId: string) {
     const result = CuidSchema.safeParse(unitId);
@@ -10,10 +11,20 @@ export async function deleteUnit(unitId: string) {
         return { success: false, message: 'Invalid unit ID format' };
     }
 
+    const userId = await requireUser();
+
     try {
-        await prisma.studyUnit.delete({
-            where: { id: unitId }
+        // StudyUnit doesn't have userId directly, so check via source relationship
+        const deleted = await prisma.studyUnit.deleteMany({
+            where: {
+                id: unitId,
+                source: { userId }
+            }
         });
+
+        if (deleted.count === 0) {
+            return { success: false, message: 'Unit not found or unauthorized' };
+        }
 
         revalidatePath('/');
         return { success: true };

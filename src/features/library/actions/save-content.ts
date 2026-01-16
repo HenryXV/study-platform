@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { ContentInputSchema } from '@/lib/validation';
+import { requireUser } from '@/lib/auth';
 
 export async function saveRawContent(text: string) {
     const result = ContentInputSchema.safeParse({ text });
@@ -10,6 +11,9 @@ export async function saveRawContent(text: string) {
         return { success: false, message: result.error.issues[0].message };
     }
     const validatedText = result.data.text;
+
+    // Auth check
+    const userId = await requireUser();
 
     try {
         // Auto-generate title first 30 chars or fallback to timestamp
@@ -20,6 +24,7 @@ export async function saveRawContent(text: string) {
                 title,
                 bodyText: validatedText,
                 status: 'UNPROCESSED',
+                userId,
             },
         });
 

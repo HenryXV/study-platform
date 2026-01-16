@@ -3,12 +3,24 @@
 import { generateText, Output } from 'ai';
 import { prisma } from '@/lib/prisma';
 import { ResultSchema, Question } from '@/features/library/schemas/question-generator';
+import { ratelimit } from '@/lib/ratelimit';
+import { auth } from '@clerk/nextjs/server';
 
 export async function generateQuestionsPreview(
     unitId: string,
     unitContent: string,
     unitType: 'TEXT' | 'CODE'
 ): Promise<{ success: boolean; questions?: Question[]; message?: string }> {
+    const { userId } = await auth();
+    if (!userId) {
+        return { success: false, message: "Unauthorized" };
+    }
+
+    const { success } = await ratelimit.limit(userId);
+    if (!success) {
+        throw new Error("Rate limit exceeded. Try again later.");
+    }
+
     try {
         // MATCHING LOGIC FROM generate-questions.ts
         const unit = await prisma.studyUnit.findUnique({

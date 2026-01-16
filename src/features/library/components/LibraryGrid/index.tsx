@@ -11,9 +11,10 @@ import { LibraryItemCard } from './LibraryItemCard';
 
 interface LibraryGridProps {
     sources: LibraryItem[];
+    query?: string;
 }
 
-export function LibraryGrid({ sources }: LibraryGridProps) {
+export function LibraryGrid({ sources, query }: LibraryGridProps) {
     const [selectedSubject, setSelectedSubject] = useState<string>('All');
 
     // Deletion State
@@ -44,17 +45,33 @@ export function LibraryGrid({ sources }: LibraryGridProps) {
 
     // Extract unique subjects
     const subjects = useMemo(() => {
-        const set = new Set(sources.map(s => s.subject?.name).filter(Boolean) as string[]);
+        const set = new Set(sources.map((s) => s.subject?.name).filter(Boolean) as string[]);
         return ['All', ...Array.from(set)];
     }, [sources]);
 
     // Filter sources
     const filteredSources = useMemo(() => {
         if (selectedSubject === 'All') return sources;
-        return sources.filter(s => s.subject?.name === selectedSubject);
+        return sources.filter((s) => s.subject?.name === selectedSubject);
     }, [sources, selectedSubject]);
 
-    if (sources.length === 0) {
+    // Empty State: No matches found (Search active)
+    if (sources.length === 0 && query) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/20">
+                <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+                    <FileText className="w-8 h-8 text-zinc-600" />
+                </div>
+                <h3 className="text-xl font-medium text-zinc-300 mb-2">No matches found</h3>
+                <p className="text-zinc-500">
+                    No results for <span className="text-zinc-300">"{query}"</span>. Try a different term.
+                </p>
+            </div>
+        );
+    }
+
+    // Empty State: Library is empty (Start fresh)
+    if (sources.length === 0 && !query) {
         return (
             <div className="flex flex-col items-center justify-center py-20 border border-dashed border-zinc-800 rounded-2xl bg-zinc-900/20">
                 <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4">

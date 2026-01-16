@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { CuidSchema } from '@/lib/validation';
+import { requireUser } from '@/lib/auth';
 
 export async function deleteQuestion(questionId: string) {
     const result = CuidSchema.safeParse(questionId);
@@ -10,10 +11,16 @@ export async function deleteQuestion(questionId: string) {
         return { success: false, message: 'Invalid question ID format' };
     }
 
+    const userId = await requireUser();
+
     try {
-        await prisma.question.delete({
-            where: { id: questionId }
+        const deleted = await prisma.question.deleteMany({
+            where: { id: questionId, userId }
         });
+
+        if (deleted.count === 0) {
+            return { success: false, message: 'Question not found or unauthorized' };
+        }
 
         revalidatePath('/library/[id]');
         revalidatePath('/');

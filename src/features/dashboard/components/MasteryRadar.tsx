@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import {
     ResponsiveContainer,
     RadarChart,
@@ -11,6 +12,7 @@ import {
 } from 'recharts';
 
 interface SubjectStat {
+    subjectId: string;
     subject: string;
     mastery: number;
     total: number;
@@ -21,6 +23,8 @@ interface MasteryRadarProps {
 }
 
 export function MasteryRadar({ data }: MasteryRadarProps) {
+    const router = useRouter();
+
     if (!data || data.length === 0) {
         return (
             <div className="w-full h-[300px] flex items-center justify-center border border-zinc-800 rounded-xl bg-zinc-900/50">
@@ -28,6 +32,18 @@ export function MasteryRadar({ data }: MasteryRadarProps) {
             </div>
         );
     }
+
+    const handleSubjectClick = (payload: any) => {
+        // payload.value is the subject name (dataKey="subject")
+        // We need the subjectId. We can find it in the data array.
+
+        const subjectName = payload.value;
+        const subjectData = data.find(d => d.subject === subjectName);
+
+        if (subjectData) {
+            router.push(`/study/active?mode=cram&subjectId=${subjectData.subjectId}`);
+        }
+    };
 
     return (
         <div className="w-full h-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 flex flex-col items-center justify-center relative overflow-hidden min-h-[250px]">
@@ -42,7 +58,13 @@ export function MasteryRadar({ data }: MasteryRadarProps) {
                     <PolarGrid stroke="#27272a" />
                     <PolarAngleAxis
                         dataKey="subject"
-                        tick={{ fill: '#a1a1aa', fontSize: 10, fontFamily: 'var(--font-mono)' }}
+                        tick={{
+                            fill: '#a1a1aa',
+                            fontSize: 10,
+                            fontFamily: 'var(--font-mono)',
+                            cursor: 'pointer',
+                        }}
+                        onClick={handleSubjectClick}
                     />
                     <PolarRadiusAxis
                         angle={30}
@@ -58,6 +80,7 @@ export function MasteryRadar({ data }: MasteryRadarProps) {
                         fill="#10b981"
                         fillOpacity={0.2}
                     />
+
                     <Tooltip
                         contentStyle={{
                             backgroundColor: '#18181b',
