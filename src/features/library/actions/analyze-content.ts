@@ -3,8 +3,14 @@
 import { generateText, Output } from 'ai';
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
+import { CuidSchema } from '@/lib/validation';
 
 export async function analyzeContentPreview(sourceId: string) {
+    const idResult = CuidSchema.safeParse(sourceId);
+    if (!idResult.success) {
+        return { success: false, message: 'Invalid source ID format' };
+    }
+
     try {
         // 1. Fetch the raw content
         const source = await prisma.contentSource.findUnique({

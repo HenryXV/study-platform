@@ -25,4 +25,6 @@ export interface FlashCard {
     explanation?: string;
     subject?: { name: string; color: string };
     topics?: { name: string }[];
+    unitId?: string;
+    isReviewAhead?: boolean;
 }

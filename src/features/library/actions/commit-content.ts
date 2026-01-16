@@ -3,8 +3,14 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { ApprovedDraftData } from '../components/DraftSupervisor';
+import { CuidSchema } from '@/lib/validation';
 
 export async function commitContent(sourceId: string, data: ApprovedDraftData) {
+    const idResult = CuidSchema.safeParse(sourceId);
+    if (!idResult.success) {
+        return { success: false, message: 'Invalid source ID format' };
+    }
+
     try {
         const count = await prisma.$transaction(async (tx) => {
             // 1. Handle Subject

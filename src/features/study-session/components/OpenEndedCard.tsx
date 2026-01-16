@@ -10,6 +10,7 @@ interface OpenEndedCardProps {
     isFlipped: boolean;
     onFlip: () => void;
     explanation?: string;
+    unitId?: string;
 }
 
 export function OpenEndedCard({
@@ -17,7 +18,8 @@ export function OpenEndedCard({
     modelAnswer,
     isFlipped,
     onFlip,
-    explanation
+    explanation,
+    unitId
 }: OpenEndedCardProps) {
     const [userAnswer, setUserAnswer] = useState('');
 
@@ -62,7 +64,7 @@ export function OpenEndedCard({
                         <div className="w-full flex-1 bg-zinc-900/50 border border-green-900/30 rounded-lg p-4 text-green-100/90 overflow-auto custom-scrollbar leading-relaxed shadow-[0_0_20px_-10px_rgba(16,185,129,0.1)]">
                             {modelAnswer}
                         </div>
-                        <ExplanationReveal explanation={explanation} />
+                        <ExplanationReveal explanation={explanation} unitId={unitId} />
                     </div>
                 )}
             </div>

@@ -2,9 +2,13 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { CuidSchema } from '@/lib/validation';
 
 export async function deleteContentSource(sourceId: string) {
-    if (!sourceId) return { success: false, message: "No ID provided" };
+    const result = CuidSchema.safeParse(sourceId);
+    if (!result.success) {
+        return { success: false, message: 'Invalid source ID format' };
+    }
 
     try {
         await prisma.contentSource.delete({

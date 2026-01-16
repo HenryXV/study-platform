@@ -12,6 +12,7 @@ interface MultipleChoiceCardProps {
     isFlipped: boolean;
     onAnswer: (selected: string) => void;
     explanation?: string;
+    unitId?: string;
 }
 
 export function MultipleChoiceCard({
@@ -20,7 +21,8 @@ export function MultipleChoiceCard({
     correctAnswer,
     isFlipped,
     onAnswer,
-    explanation
+    explanation,
+    unitId
 }: MultipleChoiceCardProps) {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
@@ -56,7 +58,7 @@ export function MultipleChoiceCard({
 
                     if (isFlipped) {
                         if (isCorrect) {
-                            stateStyles = "bg-emerald-950/60 border-emerald-500/50 text-emerald-200 shadow-[0_0_15px_-3px_rgba(16,185,129,0.2)]";
+                            stateStyles = "bg-emerald-950/60 border-emerald-500/50 text-emerald-200 shadow-glow-emerald";
                             icon = <Check className="w-5 h-5 text-emerald-400" />;
                         } else if (isSelected && !isCorrect) {
                             stateStyles = "bg-red-950/60 border-red-500/50 text-red-200 opacity-80";
@@ -93,7 +95,7 @@ export function MultipleChoiceCard({
                             ? "Correct! Well done."
                             : "Incorrect. Review the answer above."}
                     </p>
-                    <ExplanationReveal explanation={explanation} />
+                    <ExplanationReveal explanation={explanation} unitId={unitId} />
                 </div>
             )}
         </div>

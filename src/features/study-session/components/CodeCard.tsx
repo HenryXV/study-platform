@@ -10,9 +10,10 @@ interface CodeCardProps {
     expectedAnswer?: string;
     isFlipped: boolean;
     explanation?: string;
+    unitId?: string;
 }
 
-export function CodeCard({ question, initialCode = '', expectedAnswer = '', isFlipped, explanation }: CodeCardProps) {
+export function CodeCard({ question, initialCode = '', expectedAnswer = '', isFlipped, explanation, unitId }: CodeCardProps) {
     const [userCode, setUserCode] = useState(initialCode);
 
     return (
@@ -68,7 +69,7 @@ export function CodeCard({ question, initialCode = '', expectedAnswer = '', isFl
                             </div>
                         </div>
                     </div>
-                    <ExplanationReveal explanation={explanation} />
+                    <ExplanationReveal explanation={explanation} unitId={unitId} />
                 </div>
             )}
         </div>

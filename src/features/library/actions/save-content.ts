@@ -2,20 +2,23 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { ContentInputSchema } from '@/lib/validation';
 
 export async function saveRawContent(text: string) {
-    if (!text || text.trim().length === 0) {
-        return { success: false, message: 'Content cannot be empty' };
+    const result = ContentInputSchema.safeParse({ text });
+    if (!result.success) {
+        return { success: false, message: result.error.issues[0].message };
     }
+    const validatedText = result.data.text;
 
     try {
         // Auto-generate title first 30 chars or fallback to timestamp
-        const title = text.trim().slice(0, 30) + (text.length > 30 ? '...' : '') || `Quick Note: ${new Date().toLocaleString()}`;
+        const title = validatedText.trim().slice(0, 30) + (validatedText.length > 30 ? '...' : '') || `Quick Note: ${new Date().toLocaleString()}`;
 
         await prisma.contentSource.create({
             data: {
                 title,
-                bodyText: text,
+                bodyText: validatedText,
                 status: 'UNPROCESSED',
             },
         });

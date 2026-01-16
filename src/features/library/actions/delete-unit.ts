@@ -2,9 +2,13 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { CuidSchema } from '@/lib/validation';
 
 export async function deleteUnit(unitId: string) {
-    if (!unitId) return { success: false, message: "No ID provided" };
+    const result = CuidSchema.safeParse(unitId);
+    if (!result.success) {
+        return { success: false, message: 'Invalid unit ID format' };
+    }
 
     try {
         await prisma.studyUnit.delete({
