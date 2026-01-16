@@ -1,19 +1,59 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { DAILY_OPTIONS, MenuOption } from '../data/mock-menu';
+import { SessionPlannerModal } from '../components/SessionPlannerModal';
+import { Sparkles } from 'lucide-react';
 
 export function DashboardMenu() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto">
-            {DAILY_OPTIONS.map((option) => (
-                <MenuCard
-                    key={option.title}
-                    option={option}
-                />
-            ))}
-        </div>
+        <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl mx-auto">
+                {DAILY_OPTIONS.map((option) => (
+                    <MenuCard
+                        key={option.title}
+                        option={option}
+                    />
+                ))}
+
+                {/* Custom Session Card */}
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="relative group p-6 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between h-48 select-none text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950
+                        bg-gradient-to-br from-violet-950/20 to-fuchsia-950/20 border-violet-900/30 hover:border-violet-500/40 hover:from-violet-950/30 hover:to-fuchsia-950/30"
+                >
+                    <div className="space-y-2">
+                        <h3 className="text-xl font-medium tracking-tight text-zinc-50 flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-violet-400" />
+                            Custom
+                        </h3>
+                        <p className="text-sm text-violet-200/70 font-mono">
+                            Design your own
+                        </p>
+                    </div>
+
+                    <div className="flex items-end justify-between">
+                        <div className="flex flex-col">
+                            <span className="text-3xl font-bold text-violet-900 group-hover:text-violet-800 transition-colors">
+                                ∞
+                            </span>
+                            <span className="text-xs uppercase tracking-wider font-mono text-violet-500/70 group-hover:text-violet-400 transition-opacity">
+                                Flexible
+                            </span>
+                        </div>
+                        <span className="text-xs uppercase tracking-wider text-violet-500/50 font-mono mb-1">Personalized</span>
+                    </div>
+                </button>
+            </div>
+
+            <SessionPlannerModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
+        </>
     );
 }
 

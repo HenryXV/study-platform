@@ -1,28 +1,70 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { FlashCard, CardType, QuestionData } from '../data/flash-cards'; // Re-using types
-import { LimitSchema, StudyModeSchema } from '@/lib/validation';
+import { FlashCard, CardType, QuestionData } from '../data/flash-cards';
+import { LimitSchema, QuestionFiltersSchema } from '@/lib/validation';
+import { calculateSystemizerScore } from '@/lib/srs-algorithm';
+
+type StudyMode = 'crisis' | 'deep' | 'maintenance' | 'custom';
+
+interface QuestionFilters {
+    subjectIds?: string[];
+    topicIds?: string[];
+    mode?: StudyMode;
+}
 
 export async function getQuestions(
-    limit: number,
-    mode: 'crisis' | 'deep' | 'maintenance' = 'maintenance'
+    limit: number = 20,
+    filters?: QuestionFilters
 ): Promise<FlashCard[]> {
     const limitResult = LimitSchema.safeParse(limit);
-    const modeResult = StudyModeSchema.safeParse(mode);
+    const filtersResult = QuestionFiltersSchema.safeParse(filters ?? {});
 
-    if (!limitResult.success || !modeResult.success) {
-        console.error('Invalid parameters:', { limit, mode });
+    if (!limitResult.success || !filtersResult.success) {
+        console.error('Invalid parameters:', { limit, filters });
         return [];
     }
 
+    const validatedFilters = filtersResult.data;
+    const mode: StudyMode = validatedFilters.mode ?? 'maintenance';
+
     try {
         const now = new Date();
-        const fetchLimit = limitResult.data * 3; // Buffer for sorting
+        const fetchLimit = limitResult.data * 3;
 
+        // Build dynamic where clause based on filters
+        const baseWhere: Record<string, unknown> = {};
+
+        if (validatedFilters.subjectIds?.length) {
+            baseWhere.subjectId = { in: validatedFilters.subjectIds };
+        }
+
+        if (validatedFilters.topicIds?.length) {
+            baseWhere.topics = { some: { id: { in: validatedFilters.topicIds } } };
+        }
+
+        // CUSTOM MODE: Bypass overdue logic, fetch any matching cards with random shuffle
+        if (mode === 'custom') {
+            const customQuestions = await prisma.question.findMany({
+                where: baseWhere,
+                take: fetchLimit,
+                include: {
+                    subject: { select: { name: true, color: true } },
+                    topics: { select: { name: true } }
+                }
+            });
+
+            // Shuffle randomly
+            const shuffled = customQuestions.sort(() => Math.random() - 0.5);
+            const sliced = shuffled.slice(0, limitResult.data);
+
+            return sliced.map(q => mapQuestionToFlashCard(q, false));
+        }
+
+        // STANDARD MODES: Use overdue prioritization logic
         // 1. Fetch Overdue Items
         const overduePromise = prisma.question.findMany({
-            where: { nextReviewDate: { lte: now } },
+            where: { ...baseWhere, nextReviewDate: { lte: now } },
             take: fetchLimit,
             include: {
                 subject: { select: { name: true, color: true } },
@@ -31,44 +73,35 @@ export async function getQuestions(
         });
 
         // 2. Fetch New Items (Only if NOT 'crisis')
-        let newItemsPromise = Promise.resolve([]);
-        if (modeResult.data !== 'crisis') {
+        let newItemsPromise = Promise.resolve<typeof overduePromise extends Promise<infer T> ? T : never>([]);
+        if (mode !== 'crisis') {
             newItemsPromise = prisma.question.findMany({
-                where: { lastReviewed: null },
+                where: { ...baseWhere, lastReviewed: null },
                 take: fetchLimit,
                 include: {
                     subject: { select: { name: true, color: true } },
                     topics: { select: { name: true } }
                 }
-            }) as any; // Cast to avoid TS issues if types mismatch slightly, though they shouldn't
+            });
         }
 
         const [overdue, newItems] = await Promise.all([overduePromise, newItemsPromise]);
         let allCandidates = [...overdue, ...newItems];
 
         // 3. Filter for Crisis Mode (Strict)
-        if (modeResult.data === 'crisis') {
+        if (mode === 'crisis') {
             allCandidates = allCandidates.filter(q => q.interval < 3);
             if (allCandidates.length === 0) return [];
         }
 
         // 4. Calculate Scores (The Systemizer Score)
         const scoredCandidates = allCandidates.map(q => {
-            let score = 0;
-
-            // Overdue Penalty: +1 per day overdue
-            const daysOverdue = Math.max(0, Math.floor((now.getTime() - new Date(q.nextReviewDate).getTime()) / (1000 * 60 * 60 * 24)));
-            score += daysOverdue;
-
-            // Danger Zone: +50 checks
-            if (q.interval < 3) score += 50;
-
-            // Interest Bonus: +20 for CODE
-            if (q.type === 'SNIPPET') score += 20;
-
-            // New Item Bonus: +10
-            if (q.interval === 0 || !q.lastReviewed) score += 10;
-
+            const score = calculateSystemizerScore({
+                nextReviewDate: q.nextReviewDate,
+                interval: q.interval,
+                type: q.type,
+                lastReviewed: q.lastReviewed,
+            }, now);
             return { question: q, score };
         });
 
@@ -79,12 +112,12 @@ export async function getQuestions(
         let finalQuestions = scoredCandidates.slice(0, limitResult.data).map(item => ({ ...item.question, isReviewAhead: false }));
 
         // 7. Review Ahead Fallback
-        if (modeResult.data !== 'crisis' && finalQuestions.length < limitResult.data) {
+        if (mode !== 'crisis' && finalQuestions.length < limitResult.data) {
             const needed = limitResult.data - finalQuestions.length;
             const futureQuestions = await prisma.question.findMany({
-                where: { nextReviewDate: { gt: now } },
+                where: { ...baseWhere, nextReviewDate: { gt: now } },
                 take: needed,
-                orderBy: { nextReviewDate: 'asc' }, // Soonest first
+                orderBy: { nextReviewDate: 'asc' },
                 include: {
                     subject: { select: { name: true, color: true } },
                     topics: { select: { name: true } }
@@ -95,36 +128,49 @@ export async function getQuestions(
             finalQuestions = [...finalQuestions, ...mappedFuture];
         }
 
-        return finalQuestions.map(q => {
-            const data = q.data as unknown as QuestionData;
-
-            let uiType: CardType = 'TEXT';
-            if (q.type === 'SNIPPET') uiType = 'CODE';
-            if (q.type === 'MULTI_CHOICE') uiType = 'MULTI_CHOICE';
-            if (q.type === 'OPEN') uiType = 'OPEN';
-
-            const codeSnippet = 'codeSnippet' in data ? data.codeSnippet : undefined;
-            const options = 'options' in data ? data.options : undefined;
-            const explanation = 'explanation' in data ? (data.explanation as string) : undefined;
-
-            return {
-                id: q.id,
-                type: uiType,
-                question: data.question || "Unknown Question",
-                answer: data.answer || "No answer provided",
-                codeSnippet: codeSnippet,
-                options: options,
-                expected: data.answer,
-                explanation: explanation,
-                subject: q.subject || undefined,
-                topics: q.topics || [],
-                unitId: q.unitId,
-                isReviewAhead: q.isReviewAhead
-            };
-        });
+        return finalQuestions.map(q => mapQuestionToFlashCard(q, q.isReviewAhead));
 
     } catch (error) {
         console.error("Failed to fetch questions:", error);
         return [];
     }
+}
+
+// Helper to map Prisma Question to FlashCard type
+function mapQuestionToFlashCard(
+    q: {
+        id: string;
+        type: string;
+        data: unknown;
+        unitId: string;
+        subject?: { name: string; color: string } | null;
+        topics: { name: string }[];
+    },
+    isReviewAhead: boolean
+): FlashCard {
+    const data = q.data as unknown as QuestionData;
+
+    let uiType: CardType = 'TEXT';
+    if (q.type === 'SNIPPET') uiType = 'CODE';
+    if (q.type === 'MULTI_CHOICE') uiType = 'MULTI_CHOICE';
+    if (q.type === 'OPEN') uiType = 'OPEN';
+
+    const codeSnippet = 'codeSnippet' in data ? data.codeSnippet : undefined;
+    const options = 'options' in data ? data.options : undefined;
+    const explanation = 'explanation' in data ? (data.explanation as string) : undefined;
+
+    return {
+        id: q.id,
+        type: uiType,
+        question: data.question || "Unknown Question",
+        answer: data.answer || "No answer provided",
+        codeSnippet: codeSnippet,
+        options: options,
+        expected: data.answer,
+        explanation: explanation,
+        subject: q.subject || undefined,
+        topics: q.topics || [],
+        unitId: q.unitId,
+        isReviewAhead: isReviewAhead
+    };
 }

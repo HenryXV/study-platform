@@ -2,8 +2,16 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+
+const ItemsCountSchema = z.number().int().positive().max(1000);
 
 export async function logStudyActivity(itemsCount: number) {
+    const countResult = ItemsCountSchema.safeParse(itemsCount);
+    if (!countResult.success) {
+        return { success: false, message: 'Invalid items count' };
+    }
+
     try {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

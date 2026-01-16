@@ -4,11 +4,28 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { ApprovedDraftData } from '../components/DraftSupervisor';
 import { CuidSchema } from '@/lib/validation';
+import { z } from 'zod';
+
+const DraftUnitSchema = z.object({
+    title: z.string().min(1).max(500),
+    type: z.enum(['TEXT', 'CODE']),
+});
+
+const ApprovedDraftDataSchema = z.object({
+    suggestedSubject: z.string().min(1).max(200),
+    suggestedTopics: z.array(z.string().min(1).max(100)),
+    units: z.array(DraftUnitSchema).min(1),
+});
 
 export async function commitContent(sourceId: string, data: ApprovedDraftData) {
     const idResult = CuidSchema.safeParse(sourceId);
     if (!idResult.success) {
         return { success: false, message: 'Invalid source ID format' };
+    }
+
+    const dataResult = ApprovedDraftDataSchema.safeParse(data);
+    if (!dataResult.success) {
+        return { success: false, message: 'Invalid data format: ' + dataResult.error.issues[0].message };
     }
 
     try {

@@ -76,17 +76,17 @@ export async function getOvertimeQuestions(
 
         // Map to FlashCard interface
         const mappedQuestions: FlashCard[] = questions.map((q) => {
-            const data = q.data as any; // Type assertion since data is Json
+            const data = q.data as Record<string, unknown>;
 
             return {
                 id: q.id,
                 type: mapQuestionType(q.type),
-                question: data.question || "No Question Text",
-                answer: data.answer || "No Answer Text",
-                options: data.options,
-                codeSnippet: data.codeSnippet,
-                expected: data.expected,
-                explanation: data.explanation,
+                question: String(data.question || "No Question Text"),
+                answer: String(data.answer || "No Answer Text"),
+                options: data.options as string[] | undefined,
+                codeSnippet: data.codeSnippet as string | undefined,
+                expected: data.expected as string | undefined,
+                explanation: data.explanation as string | undefined,
                 subject: q.subject ? {
                     name: q.subject.name,
                     color: q.subject.color

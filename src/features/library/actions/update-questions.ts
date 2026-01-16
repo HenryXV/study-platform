@@ -4,12 +4,20 @@ import { prisma } from '@/lib/prisma';
 import { QuestionSchema, EditableQuestion } from '@/features/library/schemas/question-generator';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { CuidSchema } from '@/lib/validation';
+
+const DeletedIdsSchema = z.array(CuidSchema);
 
 export async function updateQuestions(questions: EditableQuestion[], deletedIds: string[] = []) {
     const parseResult = z.array(QuestionSchema.extend({ id: z.string().optional() })).safeParse(questions);
+    const deletedIdsResult = DeletedIdsSchema.safeParse(deletedIds);
 
     if (!parseResult.success) {
         return { success: false, message: "Validation failed: " + parseResult.error.issues.map(e => e.message).join(", ") };
+    }
+
+    if (!deletedIdsResult.success) {
+        return { success: false, message: "Invalid deleted IDs format" };
     }
 
     const questionsToUpdate = parseResult.data.filter(q => q.id);
