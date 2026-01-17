@@ -56,7 +56,10 @@ export function calculateNextReview(
     // to prevent artificially inflating the interval (e.g., spamming "Easy").
     // We EXCLUDE 'FORGOT' from this check because if you forgot it, you forgot it.
     if (lastReviewDate && rating !== 'FORGOT') {
-        const isSameDay = now.toDateString() === lastReviewDate.toDateString();
+        const isSameDay =
+            now.getUTCFullYear() === lastReviewDate.getUTCFullYear() &&
+            now.getUTCMonth() === lastReviewDate.getUTCMonth() &&
+            now.getUTCDate() === lastReviewDate.getUTCDate();
 
         if (isSameDay) {
             // Return current state without changes, effectively ignoring this review.

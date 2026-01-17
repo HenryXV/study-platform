@@ -2,20 +2,20 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getQuestions } from '@/features/study-session/actions/get-questions';
-import { prisma } from '@/lib/prisma';
+import { fetchQuestions } from '@/features/study-session/services/session-service';
+import { requireUser } from '@/lib/auth';
 
-// Mock Clerk Auth
+// Mock Dependencies
 vi.mock('@clerk/nextjs/server', () => ({
-    auth: vi.fn().mockResolvedValue({ userId: 'user_123' }),
+    auth: vi.fn(),
 }));
 
-// Mock Prisma
-vi.mock('@/lib/prisma', () => ({
-    prisma: {
-        question: {
-            findMany: vi.fn(),
-        },
-    },
+vi.mock('@/lib/auth', () => ({
+    requireUser: vi.fn(),
+}));
+
+vi.mock('@/features/study-session/services/session-service', () => ({
+    fetchQuestions: vi.fn(),
 }));
 
 describe('getQuestions - Cram Mode', () => {
@@ -23,73 +23,36 @@ describe('getQuestions - Cram Mode', () => {
         vi.clearAllMocks();
     });
 
-    it('should fetch questions for specific subject sorted by due date in cram mode', async () => {
-        const mockQuestions = [
-            {
-                id: 'q1',
-                type: 'TEXT',
-                data: { question: 'Q1', answer: 'A1' },
-                unitId: 'u1',
-                subjectId: 'sub1',
-                nextReviewDate: new Date('2023-01-01'), // Overdue
-                subject: { name: 'Math', color: 'red' },
-                topics: [{ name: 'Algebra' }],
-            },
-            {
-                id: 'q2',
-                type: 'TEXT',
-                data: { question: 'Q2', answer: 'A2' },
-                unitId: 'u1',
-                subjectId: 'sub1',
-                nextReviewDate: new Date('2025-01-01'), // Future
-                subject: { name: 'Math', color: 'red' },
-                topics: [{ name: 'Algebra' }],
-            },
-        ];
+    it('should delegate to fetchQuestions with cram mode', async () => {
+        // Arrange
+        vi.mocked(requireUser).mockResolvedValue('user_123');
+        const mockQuestions = [{ id: 'q1', isReviewAhead: false }];
+        vi.mocked(fetchQuestions).mockResolvedValue(mockQuestions as any);
 
-        (prisma.question.findMany as any).mockResolvedValue(mockQuestions);
-
+        // Act
         const result = await getQuestions(10, {
             mode: 'cram',
             subjectIds: ['sub1'],
         });
 
-        // Verify Prisma Call
-        expect(prisma.question.findMany).toHaveBeenCalledWith({
-            where: {
-                subjectId: { in: ['sub1'] },
-                userId: 'user_123',
-            },
-            take: 30, // limit * 3
-            orderBy: { nextReviewDate: 'asc' },
-            include: {
-                subject: { select: { name: true, color: true } },
-                topics: { select: { name: true } },
-            },
-        });
-
-        // Verify Result
-        expect(result).toHaveLength(2);
-        expect(result[0].id).toBe('q1');
-        expect(result[1].id).toBe('q2');
-        expect(result[0].isReviewAhead).toBe(false);
+        // Assert
+        expect(requireUser).toHaveBeenCalled();
+        expect(fetchQuestions).toHaveBeenCalledWith(
+            'user_123',
+            'cram',
+            10,
+            'sub1',
+            undefined
+        );
+        expect(result).toEqual(mockQuestions);
     });
 
-    it('should ignore other subjects in cram mode', async () => {
-        (prisma.question.findMany as any).mockResolvedValue([]);
+    it('should handle validation errors gracefully', async () => {
+        // Act
+        const result = await getQuestions(-5); // Invalid limit
 
-        await getQuestions(10, {
-            mode: 'cram',
-            subjectIds: ['sub1'],
-        });
-
-        expect(prisma.question.findMany).toHaveBeenCalledWith(
-            expect.objectContaining({
-                where: expect.objectContaining({
-                    subjectId: { in: ['sub1'] },
-                    userId: 'user_123'
-                }),
-            })
-        );
+        // Assert
+        expect(result).toEqual([]);
+        expect(fetchQuestions).not.toHaveBeenCalled();
     });
 });

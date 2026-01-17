@@ -6,8 +6,11 @@
 
 ```mermaid
 graph TB
-    Client["Web Client (Next.js)"] --> API["App Router / Server Actions"]
-    API --> DB[("Postgres / Prisma")]
+    Client["Web Client (Next.js)"] --> API["Server Actions"]
+    API --> Service["Services (Business Logic)"]
+    Service --> Repo["Repositories (Data Access)"]
+    Repo --> DB[("Postgres / Prisma")]
+    
     API --> Auth["Clerk Auth"]
     API --> Cache["Upstash Redis (Rate Limiting)"]
     
@@ -154,19 +157,30 @@ We rely on standard Next.js 16 patterns to keep the implementation boring and pr
 
 ### 5.1 Project Structure
 *   `src/app/` **(Routes):** Minimal logic. Responsible for layout and metadata only. Imports feature components.
-*   `src/features/` **(Business Logic):** collocated components, actions, and hooks.
-    *   `features/[name]/actions`: Server Actions (Zod-protected).
+*   `src/features/` **(Domain Modules):** 
+    *   `features/[name]/actions`: Entry points (Validation, Auth, Rate Limiting).
+    *   `features/[name]/services`: Business logic (Pure functions, Algorithms).
+    *   `features/[name]/repositories`: Data access (Prisma queries, Transactions).
     *   `features/[name]/components`: Feature-specific UI.
     *   `features/[name]/schemas`: Zod contracts.
-*   `src/shared/ui/` **(Design System):** "Dumb" UI components (Card, Button, Badge) with no business logic.
+*   `src/shared/ui/` **(Design System):** "Dumb" UI components (Card, Button, Badge).
 
-### 5.2 Server Actions Pattern
-All mutations follow a strict "RPC-like" pattern:
-1.  **Auth Check:** `requireUser()` (Throws if anon).
-2.  **Rate Limit:** `ratelimit.limit(userId)` (Throws if abuse).
-3.  **Input Validation:** `Schema.parse(input)` (Throws if invalid).
-4.  **DB Mutation:** Prisma transaction.
-5.  **Revalidate:** `revalidatePath()` to update UI.
+### 5.2 Server Actions Pattern (3-Layer Architecture)
+We separate concerns to keep business logic testable:
+
+1.  **Action Layer (The Controller):**
+    *   Checks Auth (`requireUser`).
+    *   Checks Rate Limits.
+    *   Validates Input (Zod).
+    *   Calls the **Service**.
+2.  **Service Layer (The Brain):**
+    *   Contains business rules (e.g., "Crisis Mode" filtering, SRS calculations).
+    *   Orchestrates multiple repository calls.
+    *   **Unit Testable** without mocking DB.
+3.  **Repository Layer (The Memory):**
+    *   Executes raw Prisma queries.
+    *   Handles Transactions.
+    *   Returns strict typed objects.
 
 ## 6. Security & Access Control
 
