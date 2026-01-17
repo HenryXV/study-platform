@@ -1,18 +1,15 @@
 # System Architecture
 
-> **Philosophy:** "Systemizer" Design
-> This architecture is built to withstand high-entropy input (random notes, PDFs, code) and convert it into low-entropy, strictly typed "Study Units." It prioritizes Type Safety, Deterministic Logic, and Zero-Friction Ingestion.
-
 ## 1. System Overview
 
 ### 1.1 High-Level Architecture
 
 ```mermaid
 graph TB
-    Client[Web Client (Next.js)] --> API[App Router / Server Actions]
-    API --> DB[(Postgres / Prisma)]
-    API --> Auth[Clerk Auth]
-    API --> Cache[Upstash Redis (Rate Limiting)]
+    Client["Web Client (Next.js)"] --> API["App Router / Server Actions"]
+    API --> DB[("Postgres / Prisma")]
+    API --> Auth["Clerk Auth"]
+    API --> Cache["Upstash Redis (Rate Limiting)"]
     
     subgraph "Features"
         Dashboard

@@ -7,10 +7,10 @@
 
 ```mermaid
 graph TB
-    Client[Web Client (Next.js)] --> API[App Router / Server Actions]
-    API --> DB[(Postgres / Prisma)]
-    API --> Auth[Clerk Auth]
-    API --> Cache[Upstash Redis (Rate Limiting)]
+    Client["Web Client (Next.js)"] --> API["App Router / Server Actions"]
+    API --> DB[("Postgres / Prisma")]
+    API --> Auth["Clerk Auth"]
+    API --> Cache["Upstash Redis (Rate Limiting)"]
     
     subgraph "Features"
         Dashboard
