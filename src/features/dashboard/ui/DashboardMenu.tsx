@@ -1,52 +1,50 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import { DAILY_OPTIONS, MenuOption } from '../data/mock-menu';
 import { SessionPlannerModal } from '../components/SessionPlannerModal';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, LucideIcon } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/Card';
+import { Badge } from '@/shared/ui/Badge';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export function DashboardMenu() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     return (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full">
                 {DAILY_OPTIONS.map((option) => (
-                    <MenuCard
+                    <Link
                         key={option.title}
-                        option={option}
-                    />
+                        href={`/study/active?mode=${option.type === 'standard' ? 'maintenance' : option.type === 'deep' ? 'deep' : 'crisis'}`}
+                        className="block h-full group"
+                    >
+                        <DashboardCard
+                            title={option.title}
+                            description={option.duration}
+                            icon={option.icon}
+                            mainMetric={option.questionCount}
+                            metricLabel="Questions"
+                            variant={option.type}
+                            badgeLabel={option.type === 'deep' ? 'Intense' : undefined}
+                        />
+                    </Link>
                 ))}
 
                 {/* Custom Session Card */}
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="relative group p-6 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between h-48 select-none text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950
-                        bg-gradient-to-br from-violet-950/20 to-fuchsia-950/20 border-violet-900/30 hover:border-violet-500/40 hover:from-violet-950/30 hover:to-fuchsia-950/30"
-                >
-                    <div className="space-y-2">
-                        <h3 className="text-xl font-medium tracking-tight text-zinc-50 flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-violet-400" />
-                            Custom
-                        </h3>
-                        <p className="text-sm text-violet-200/70 font-mono">
-                            Design your own
-                        </p>
-                    </div>
-
-                    <div className="flex items-end justify-between">
-                        <div className="flex flex-col">
-                            <span className="text-3xl font-bold text-violet-900 group-hover:text-violet-800 transition-colors">
-                                ∞
-                            </span>
-                            <span className="text-xs uppercase tracking-wider font-mono text-violet-500/70 group-hover:text-violet-400 transition-opacity">
-                                Flexible
-                            </span>
-                        </div>
-                        <span className="text-xs uppercase tracking-wider text-violet-500/50 font-mono mb-1">Personalized</span>
-                    </div>
-                </button>
+                <div onClick={() => setIsModalOpen(true)} className="h-full cursor-pointer group">
+                    <DashboardCard
+                        title="Custom"
+                        description="Design your own"
+                        icon={Sparkles}
+                        mainMetric="∞"
+                        metricLabel="Flexible"
+                        variant="custom"
+                        badgeLabel="Personalized"
+                    />
+                </div>
             </div>
 
             <SessionPlannerModal
@@ -57,58 +55,86 @@ export function DashboardMenu() {
     );
 }
 
-function MenuCard({ option }: { option: MenuOption }) {
-    const baseStyles = "relative group p-6 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between h-48 select-none block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
+interface DashboardCardProps {
+    title: string;
+    description: string;
+    icon: LucideIcon;
+    mainMetric: string | number;
+    metricLabel: string;
+    variant: 'standard' | 'deep' | 'crisis' | 'custom';
+    badgeLabel?: string;
+}
 
-    const typeStyles = {
-        standard: "bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50",
-        deep: "bg-zinc-900 border-orange-900/50 hover:border-orange-500/50 hover:bg-orange-950/10 shadow-[0_0_15px_-5px_rgba(234,88,12,0.1)] hover:shadow-[0_0_20px_-5px_rgba(234,88,12,0.3)]",
-        crisis: "bg-emerald-950/10 border-emerald-900/30 hover:border-emerald-500/30 hover:bg-emerald-950/20"
+function DashboardCard({
+    title,
+    description,
+    icon: Icon,
+    mainMetric,
+    metricLabel,
+    variant,
+    badgeLabel
+}: DashboardCardProps) {
+
+    const variants = {
+        standard: {
+            wrapper: "bg-zinc-900 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/50",
+            icon: "text-zinc-500 group-hover:text-zinc-400",
+            metric: "text-zinc-700 group-hover:text-zinc-600",
+            badge: null
+        },
+        deep: {
+            wrapper: "bg-zinc-900 border-orange-900/50 hover:border-orange-500/50 hover:bg-orange-950/10 shadow-[0_0_15px_-5px_rgba(234,88,12,0.1)] hover:shadow-[0_0_20px_-5px_rgba(234,88,12,0.3)]",
+            icon: "text-orange-500/70 group-hover:text-orange-500",
+            metric: "text-orange-900 group-hover:text-orange-800",
+            badge: "bg-orange-500/10 text-orange-400 border-orange-500/20"
+        },
+        crisis: {
+            wrapper: "bg-emerald-950/10 border-emerald-900/30 hover:border-emerald-500/30 hover:bg-emerald-950/20",
+            icon: "text-emerald-500/70 group-hover:text-emerald-500",
+            metric: "text-emerald-900 group-hover:text-emerald-800",
+            badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+        },
+        custom: {
+            wrapper: "bg-gradient-to-br from-violet-950/20 to-fuchsia-950/20 border-violet-900/30 hover:border-violet-500/40 hover:from-violet-950/30 hover:to-fuchsia-950/30",
+            icon: "text-violet-400 group-hover:text-violet-300",
+            metric: "text-violet-900 group-hover:text-violet-800",
+            badge: "bg-violet-500/10 text-violet-400 border-violet-500/20"
+        }
     };
 
-    const textStyles = {
-        standard: "text-zinc-400 group-hover:text-zinc-200",
-        deep: "text-orange-200/80 group-hover:text-orange-100",
-        crisis: "text-emerald-200/80 group-hover:text-emerald-100"
-    };
-
-    // Construct href based on option logic
-    let mode = 'maintenance';
-    if (option.title === 'Deep Flow') mode = 'deep';
-    if (option.title === 'Emergency') mode = 'crisis';
-
-    const href = `/study/active?mode=${mode}`;
+    const style = variants[variant];
 
     return (
-        <Link
-            href={href}
-            className={`${baseStyles} ${typeStyles[option.type]}`}
-        >
-            <div className="space-y-2">
-                <h3 className={`text-xl font-medium tracking-tight ${option.type === 'standard' ? 'text-zinc-100' : 'text-zinc-50'}`}>
-                    {option.title}
-                </h3>
-                <p className={`text-sm ${textStyles[option.type]} font-mono`}>
-                    {option.duration}
-                </p>
-            </div>
+        <Card className={cn("h-full transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between", style.wrapper)}>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="space-y-1">
+                    <CardTitle className="text-xl font-medium text-zinc-100 flex items-center gap-2">
+                        {title}
+                    </CardTitle>
+                    <CardDescription className="font-mono text-zinc-400">
+                        {description}
+                    </CardDescription>
+                </div>
+                <Icon className={cn("h-5 w-5 transition-colors", style.icon)} />
+            </CardHeader>
 
-            <div className="flex items-end justify-between">
+            <CardContent className="h-6" />
+
+            <CardFooter className="justify-between items-end pb-6">
                 <div className="flex flex-col">
-                    <span className={`text-3xl font-bold ${option.type === 'standard' ? 'text-zinc-700 group-hover:text-zinc-600' :
-                        option.type === 'deep' ? 'text-orange-900 group-hover:text-orange-800' :
-                            'text-emerald-900 group-hover:text-emerald-800'
-                        } transition-colors`}>
-                        {option.questionCount}
+                    <span className={cn("text-3xl font-bold font-mono transition-colors", style.metric)}>
+                        {mainMetric}
                     </span>
-                    <span className={`text-xs uppercase tracking-wider font-mono ${option.type === 'standard' ? 'text-zinc-500' : 'opacity-70'} group-hover:opacity-100 transition-opacity`}>
-                        Questions
+                    <span className="text-xs uppercase tracking-wider font-mono text-zinc-500 group-hover:text-zinc-400 transition-opacity">
+                        {metricLabel}
                     </span>
                 </div>
-                {option.type === 'deep' && (
-                    <span className="text-xs uppercase tracking-wider text-orange-500/50 font-mono mb-1">Intense</span>
+                {badgeLabel && (
+                    <Badge variant="outline" className={cn("font-mono text-[10px] uppercase tracking-wider border", style.badge)}>
+                        {badgeLabel}
+                    </Badge>
                 )}
-            </div>
-        </Link>
+            </CardFooter>
+        </Card>
     );
 }

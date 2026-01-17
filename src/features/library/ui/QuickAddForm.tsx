@@ -37,7 +37,7 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
     };
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
+        <div className="w-full p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
             <div className="mb-4 flex items-start justify-between">
                 <div>
                     <h3 className="text-lg font-medium text-zinc-100 mb-1">Quick Add</h3>

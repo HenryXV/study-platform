@@ -15,7 +15,7 @@ export type LibraryItem = {
     };
 };
 
-export async function getSources(query?: string): Promise<LibraryItem[]> {
+export async function getSources(query?: string, limit?: number): Promise<LibraryItem[]> {
     try {
         const userId = await requireUser();
 
@@ -37,6 +37,7 @@ export async function getSources(query?: string): Promise<LibraryItem[]> {
                     : {}
                 )
             },
+            take: limit,
             orderBy: { createdAt: 'desc' },
             select: {
                 id: true,

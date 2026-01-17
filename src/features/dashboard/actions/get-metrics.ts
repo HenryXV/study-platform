@@ -16,7 +16,7 @@ export async function getWeeklyMetrics() {
     const days: DailyMetric[] = [];
 
     // Generate last 7 days including today
-    for (let i = 6; i >= 0; i--) {
+    for (let i = 20; i >= 0; i--) {
         const d = subDays(today, i);
         days.push({
             date: d.toISOString(),
@@ -35,7 +35,7 @@ export async function getWeeklyMetrics() {
         prisma.studyLog.findMany({
             where: {
                 userId: user.id,
-                date: { gte: subDays(today, 6) }
+                date: { gte: subDays(today, 20) }
             }
         }),
         prisma.studyLog.findMany({
