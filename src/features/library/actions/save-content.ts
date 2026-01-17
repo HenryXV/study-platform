@@ -1,9 +1,10 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { ContentInputSchema } from '@/lib/validation';
 import { requireUser } from '@/lib/auth';
+import { createContentSource } from '../services/content-service';
+import { DomainError } from '@/lib/errors';
 
 export async function saveRawContent(text: string) {
     const result = ContentInputSchema.safeParse({ text });
@@ -12,25 +13,16 @@ export async function saveRawContent(text: string) {
     }
     const validatedText = result.data.text;
 
-    // Auth check
-    const userId = await requireUser();
-
     try {
-        // Auto-generate title first 30 chars or fallback to timestamp
-        const title = validatedText.trim().slice(0, 30) + (validatedText.length > 30 ? '...' : '') || `Quick Note: ${new Date().toLocaleString()}`;
+        const userId = await requireUser();
+        await createContentSource(userId, validatedText);
 
-        await prisma.contentSource.create({
-            data: {
-                title,
-                bodyText: validatedText,
-                status: 'UNPROCESSED',
-                userId,
-            },
-        });
-
-        revalidatePath('/'); // Revalidate relevant paths if needed
+        revalidatePath('/');
         return { success: true, message: 'Saved successfully' };
     } catch (error) {
+        if (error instanceof DomainError) {
+            return { success: false, message: error.message };
+        }
         console.error('Failed to save content:', error);
         return { success: false, message: 'Failed to save to database' };
     }

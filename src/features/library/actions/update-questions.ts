@@ -1,11 +1,12 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { QuestionSchema, EditableQuestion } from '@/features/library/schemas/question-generator';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { CuidSchema } from '@/lib/validation';
 import { requireUser } from '@/lib/auth';
+import { updateQuestions as updateQuestionsService } from '../services/question-service';
+import { DomainError } from '@/lib/errors';
 
 const DeletedIdsSchema = z.array(CuidSchema);
 
@@ -27,65 +28,17 @@ export async function updateQuestions(questions: EditableQuestion[], deletedIds:
         return { success: false, message: "No questions to update or delete" };
     }
 
-    const userId = await requireUser();
-
     try {
-        await prisma.$transaction(async (tx) => {
-            // 1. Handle Deletions
-            if (deletedIds.length > 0) {
-                await tx.question.deleteMany({
-                    where: { id: { in: deletedIds } }
-                });
-            }
-
-            // 2. Handle Updates
-            for (const q of questionsToUpdate) {
-                if (!q.id) continue;
-
-                // Fetch current context to ensure we have subjectId for topics
-                const current = await tx.question.findUnique({
-                    where: { id: q.id },
-                    select: { subjectId: true }
-                });
-
-                if (!current) continue;
-
-                await tx.question.update({
-                    where: { id: q.id },
-                    data: {
-                        type: q.type === 'CODE' ? 'SNIPPET' : (q.type === 'MULTIPLE_CHOICE' ? 'MULTI_CHOICE' : 'OPEN'),
-                        data: {
-                            question: q.questionText,
-                            answer: q.correctAnswer,
-                            options: q.options || [],
-                            explanation: q.explanation || ''
-                        },
-                        // Only sync topics if we have a subjectId to scope them to
-                        topics: (current.subjectId && q.topics) ? {
-                            set: [], // Clear current relationships for this question
-                            connectOrCreate: q.topics.map(t => ({
-                                where: {
-                                    name_subjectId_userId: {
-                                        name: t,
-                                        subjectId: current.subjectId!,
-                                        userId
-                                    }
-                                },
-                                create: {
-                                    name: t,
-                                    subjectId: current.subjectId!,
-                                    userId
-                                }
-                            }))
-                        } : undefined
-                    }
-                });
-            }
-        });
+        const userId = await requireUser();
+        // Cast parseResult.data to EditableQuestion[] because validated inputs are safe
+        await updateQuestionsService(userId, parseResult.data as EditableQuestion[], deletedIds);
 
         revalidatePath('/');
         return { success: true };
     } catch (error) {
+        if (error instanceof DomainError) {
+            return { success: false, message: error.message };
+        }
         console.error("Update failed:", error);
         return { success: false, message: "Update operation failed" };
     }

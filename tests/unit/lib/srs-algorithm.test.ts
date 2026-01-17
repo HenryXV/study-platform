@@ -111,6 +111,48 @@ describe('calculateNextReview (SM-2 Algorithm)', () => {
             expect(result.interval).toBe(1);
         });
     });
+
+    describe('Gaming Prevention (Throttling)', () => {
+        // baseState: interval: 3, easeFactor: 2.5, streak: 2
+        // fixedNow: 2026-01-15T12:00:00Z
+
+        it('ignores reviews if last review was on the SAME day', () => {
+            // 4 hours ago on the same day (15th)
+            const lastReviewed = new Date('2026-01-15T08:00:00Z');
+            const result = calculateNextReview('EASY', baseState, fixedNow, lastReviewed);
+
+            // Should NOT change state
+            expect(result.interval).toBe(3);
+            expect(result.easeFactor).toBe(2.5);
+            expect(result.streak).toBe(2);
+
+            // Should set next review relative to existing interval (15th + 3 days = 18th)
+            // Note: Since we use 'now' + interval in the fix, if now is 15th and interval is 3, it should be 18th.
+            const expectedDate = new Date('2026-01-18T12:00:00Z');
+            expect(result.nextReviewDate.toISOString()).toBe(expectedDate.toISOString());
+        });
+
+        it('processes review normally if last review was on a DIFFERENT day', () => {
+            // Yesterday (14th)
+            const lastReviewed = new Date('2026-01-14T23:59:59Z');
+            const result = calculateNextReview('EASY', baseState, fixedNow, lastReviewed);
+
+            // standard EASY update: interval 10, ease 2.65, streak 3
+            expect(result.interval).toBe(10);
+            expect(result.easeFactor).toBe(2.65);
+            expect(result.streak).toBe(3);
+        });
+
+        it('always processes FORGOT even if same day (honesty override)', () => {
+            // Same day
+            const lastReviewed = new Date('2026-01-15T10:00:00Z');
+            const result = calculateNextReview('FORGOT', baseState, fixedNow, lastReviewed);
+
+            // Should process the FORGOT
+            expect(result.interval).toBe(1);
+            expect(result.streak).toBe(0);
+        });
+    });
 });
 
 describe('calculateSystemizerScore', () => {

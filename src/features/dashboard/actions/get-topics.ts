@@ -1,9 +1,9 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { CuidSchema } from '@/lib/validation';
 import { z } from 'zod';
 import { requireUser } from '@/lib/auth';
+import { fetchTopics } from '../services/dashboard-service';
 
 interface TopicData {
     id: string;
@@ -23,23 +23,7 @@ export async function getTopics(subjectIds?: string[]): Promise<TopicData[]> {
 
     try {
         const userId = await requireUser();
-
-        const where = {
-            userId,
-            ...(parseResult.data?.length ? { subjectId: { in: parseResult.data } } : {})
-        };
-
-        const topics = await prisma.topic.findMany({
-            where,
-            select: {
-                id: true,
-                name: true,
-                subjectId: true,
-            },
-            orderBy: { name: 'asc' },
-        });
-
-        return topics;
+        return await fetchTopics(userId, parseResult.data);
     } catch (error) {
         console.error('Failed to fetch topics:', error);
         return [];

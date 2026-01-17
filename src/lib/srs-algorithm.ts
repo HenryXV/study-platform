@@ -38,6 +38,7 @@ export interface QuestionForScoring {
  * @param rating - User's rating of how well they remembered (FORGOT, HARD, EASY)
  * @param current - Current SRS state (interval, easeFactor, streak)
  * @param now - Current timestamp (defaults to now)
+ * @param lastReviewDate - When the card was last reviewed (optional). Used to prevent gaming.
  * @returns New SRS state with calculated nextReviewDate
  * 
  * @example
@@ -47,8 +48,31 @@ export interface QuestionForScoring {
 export function calculateNextReview(
     rating: SRSRating,
     current: SRSState,
-    now: Date = new Date()
+    now: Date = new Date(),
+    lastReviewDate?: Date
 ): SRSResult {
+    // GAMING PREVENTION:
+    // If the user reviews the same card multiple times on the same day, ignore the result
+    // to prevent artificially inflating the interval (e.g., spamming "Easy").
+    // We EXCLUDE 'FORGOT' from this check because if you forgot it, you forgot it.
+    if (lastReviewDate && rating !== 'FORGOT') {
+        const isSameDay = now.toDateString() === lastReviewDate.toDateString();
+
+        if (isSameDay) {
+            // Return current state without changes, effectively ignoring this review.
+            // We set nextReviewDate based on the *current* interval so it stays "due" roughly when it was.
+            // We use 'now' + interval ensuring that if they review it today (and get ignored), 
+            // it's still due in 'interval' days from today.
+            const nextReviewDate = new Date(now);
+            nextReviewDate.setDate(nextReviewDate.getDate() + current.interval);
+
+            return {
+                ...current,
+                nextReviewDate
+            };
+        }
+    }
+
     let { interval, easeFactor, streak } = current;
 
     if (rating === 'FORGOT') {

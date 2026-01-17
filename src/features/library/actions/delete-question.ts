@@ -1,9 +1,10 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { CuidSchema } from '@/lib/validation';
 import { requireUser } from '@/lib/auth';
+import { deleteQuestion as deleteQuestionService } from '../services/question-service';
+import { DomainError } from '@/lib/errors';
 
 export async function deleteQuestion(questionId: string) {
     const result = CuidSchema.safeParse(questionId);
@@ -11,21 +12,17 @@ export async function deleteQuestion(questionId: string) {
         return { success: false, message: 'Invalid question ID format' };
     }
 
-    const userId = await requireUser();
-
     try {
-        const deleted = await prisma.question.deleteMany({
-            where: { id: questionId, userId }
-        });
-
-        if (deleted.count === 0) {
-            return { success: false, message: 'Question not found or unauthorized' };
-        }
+        const userId = await requireUser();
+        await deleteQuestionService(userId, questionId);
 
         revalidatePath('/library/[id]');
         revalidatePath('/');
         return { success: true };
     } catch (error) {
+        if (error instanceof DomainError) {
+            return { success: false, message: error.message };
+        }
         console.error("Failed to delete question:", error);
         return { success: false, message: "Failed to delete question" };
     }

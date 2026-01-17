@@ -1,9 +1,9 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { requireUser } from '@/lib/auth';
+import { fetchSubjects } from '../services/dashboard-service';
 
-interface SubjectData {
+export interface SubjectData {
     id: string;
     name: string;
     color: string;
@@ -12,18 +12,7 @@ interface SubjectData {
 export async function getSubjects(): Promise<SubjectData[]> {
     try {
         const userId = await requireUser();
-
-        const subjects = await prisma.subject.findMany({
-            where: { userId },
-            select: {
-                id: true,
-                name: true,
-                color: true,
-            },
-            orderBy: { name: 'asc' },
-        });
-
-        return subjects;
+        return await fetchSubjects(userId);
     } catch (error) {
         console.error('Failed to fetch subjects:', error);
         return [];
