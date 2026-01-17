@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Systemizer
+> **The High-Fidelity Study Platform for Engineers.**
+> Stop analyzing *how* to study. Just study.
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![Stack](https://img.shields.io/badge/stack-Next.js_16-black.svg)
+
+## The Problem: "Analysis Paralysis"
+Most study tools are too flexible. They ask "What do you want to do?" which triggers decision fatigue. For the "Systemizer" personality type, this leads to:
+*   **Hoarding:** Saving 100 PDFs but reading zero.
+*   **Review Debt:** Seeing "500 cards due" and quitting immediately.
+*   **Imposter Syndrome:** Fearing that "easy" flashcards aren't proving real competence.
+
+## The Solution
+**Systemizer** is an opinionated platform that enforces a strict **"Ingest -> Atomize -> Interrogate"** workflow. It uses AI not to summarize (which is passive), but to **chunk** concepts and **test** you on them (active recall).
+
+---
+
+## The 3-Step Flow
+
+### 1. The Warehouse (Ingestion)
+*   **Zero-Friction Capture:** Paste code, upload PDFs, or dump raw notes.
+*   **"Unprocessed" State:** Content lands in a staging area. You don't need to tag it yet. Just get it out of your browser tabs.
+
+### 2. The Factory (Atomization)
+*   **AI-Assisted Chunking:** The "Analyzer Agent" splits large documents into atomic **Study Units**.
+*   **Strict Types:** Units are classified as `TEXT` (Theory) or `CODE` (Syntax).
+*   **Visual Logic:** The UI separates the "Drafting" phase from the "Studying" phase.
+
+### 3. The Drill (Interrogation)
+*   **Active Recall:** We generate 3 types of questions per unit:
+    1.  **Multiple Choice:** With plausible distractors.
+    2.  **Cloze Deletion:** For memorizing syntax.
+    3.  **Code Scenarios:** Execute code in a real Monaco Editor.
+*   **Deterministic Scheduling:** A custom SM-2 algorithm manages your review intervals.
+
+---
+
+## Tech Stack (The "Boring" Stack)
+We use a Type-Safe, production-grade stack to ensure reliability.
+
+*   **Framework:** Next.js 16 (App Router)
+*   **Database:** PostgreSQL + Prisma (Strict Schema)
+*   **Auth:** Clerk (Lazy Creation Pattern)
+*   **AI:** Vercel AI SDK (Model Agnostic)
+*   **Styling:** Tailwind CSS + shadcn/ui
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+*   Node.js 20+
+*   PostgreSQL Database (Local or Neon)
+*   Clerk Account keys
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Installation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1.  Clone the repo:
+    ```bash
+    git clone https://github.com/yourusername/study-platform.git
+    cd study-platform
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2.  Install dependencies:
+    ```bash
+    npm install
+    # or
+    npm ci
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3.  Set up Environment:
+    ```bash
+    cp .env.example .env
+    # Fill in DATABASE_URL, CLERK_KEYS, and AI_KEYS
+    ```
 
-## Learn More
+4.  Run Database Migrations:
+    ```bash
+    npx prisma migrate dev
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+5.  Start the Development Server:
+    ```bash
+    npm run dev
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Architecture
+For a deep dive into the engineering principles, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
