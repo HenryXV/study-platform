@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { DAILY_OPTIONS, MenuOption } from '../data/mock-menu';
-import { SessionPlannerModal } from '../components/SessionPlannerModal';
+import { SessionPlannerModal } from '../ui/SessionPlannerModal';
 import { Sparkles, LucideIcon } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/Badge';

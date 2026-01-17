@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/shared/ui/Button';
 import { Plus } from 'lucide-react';
-import { QuickAddForm } from '@/features/library/ui/QuickAddForm';
+import { QuickAddForm } from '@/features/library/components/QuickAddForm';
 import { Modal } from '@/shared/ui/Modal';
 
 export function AddSourceButton() {

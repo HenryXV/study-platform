@@ -1,13 +1,14 @@
 "use client";
 
+import { useState } from 'react';
 import { Button } from '@/shared/ui/Button';
-import { CodeCard } from '../components/CodeCard';
-import { MultipleChoiceCard } from '../components/MultipleChoiceCard';
-import { OpenEndedCard } from '../components/OpenEndedCard';
-import { ExplanationReveal } from '../components/ExplanationReveal';
-import { CompletionView } from '../components/CompletionView';
+import { CodeCard } from '../ui/CodeCard';
+import { MultipleChoiceCard } from '../ui/MultipleChoiceCard';
+import { OpenEndedCard } from '../ui/OpenEndedCard';
+import { ExplanationReveal } from '../ui/ExplanationReveal';
+import { CompletionView } from '../ui/CompletionView';
 import { FlashCard } from '../data/flash-cards';
-import { useStudySession } from '../hooks/useStudySession';
+import { useSessionEngine } from '../hooks/useSessionEngine';
 import { Flame } from 'lucide-react';
 
 export function StudySession({
@@ -17,24 +18,34 @@ export function StudySession({
     mode?: string;
     initialCards: FlashCard[]
 }) {
+    // Separate Logic (Hook) from UI State (Local)
     const {
         currentCard,
-        isComplete,
-        isFlipped,
+        isFinished,
         progress,
-        handleFlip,
-        handleNext,
-        handleExtendSession
-    } = useStudySession(initialCards);
+        submitAnswer,
+        extendSession
+    } = useSessionEngine(initialCards);
 
-    if (isComplete) {
+    const [isFlipped, setIsFlipped] = useState(false);
+
+    const handleFlip = () => setIsFlipped(true);
+
+    const handleNext = (rating: 'FORGOT' | 'HARD' | 'EASY') => {
+        submitAnswer(rating);
+        setIsFlipped(false);
+    };
+
+    if (isFinished) {
         return (
             <CompletionView
                 count={progress.total}
-                onExtend={handleExtendSession}
+                onExtend={extendSession}
             />
         );
     }
+
+    if (!currentCard) return null;
 
     return (
         <div className="w-full max-w-2xl mx-auto p-6 flex flex-col items-center min-h-[50vh] relative">

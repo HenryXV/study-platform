@@ -1,7 +1,13 @@
+// @vitest-environment node
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getQuestions } from '@/features/study-session/actions/get-questions';
 import { prisma } from '@/lib/prisma';
+
+// Mock Clerk Auth
+vi.mock('@clerk/nextjs/server', () => ({
+    auth: vi.fn().mockResolvedValue({ userId: 'user_123' }),
+}));
 
 // Mock Prisma
 vi.mock('@/lib/prisma', () => ({
@@ -52,6 +58,7 @@ describe('getQuestions - Cram Mode', () => {
         expect(prisma.question.findMany).toHaveBeenCalledWith({
             where: {
                 subjectId: { in: ['sub1'] },
+                userId: 'user_123',
             },
             take: 30, // limit * 3
             orderBy: { nextReviewDate: 'asc' },
@@ -80,6 +87,7 @@ describe('getQuestions - Cram Mode', () => {
             expect.objectContaining({
                 where: expect.objectContaining({
                     subjectId: { in: ['sub1'] },
+                    userId: 'user_123'
                 }),
             })
         );
