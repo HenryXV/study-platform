@@ -1,5 +1,4 @@
 import { DashboardMenu } from '@/features/dashboard/components/DashboardMenu';
-import { Button } from '@/shared/ui/Button';
 import { UserButton } from "@clerk/nextjs";
 import { QuickAddForm } from '@/features/library/components/QuickAddForm';
 import { ActivityHeatmap } from '@/features/dashboard/ui/ActivityHeatmap';
@@ -7,19 +6,21 @@ import { MasteryRadar } from '@/features/dashboard/ui/MasteryRadar';
 import { LibraryRecentItems } from '@/features/library/components/LibraryRecentItems';
 import { getWeeklyMetrics } from '@/features/dashboard/actions/get-metrics';
 import { getSubjectStats } from '@/features/dashboard/actions/get-subject-stats';
+import { getTranslations, getLocale } from 'next-intl/server';
 
 export async function DashboardFeature() {
-    const [metrics, stats] = await Promise.all([
+    const [metrics, stats, t, locale] = await Promise.all([
         getWeeklyMetrics(),
         getSubjectStats(),
+        getTranslations('dashboard'),
+        getLocale(),
     ]);
-
 
     const { days, streak } = metrics;
 
-    // Format date: "Friday, Jan 16"
+    // Format date using the current locale
     const today = new Date();
-    const dateString = today.toLocaleDateString('en-US', {
+    const dateString = today.toLocaleDateString(locale, {
         weekday: 'long',
         month: 'short',
         day: 'numeric',
@@ -32,9 +33,9 @@ export async function DashboardFeature() {
                 {/* HEADER: Title & Date (Left Aligned) + User Button */}
                 <header className="flex items-start justify-between">
                     <div className="flex flex-col space-y-2">
-                        <h1 className="text-4xl font-bold text-zinc-100 tracking-tight">System Command</h1>
+                        <h1 className="text-4xl font-bold text-zinc-100 tracking-tight">{t('title')}</h1>
                         <p className="text-zinc-400 font-medium">
-                            {dateString} <span className="text-zinc-600 mx-2">|</span> Select Protocol
+                            {dateString} <span className="text-zinc-600 mx-2">|</span> {t('subtitle')}
                         </p>
                     </div>
                     <UserButton appearance={{

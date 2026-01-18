@@ -8,27 +8,40 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/shared/ui/Badge';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export function DashboardMenu() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const t = useTranslations('dashboard.menu');
+    const tCommon = useTranslations('common');
+
+    // Map option types to translation keys
+    const getTitleKey = (type: MenuOption['type']): string => {
+        const map: Record<MenuOption['type'], string> = {
+            standard: 'maintenance',
+            deep: 'deepFlow',
+            crisis: 'emergency',
+        };
+        return map[type];
+    };
 
     return (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full">
                 {DAILY_OPTIONS.map((option) => (
                     <Link
-                        key={option.title}
+                        key={option.type}
                         href={`/study/active?mode=${option.type === 'standard' ? 'maintenance' : option.type === 'deep' ? 'deep' : 'crisis'}`}
                         className="block h-full group"
                     >
                         <DashboardCard
-                            title={option.title}
+                            title={t(getTitleKey(option.type))}
                             description={option.duration}
                             icon={option.icon}
                             mainMetric={option.questionCount}
-                            metricLabel="Questions"
+                            metricLabel={tCommon('questions')}
                             variant={option.type}
-                            badgeLabel={option.type === 'deep' ? 'Intense' : undefined}
+                            badgeLabel={option.type === 'deep' ? t('intense') : undefined}
                         />
                     </Link>
                 ))}
@@ -36,13 +49,13 @@ export function DashboardMenu() {
                 {/* Custom Session Card */}
                 <div onClick={() => setIsModalOpen(true)} className="h-full cursor-pointer group">
                     <DashboardCard
-                        title="Custom"
-                        description="Design your own"
+                        title={t('custom')}
+                        description={t('designYourOwn')}
                         icon={Sparkles}
                         mainMetric="∞"
-                        metricLabel="Flexible"
+                        metricLabel={tCommon('flexible')}
                         variant="custom"
-                        badgeLabel="Personalized"
+                        badgeLabel={t('personalized')}
                     />
                 </div>
             </div>

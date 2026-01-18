@@ -11,3 +11,5 @@ trigger: always_on
 - Database: PostgreSQL
 
 Service Layer Design -> Separates Server Actions -> Services -> Repository
+proxy.ts is the new pattern 
+middleware.ts is the OLD PATTERN, do not use this

@@ -8,6 +8,7 @@ import { Trash2, Plus, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { DraftUnitCard, DraftUnit } from './DraftUnitCard';
+import { useTranslations } from 'next-intl';
 
 export interface ApprovedDraftData {
     suggestedSubject: string;
@@ -22,6 +23,9 @@ interface DraftSupervisorProps {
 }
 
 export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSupervisorProps) {
+    const t = useTranslations('library.draft');
+    const tCommon = useTranslations('common');
+
     const [subject, setSubject] = useState(initialData.suggestedSubject);
     const [topics, setTopics] = useState(initialData.suggestedTopics);
     const [units, setUnits] = useState<DraftUnit[]>(initialData.units);
@@ -43,7 +47,7 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
         setUnits([
             ...units,
             {
-                title: 'New Concept',
+                title: t('newConcept'),
                 type: 'TEXT',
                 description: '',
             }
@@ -83,17 +87,17 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div className="space-y-1">
-                            <CardTitle className="text-zinc-100">Review Draft</CardTitle>
-                            <p className="text-sm text-zinc-400">Verify AI-generated content before saving.</p>
+                            <CardTitle className="text-zinc-100">{t('reviewTitle')}</CardTitle>
+                            <p className="text-sm text-zinc-400">{t('reviewSubtitle')}</p>
                         </div>
                         <div className="flex gap-2">
                             <Button variant="danger" size="sm" onClick={onCancel} disabled={isSubmitting}>
                                 <X className="w-4 h-4 mr-1" />
-                                Discard
+                                {tCommon('discard')}
                             </Button>
                             <Button variant="success" size="sm" onClick={handleCommit} isLoading={isSubmitting}>
                                 <Check className="w-4 h-4 mr-1" />
-                                Commit to Library
+                                {tCommon('commitToLibrary')}
                             </Button>
                         </div>
                     </div>
@@ -101,7 +105,7 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label htmlFor="subject-input" className="text-xs font-medium text-zinc-500 uppercase">Subject</label>
+                            <label htmlFor="subject-input" className="text-xs font-medium text-zinc-500 uppercase">{t('subject')}</label>
                             <input
                                 id="subject-input"
                                 type="text"
@@ -111,7 +115,7 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-medium text-zinc-500 uppercase">Topics (Press Enter)</label>
+                            <label className="text-xs font-medium text-zinc-500 uppercase">{t('topics')}</label>
                             <div className="flex flex-wrap gap-2 p-2 bg-zinc-950 border border-zinc-800 rounded-md min-h-[42px]">
                                 {topics.map(topic => (
                                     <Badge key={topic} variant="outline" className="bg-zinc-900 pr-1 gap-1">
@@ -126,7 +130,7 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
                                     value={newTopic}
                                     onChange={(e) => setNewTopic(e.target.value)}
                                     onKeyDown={addTopic}
-                                    placeholder="Add topic..."
+                                    placeholder={tCommon('addTopic')}
                                     className="bg-transparent text-sm text-zinc-200 focus:outline-none min-w-[80px] flex-1"
                                     aria-label="Add new topic"
                                 />
@@ -139,10 +143,10 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
             {/* Units List */}
             <div className="space-y-4">
                 <div className="flex items-center justify-between px-1">
-                    <h3 className="text-sm font-medium text-zinc-300">Generated Units ({units.length})</h3>
+                    <h3 className="text-sm font-medium text-zinc-300">{t('generatedUnits', { count: units.length })}</h3>
                     <Button size="sm" variant="outline" onClick={addUnit}>
                         <Plus className="w-4 h-4 mr-2" />
-                        Add Manual Unit
+                        {t('addManualUnit')}
                     </Button>
                 </div>
 
@@ -162,7 +166,7 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
 
                 {units.length === 0 && (
                     <div className="text-center py-10 border border-dashed border-zinc-800 rounded-xl text-zinc-500 text-sm">
-                        No units in draft. Add one manually.
+                        {t('noUnits')}
                     </div>
                 )}
             </div>

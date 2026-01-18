@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Button } from '@/shared/ui/Button';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function Error({
     error,
@@ -11,6 +12,8 @@ export default function Error({
     error: Error & { digest?: string };
     reset: () => void;
 }) {
+    const t = useTranslations('errors.generic');
+
     useEffect(() => {
         // Log the error to an error reporting service
         console.error(error);
@@ -26,11 +29,11 @@ export default function Error({
                 </div>
 
                 <h2 className="text-xl font-bold text-zinc-100 mb-2">
-                    System Malfunction
+                    {t('title')}
                 </h2>
 
                 <p className="text-zinc-400 mb-6 text-sm">
-                    Something went wrong while processing your request. The issue has been logged for investigation.
+                    {t('message')}
                 </p>
 
                 <div className="flex flex-col gap-3">
@@ -39,7 +42,7 @@ export default function Error({
                         variant="default"
                         className="w-full"
                     >
-                        Try again
+                        {t('action')}
                     </Button>
 
                     {/* Optional: Add a text to show error digest for debugging if needed */}

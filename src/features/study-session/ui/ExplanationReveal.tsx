@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/shared/ui/Button';
+import { useTranslations } from 'next-intl';
+import { Lightbulb, ChevronDown, ChevronUp, Loader2, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getUnitContent } from '../actions/get-unit-content';
 
 interface ExplanationRevealProps {
     explanation?: string;
@@ -11,15 +12,14 @@ interface ExplanationRevealProps {
     className?: string;
 }
 
-import { getUnitContent } from '../actions/get-unit-content';
-import { Loader2, BookOpen } from 'lucide-react';
-
 export function ExplanationReveal({ explanation, unitId, className }: ExplanationRevealProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [sourceContent, setSourceContent] = useState<string | null>(null);
     const [sourceTitle, setSourceTitle] = useState<string | null>(null);
     const [isLoadingSource, setIsLoadingSource] = useState(false);
     const [showSource, setShowSource] = useState(false);
+
+    const t = useTranslations('study.explanation');
 
     const handleVerifySource = async () => {
         if (showSource) {
@@ -59,7 +59,7 @@ export function ExplanationReveal({ explanation, unitId, className }: Explanatio
                     aria-controls="explanation-content"
                 >
                     <Lightbulb className="w-4 h-4 group-hover:text-indigo-400 transition-colors" />
-                    <span>Reveal Explanation</span>
+                    <span>{t('reveal')}</span>
                     <ChevronDown className="w-3 h-3 group-hover:translate-y-0.5 transition-transform" />
                 </button>
             ) : (
@@ -70,7 +70,7 @@ export function ExplanationReveal({ explanation, unitId, className }: Explanatio
                     <div className="flex items-center justify-between">
                         <span className="text-xs uppercase tracking-wider text-indigo-400 font-semibold flex items-center gap-2">
                             <Lightbulb className="w-3 h-3" />
-                            Insight
+                            {t('insight')}
                         </span>
                         <div className="flex items-center gap-2">
                             {unitId && (
@@ -84,7 +84,7 @@ export function ExplanationReveal({ explanation, unitId, className }: Explanatio
                                     ) : (
                                         <BookOpen className="w-3 h-3" />
                                     )}
-                                    {showSource ? 'Hide Source' : 'Verify Source'}
+                                    {showSource ? t('hideSource') : t('verifySource')}
                                 </button>
                             )}
                             <button
@@ -104,7 +104,7 @@ export function ExplanationReveal({ explanation, unitId, className }: Explanatio
                         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                             <div className="text-xs text-zinc-500 mb-2 font-medium flex items-center gap-2">
                                 <div className="w-1 h-1 rounded-full bg-emerald-500"></div>
-                                Source: {sourceTitle || 'Original Content'}
+                                {t('source')}: {sourceTitle || t('originalContent')}
                             </div>
                             <blockquote className="pl-4 border-l-2 border-zinc-700 text-sm text-zinc-400 italic bg-zinc-900/30 py-2 rounded-r-lg">
                                 {sourceContent}

@@ -2,25 +2,29 @@ import Link from 'next/link';
 import { getSources } from '../actions/get-sources';
 import { FileText, ArrowRight } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { getTranslations } from 'next-intl/server';
 
 export async function LibraryRecentItems() {
-    const sources = await getSources(undefined, 4);
+    const [sources, t] = await Promise.all([
+        getSources(undefined, 4),
+        getTranslations('library'),
+    ]);
 
     return (
         <div className="w-full h-full flex flex-col bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
             <div className="p-6 border-b border-zinc-800/50">
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium text-zinc-100">Library Archive</h3>
+                    <h3 className="text-lg font-medium text-zinc-100">{t('archive')}</h3>
                     <Link
                         href="/library"
                         className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors flex items-center gap-1 group"
                     >
-                        View Archive
+                        {t('viewArchive')}
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                     </Link>
                 </div>
                 <p className="text-sm text-zinc-400">
-                    Access your complete knowledge base, manage sources, and review material.
+                    {t('archiveDescription')}
                 </p>
             </div>
 
@@ -28,7 +32,7 @@ export async function LibraryRecentItems() {
                 {sources.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-zinc-500 gap-2 min-h-[160px]">
                         <FileText className="w-8 h-8 opacity-20" />
-                        <p className="text-sm">No recent items</p>
+                        <p className="text-sm">{t('noRecentItems')}</p>
                     </div>
                 ) : (
                     sources.map((item) => (

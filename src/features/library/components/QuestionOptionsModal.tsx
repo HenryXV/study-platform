@@ -15,6 +15,7 @@ import {
     BANCA_OPTIONS,
 } from '../schemas/question-options';
 import { BancaType } from '../schemas/banca-profiles';
+import { useTranslations } from 'next-intl';
 
 interface QuestionOptionsModalProps {
     isOpen: boolean;
@@ -31,6 +32,8 @@ export function QuestionOptionsModal({
     onConfirm,
     isLoading = false,
 }: QuestionOptionsModalProps) {
+    const t = useTranslations('library.options');
+    const tCommon = useTranslations('common');
     const [count, setCount] = useState<QuestionCount>('5');
     const [types, setTypes] = useState<QuestionTypeOption[]>(['MULTIPLE_CHOICE', 'OPEN', 'CODE']);
     const [banca, setBanca] = useState<BancaType>('STANDARD');
@@ -68,17 +71,17 @@ export function QuestionOptionsModal({
                 <div className="space-y-1">
                     <h2 className="text-lg font-medium text-zinc-100 flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-amber-400" />
-                        Question Options
+                        {t('title')}
                     </h2>
                     <p className="text-sm text-zinc-400">
-                        Configure how questions are generated for this unit.
+                        {t('description')}
                     </p>
                 </div>
 
                 {/* Count Selector */}
                 <div className="space-y-3">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                        Question Count
+                        {t('count')}
                     </label>
                     <div className="flex rounded-lg bg-zinc-800 p-1 gap-1">
                         {COUNT_OPTIONS.map((c) => {
@@ -106,7 +109,7 @@ export function QuestionOptionsModal({
                 {/* Type Checkboxes */}
                 <div className="space-y-3">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                        Question Types
+                        {t('types')}
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                         {QUESTION_TYPES.map((type) => {
@@ -142,13 +145,13 @@ export function QuestionOptionsModal({
                             );
                         })}
                     </div>
-                    <p className="text-xs text-zinc-500">At least one type must be selected.</p>
+                    <p className="text-xs text-zinc-500">{t('atLeastOne')}</p>
                 </div>
 
                 {/* Banca Selector */}
                 <div className="space-y-3">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                        Exam Style (Banca)
+                        {t('examStyle')}
                     </label>
                     <div className="relative">
                         <select
@@ -170,7 +173,7 @@ export function QuestionOptionsModal({
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 pointer-events-none" />
                     </div>
                     <p className="text-xs text-zinc-500">
-                        {banca === 'STANDARD' ? 'General exam format' : `Questions styled like ${BANCA_LABELS[banca]} exams`}
+                        {banca === 'STANDARD' ? t('standard') : t('styledLike', { banca: BANCA_LABELS[banca] })}
                     </p>
                 </div>
 
@@ -180,7 +183,7 @@ export function QuestionOptionsModal({
                         htmlFor="scope-constraint"
                         className="text-xs font-medium text-zinc-400 uppercase tracking-wider"
                     >
-                        Scope / Focus <span className="text-zinc-600">(optional)</span>
+                        {t('scope')} <span className="text-zinc-600">({tCommon('optional')})</span>
                     </label>
                     <textarea
                         id="scope-constraint"
@@ -210,7 +213,7 @@ export function QuestionOptionsModal({
                         disabled={isLoading}
                         className="flex-1"
                     >
-                        Cancel
+                        {tCommon('cancel')}
                     </Button>
                     <Button
                         onClick={handleConfirm}
@@ -218,11 +221,10 @@ export function QuestionOptionsModal({
                         className="flex-1"
                     >
                         <Sparkles className="h-4 w-4 mr-2" />
-                        Generate Questions
+                        {t('generate')}
                     </Button>
                 </div>
             </div>
         </Modal>
     );
 }
-

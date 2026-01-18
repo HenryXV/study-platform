@@ -1,11 +1,14 @@
 import { DailyMetric } from "../actions/get-metrics";
+import { getTranslations } from 'next-intl/server';
 
 interface ActivityHeatmapProps {
     data: DailyMetric[];
     streak: number;
 }
 
-export function ActivityHeatmap({ data, streak }: ActivityHeatmapProps) {
+export async function ActivityHeatmap({ data, streak }: ActivityHeatmapProps) {
+    const t = await getTranslations('dashboard');
+
     return (
         <div className="w-full h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 h-full flex flex-col md:flex-row lg:flex-col items-center justify-between gap-6 relative overflow-hidden">
@@ -13,10 +16,10 @@ export function ActivityHeatmap({ data, streak }: ActivityHeatmapProps) {
 
                 {/* Streak Counter */}
                 <div className="flex flex-col items-center md:items-start lg:items-center z-10">
-                    <span className="text-zinc-500 text-xs font-mono uppercase tracking-wider mb-1">Weekly Consistency</span>
+                    <span className="text-zinc-500 text-xs font-mono uppercase tracking-wider mb-1">{t('weeklyConsistency')}</span>
                     <div className="flex items-baseline gap-2">
                         <span className="text-4xl font-bold text-zinc-100">{streak}</span>
-                        <span className="text-sm text-zinc-400 font-medium">day streak</span>
+                        <span className="text-sm text-zinc-400 font-medium">{t('dayStreak')}</span>
                     </div>
                 </div>
 
@@ -25,7 +28,7 @@ export function ActivityHeatmap({ data, streak }: ActivityHeatmapProps) {
 
                 {/* Heatmap Grid */}
                 <div className="flex flex-col gap-2 w-full md:w-auto lg:w-full z-10">
-                    <span className="text-zinc-500 text-[10px] font-mono uppercase tracking-wider text-center md:text-left lg:text-center">Last 21 Days</span>
+                    <span className="text-zinc-500 text-[10px] font-mono uppercase tracking-wider text-center md:text-left lg:text-center">{t('last21Days')}</span>
                     <div className="grid grid-cols-21 gap-1 lg:gap-1.5 xl:gap-2">
                         {data.map((day) => (
                             <div key={day.date} className="flex flex-col items-center gap-2 group cursor-default">

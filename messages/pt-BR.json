@@ -1,0 +1,327 @@
+{
+    "common": {
+        "loading": "Carregando...",
+        "error": "Algo deu errado",
+        "retry": "Tentar novamente",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "save": "Salvar",
+        "delete": "Excluir",
+        "edit": "Editar",
+        "search": "Buscar...",
+        "searchLibrary": "Buscar na biblioteca...",
+        "noResults": "Nenhum resultado encontrado",
+        "back": "Voltar",
+        "questions": "Questões",
+        "flexible": "Flexível",
+        "optional": "opcional",
+        "selected": "selecionado(s)",
+        "allTopics": "Todos os tópicos",
+        "topicsSelected": "{count} tópico(s) selecionado(s)",
+        "noSubjects": "Nenhuma matéria disponível",
+        "noTopics": "Nenhum tópico disponível",
+        "noTopicsForSubjects": "Sem tópicos para as matérias selecionadas",
+        "startSession": "Iniciar Sessão",
+        "chars": "caracteres",
+        "processing": "Processando...",
+        "all": "Todos",
+        "units": "unidades",
+        "selectMultiple": "Selecionar Vários",
+        "selectAll": "Selecionar Todos",
+        "clear": "Limpar",
+        "generate": "Gerar",
+        "discard": "Descartar",
+        "commitToLibrary": "Salvar na Biblioteca",
+        "saveChanges": "Salvar Alterações",
+        "addTopic": "Adicionar tópico..."
+    },
+    "dashboard": {
+        "title": "Central de Comando",
+        "subtitle": "Selecionar Protocolo",
+        "weeklyConsistency": "Consistência Semanal",
+        "dayStreak": "dias consecutivos",
+        "last21Days": "Últimos 21 Dias",
+        "subjectMastery": "Domínio por Assunto",
+        "noMasteryData": "Sem dados de domínio ainda.",
+        "menu": {
+            "maintenance": "Manutenção",
+            "deepFlow": "Foco Profundo",
+            "emergency": "Emergência",
+            "custom": "Personalizado",
+            "designYourOwn": "Crie o seu",
+            "intense": "Intenso",
+            "personalized": "Personalizado"
+        },
+        "sessionPlanner": {
+            "title": "Planeje Sua Sessão",
+            "description": "Personalize o que você quer estudar",
+            "subjects": "Matérias",
+            "topics": "Tópicos"
+        }
+    },
+    "menu": {
+        "study": "Estudar",
+        "cram": "Intensivo",
+        "library": "Biblioteca"
+    },
+    "library": {
+        "title": "Minha Biblioteca de Conhecimento",
+        "description": "Gerencie seus materiais brutos e unidades de estudo.",
+        "backToDashboard": "Voltar ao Painel",
+        "archive": "Arquivo da Biblioteca",
+        "viewArchive": "Ver Arquivo",
+        "archiveDescription": "Acesse sua base de conhecimento completa, gerencie fontes e revise o material.",
+        "noRecentItems": "Sem itens recentes",
+        "recentSources": "Fontes Recentes",
+        "empty": "Nenhuma fonte ainda",
+        "addSource": "Adicionar Fonte",
+        "quickAdd": {
+            "title": "Adição Rápida",
+            "description": "Capture ideias ou envie fontes.",
+            "writeNote": "Escrever Nota",
+            "uploadPdf": "Enviar PDF",
+            "placeholder": "Cole texto, código ou ideias aqui...",
+            "dragDrop": "Arraste e solte o PDF aqui",
+            "or": "- ou -",
+            "browseFiles": "Procurar Arquivos",
+            "remove": "Remover",
+            "saved": "Salvo!",
+            "saveNote": "Salvar Nota",
+            "pdfOnly": "Apenas arquivos PDF são suportados"
+        },
+        "source": {
+            "units": "Unidades Atômicas",
+            "questions": "Questões",
+            "commit": "Salvar na Biblioteca",
+            "processing": "Processando...",
+            "rawSource": "Fonte Bruta",
+            "pdfDocument": "Documento PDF",
+            "rawText": "Texto Bruto",
+            "supervisorMode": "Modo Supervisor",
+            "examWorkbench": "Bancada de Questões"
+        },
+        "inspector": {
+            "noUnits": "Nenhuma Unidade Extraída",
+            "noUnitsDescription": "Processe este conteúdo para gerar flashcards e trechos de código.",
+            "analyzeAtomize": "Analisar e Atomizar",
+            "embeddingsMissing": "Embeddings Ausentes",
+            "embeddingsDescription": "O conteúdo foi salvo, mas os embeddings de IA falharam. Isso afeta busca e recursos de RAG.",
+            "retryProcessing": "Tentar Novamente",
+            "contentSaved": "Conteúdo salvo e processado!",
+            "contentSavedRetry": "Conteúdo salvo, mas embeddings falharam. Por favor, tente novamente.",
+            "savingQuestions": "Salvando questões...",
+            "updatingQuestions": "Atualizando questões...",
+            "questionsAdded": "Adicionadas {count} questões à biblioteca",
+            "questionsUpdated": "Questões atualizadas com sucesso",
+            "embeddingsSuccess": "Embeddings gerados com sucesso!"
+        },
+        "generated": {
+            "deleteTitle": "Excluir Unidade",
+            "deleteMessage": "Tem certeza que deseja excluir esta unidade? Todas as questões associadas também serão removidas.",
+            "deleteConfirm": "Excluir Unidade",
+            "deleteBulkTitle": "Excluir Unidades Selecionadas",
+            "deleteBulkMessage": "Tem certeza que deseja excluir {count} unidades? Todas as questões associadas também serão removidas.",
+            "deleteBulkConfirm": "Excluir {count} Unidades",
+            "unitsCount": "{count} unidades",
+            "noUnits": "Nenhuma unidade encontrada.",
+            "editUnit": "Editar Unidade",
+            "saveChanges": "Salvar Alterações",
+            "generateQuestions": "Gerar questões"
+        },
+        "draft": {
+            "reviewTitle": "Revisar Rascunho",
+            "reviewSubtitle": "Verifique o conteúdo gerado pela IA antes de salvar.",
+            "subject": "Matéria",
+            "topics": "Tópicos (Pressione Enter)",
+            "generatedUnits": "Unidades Geradas ({count})",
+            "addManualUnit": "Adicionar Unidade Manual",
+            "noUnits": "Nenhuma unidade no rascunho. Adicione uma manualmente.",
+            "newConcept": "Novo Conceito"
+        },
+        "processing": {
+            "title": "Opções de Processamento",
+            "description": "Configure como a IA analisa e segmenta seu conteúdo.",
+            "granularity": "Granularidade",
+            "focusConstraint": "Restrição de Foco",
+            "analyzeContent": "Analisar Conteúdo",
+            "broad": "Amplo",
+            "broadDesc": "Visão geral de alto nível",
+            "detailed": "Detalhado",
+            "detailedDesc": "Detalhamento abrangente",
+            "atomic": "Atômico",
+            "atomicDesc": "Fatos em pequenas partes"
+        },
+        "options": {
+            "title": "Opções de Questões",
+            "description": "Configure como as questões são geradas para esta unidade.",
+            "count": "Quantidade de Questões",
+            "types": "Tipos de Questões",
+            "examStyle": "Estilo de Exame (Banca)",
+            "scope": "Escopo / Foco",
+            "generate": "Gerar Questões",
+            "atLeastOne": "Pelo menos um tipo deve ser selecionado.",
+            "standard": "Formato geral de exame",
+            "styledLike": "Questões estilo {banca}"
+        },
+        "editor": {
+            "questionType": "Tipo de Questão",
+            "topics": "Tópicos",
+            "prompt": "Enunciado da Questão",
+            "promptPlaceholder": "Digite o enunciado da questão aqui...",
+            "options": "Opções",
+            "checkToMark": "Marque para definir como correta",
+            "addOption": "Adicionar Opção",
+            "modelAnswer": "Resposta Modelo",
+            "modelPlaceholder": "Digite a resposta ou saída esperada...",
+            "explanation": "Explicação",
+            "explanationPlaceholder": "Explique o raciocínio por trás da resposta correta...",
+            "addTopic": "Adicionar tópico...",
+            "removeTopic": "Remover tópico",
+            "removeOption": "Remover opção",
+            "option": "Opção",
+            "markCorrectLabel": "Marcar como correta"
+        },
+        "grid": {
+            "noMatches": "Nenhum resultado encontrado",
+            "noMatchesDesc": "Sem resultados para \"{query}\". Tente outro termo.",
+            "empty": "A biblioteca está vazia",
+            "emptyDesc": "Comece adicionando sua primeira nota ou trecho.",
+            "createSource": "Criar Fonte",
+            "deleteTitle": "Excluir Fonte",
+            "deleteMessage": "Tem certeza que deseja excluir esta fonte? Isso removerá permanentemente todas as unidades de estudo e flashcards associados.",
+            "deleteConfirm": "Excluir Definitivamente",
+            "filterBySubject": "Filtrar por Matéria:"
+        }
+    },
+    "study": {
+        "title": "Sessão de Estudo",
+        "activeSession": "Sessão Ativa",
+        "mode": "Modo",
+        "reviewingAhead": "Revisão Antecipada",
+        "crisisMode": "Modo Crise Ativo: Apenas {count} cards para manter a sequência!",
+        "targetedStudy": "Estudo Direcionado",
+        "generalReview": "Revisão Geral",
+        "cardOf": "Card {current} de {total}",
+        "showAnswer": "Mostrar Resposta",
+        "forgot": "Esqueci",
+        "hard": "Difícil",
+        "easy": "Fácil",
+        "expectedAnswer": "Resposta Esperada",
+        "complete": {
+            "title": "Sessão Concluída",
+            "allReviewed": "Todos os cards foram revisados.",
+            "findingQuestions": "Buscando Questões...",
+            "extendSession": "Estender Sessão (+10)",
+            "or": "ou",
+            "saving": "Salvando...",
+            "saveExit": "Salvar Progresso e Sair"
+        },
+        "card": {
+            "terminalInput": "Entrada do Terminal",
+            "yourSolution": "Sua Solução",
+            "noCode": "// Nenhum código fornecido",
+            "multipleChoice": "Múltipla Escolha",
+            "correct": "Correto! Muito bem.",
+            "incorrect": "Incorreto. Revise a resposta acima.",
+            "openEnded": "Resposta Aberta",
+            "yourAnswer": "Sua Resposta",
+            "typePlaceholder": "Digite sua resposta aqui...",
+            "modelAnswer": "Resposta Modelo"
+        },
+        "explanation": {
+            "reveal": "Revelar Explicação",
+            "insight": "Insights",
+            "hideSource": "Ocultar Fonte",
+            "verifySource": "Verificar Fonte",
+            "source": "Fonte",
+            "originalContent": "Conteúdo Original"
+        },
+        "rating": {
+            "again": "De Novo",
+            "hard": "Difícil",
+            "good": "Bom",
+            "easy": "Fácil"
+        }
+    },
+    "errors": {
+        "notFound": {
+            "title": "Página Não Encontrada",
+            "message": "A página que você procura não existe.",
+            "action": "Ir para Início"
+        },
+        "generic": {
+            "title": "Algo deu errado",
+            "message": "Ocorreu um erro inesperado.",
+            "action": "Tentar novamente"
+        }
+    },
+    "landing": {
+        "hero": {
+            "titleStart": "Pare de Ler.",
+            "titleEnd": "Comece a Testar.",
+            "subtitle": "Envie seus PDFs. A IA gera a prova. Você domina o conteúdo usando Active Recall.",
+            "cta": "Inicializar Sistema",
+            "freeCredits": "Receba 5 Créditos Grátis",
+            "visual": {
+                "file": "Palestra_01.pdf",
+                "activeRecall": "ACTIVE_RECALL",
+                "question": "Qual a complexidade de tempo da função process()?"
+            }
+        },
+        "meta": {
+            "subtitle": "A Lógica",
+            "title": "O Velho Meta vs. O Novo Meta",
+            "table": {
+                "vector": "Vetor",
+                "passive": "Estudo Passivo (Velho)",
+                "systemized": "Estudo Sistematizado (Novo)",
+                "rows": {
+                    "efficiency": {
+                        "name": "Eficiência",
+                        "passive": "Baixa (Reler texto)",
+                        "systemized": "Alta (Active Recall)"
+                    },
+                    "retention": {
+                        "name": "Retenção",
+                        "passive": "Desaparece em 24h",
+                        "systemized": "Repetição Espaçada (SR)"
+                    },
+                    "feedback": {
+                        "name": "Feedback",
+                        "passive": "Falsa confiança",
+                        "systemized": "Imediato & Binário"
+                    },
+                    "mentalState": {
+                        "name": "Estado Mental",
+                        "passive": "Tédio / Distração",
+                        "systemized": "Flow State / Gamificado"
+                    }
+                }
+            }
+        },
+        "arcade": {
+            "title": "Pague Por Cram. Sem Assinaturas.",
+            "subtitle": "Não queremos seu aluguel mensal. Queremos que você passe.",
+            "tiers": {
+                "trial": {
+                    "name": "Teste",
+                    "description": "Teste a lógica do sistema agora.",
+                    "credits": "5 Créditos",
+                    "cta": "Inicializar"
+                },
+                "refuel": {
+                    "name": "Reabastecer",
+                    "description": "Preço de um café.",
+                    "credits": "25 Créditos",
+                    "cta": "Comprar"
+                },
+                "marathon": {
+                    "name": "Maratona",
+                    "description": "Cobertura completa da prova.",
+                    "credits": "100 Créditos",
+                    "cta": "Comprar"
+                }
+            }
+        }
+    }
+}

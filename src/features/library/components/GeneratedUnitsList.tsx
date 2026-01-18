@@ -13,6 +13,7 @@ import { EditableQuestion } from '../schemas/question-generator';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface StudyUnit {
     id: string;
@@ -33,6 +34,8 @@ interface GeneratedUnitsListProps {
 
 export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, onOpenSupervisor, onOpenEditor }: GeneratedUnitsListProps) {
     const router = useRouter();
+    const t = useTranslations('library.generated');
+    const tCommon = useTranslations('common');
 
     // Single delete state
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -73,19 +76,19 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
     const handleBulkDelete = async () => {
         if (selectedIds.size === 0) return;
         setIsBulkDeleting(true);
-        const toastId = toast.loading(`Deleting ${selectedIds.size} units...`);
+        const toastId = toast.loading(tCommon('processing'));
 
         try {
             const result = await deleteUnitsBulk(Array.from(selectedIds));
             if (result.success) {
-                toast.success(result.message || `Deleted ${result.count} units`, { id: toastId });
+                toast.success(result.message || tCommon('delete'), { id: toastId });
                 exitSelectionMode();
                 router.refresh();
             } else {
-                toast.error(result.message || "Failed to delete", { id: toastId });
+                toast.error(result.message || tCommon('error'), { id: toastId });
             }
         } catch (error) {
-            toast.error("An error occurred", { id: toastId });
+            toast.error(tCommon('error'), { id: toastId });
         } finally {
             setIsBulkDeleting(false);
             setShowBulkDeleteModal(false);
@@ -136,25 +139,25 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
     const handleSaveEdit = async () => {
         if (!editingUnitId) return;
         setIsSaving(true);
-        const toastId = toast.loading("Updating unit...");
+        const toastId = toast.loading(tCommon('processing'));
 
         try {
             const result = await updateStudyUnit(editingUnitId, editForm.content, editForm.description);
             if (result.success) {
-                toast.success("Unit updated successfully", { id: toastId });
+                toast.success(tCommon('save'), { id: toastId });
                 setEditingUnitId(null);
             } else {
-                toast.error(result.message || "Failed to update unit", { id: toastId });
+                toast.error(result.message || tCommon('error'), { id: toastId });
             }
         } catch (error) {
-            toast.error("An error occurred while updating", { id: toastId });
+            toast.error(tCommon('error'), { id: toastId });
         } finally {
             setIsSaving(false);
         }
     };
 
     if (units.length === 0) {
-        return <p className="text-sm text-zinc-500 italic p-4">No units found.</p>;
+        return <p className="text-sm text-zinc-500 italic p-4">{t('noUnits')}</p>;
     }
 
     return (
@@ -164,9 +167,9 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                 isOpen={!!deletingId}
                 onClose={handleDeleteCancel}
                 onConfirm={handleDeleteConfirm}
-                title="Delete Unit"
-                message="Are you sure you want to delete this unit? All associated questions will also be removed."
-                confirmText="Delete Unit"
+                title={t('deleteTitle')}
+                message={t('deleteMessage')}
+                confirmText={t('deleteConfirm')}
                 isLoading={isDeleting}
             />
 
@@ -175,15 +178,15 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                 isOpen={showBulkDeleteModal}
                 onClose={() => setShowBulkDeleteModal(false)}
                 onConfirm={handleBulkDelete}
-                title="Delete Selected Units"
-                message={`Are you sure you want to delete ${selectedIds.size} units? All associated questions will also be removed.`}
-                confirmText={`Delete ${selectedIds.size} Units`}
+                title={t('deleteBulkTitle')}
+                message={t('deleteBulkMessage', { count: selectedIds.size })}
+                confirmText={t('deleteBulkConfirm', { count: selectedIds.size })}
                 isLoading={isBulkDeleting}
             />
 
             {/* Header Toolbar */}
             <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-zinc-400">{units.length} units</span>
+                <span className="text-sm text-zinc-400">{t('unitsCount', { count: units.length })}</span>
                 <Button
                     variant="ghost"
                     size="sm"
@@ -208,12 +211,12 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                     {selectionMode ? (
                         <>
                             <X size={14} />
-                            Cancel
+                            {tCommon('cancel')}
                         </>
                     ) : (
                         <>
                             <CheckSquare size={14} />
-                            Select Multiple
+                            {tCommon('selectMultiple')}
                         </>
                     )}
                 </Button>
@@ -243,7 +246,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                                 ? 'bg-indigo-500 border-indigo-500'
                                                 : 'border-zinc-600 bg-transparent hover:border-zinc-500'
                                         )}
-                                        aria-label={isSelected ? "Deselect unit" : "Select unit"}
+                                        aria-label={isSelected ? tCommon('deselectUnit') : tCommon('selectUnit')}
                                     >
                                         {isSelected && <Check size={12} className="text-white" />}
                                     </button>
@@ -282,20 +285,20 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                             <input
                                                 value={editForm.content}
                                                 onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
-                                                placeholder="Unit Title / Concept"
+                                                placeholder={t('unitTitlePlaceholder')}
                                                 className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors"
                                             />
                                             <textarea
                                                 value={editForm.description}
                                                 onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                                                placeholder="Description (optional)"
+                                                placeholder={t('descriptionPlaceholder')}
                                                 className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 h-20 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
                                             />
                                             <div className="flex justify-end gap-2">
-                                                <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isSaving}>Cancel</Button>
+                                                <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isSaving}>{tCommon('cancel')}</Button>
                                                 <Button size="sm" onClick={handleSaveEdit} disabled={isSaving}>
                                                     {isSaving ? <Loader2 size={14} className="animate-spin mr-2" /> : <Save size={14} className="mr-2" />}
-                                                    Save Changes
+                                                    {t('saveChanges')}
                                                 </Button>
                                             </div>
                                         </div>
@@ -322,10 +325,10 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                             className="h-7 text-xs gap-1.5 text-zinc-400 hover:text-blue-400 hover:bg-blue-950/20"
                                             onClick={(e) => handleActionClick(e, () => handleGenerateClick(unit))}
                                             disabled={isGenerating}
-                                            aria-label="Generate questions"
+                                            aria-label={t('generateQuestions')}
                                         >
                                             {isGenerating ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                            Generate
+                                            {t('generateQuestions')}
                                         </Button>
 
                                         <Button
@@ -333,7 +336,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                             size="icon"
                                             onClick={(e) => handleActionClick(e, () => handleEditClick(unit))}
                                             className="h-7 w-7 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-950/20"
-                                            title="Edit Unit"
+                                            title={t('editUnit')}
                                             disabled={editingUnitId === unit.id}
                                         >
                                             <Edit2 size={14} />
@@ -344,8 +347,8 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                             size="icon"
                                             onClick={(e) => handleActionClick(e, () => handleDeleteInit(unit.id))}
                                             className="h-7 w-7 text-zinc-500 hover:text-red-400 hover:bg-red-950/20"
-                                            title="Delete Unit"
-                                            aria-label="Delete unit"
+                                            title={t('deleteTitle')}
+                                            aria-label={t('deleteTitle')}
                                         >
                                             <Trash2 size={14} />
                                         </Button>
@@ -371,13 +374,13 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
             {/* Floating Action Bar (when items selected) */}
             {selectedIds.size > 0 && (
                 <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-4 z-50">
-                    <span className="text-sm text-zinc-300 font-medium">{selectedIds.size} selected</span>
+                    <span className="text-sm text-zinc-300 font-medium">{tCommon('selected', { count: selectedIds.size })}</span>
                     <div className="h-4 w-px bg-zinc-700" />
                     <Button variant="ghost" size="sm" onClick={selectAll} className="text-xs">
-                        Select All
+                        {tCommon('selectAll')}
                     </Button>
                     <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs">
-                        Clear
+                        {tCommon('clear')}
                     </Button>
                     <Button
                         variant="danger"
@@ -386,11 +389,10 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                         className="text-xs"
                     >
                         <Trash2 size={14} className="mr-1.5" />
-                        Delete Selected
+                        {t('deleteBulkConfirm', { count: selectedIds.size })}
                     </Button>
                 </div>
             )}
         </>
     );
 }
-

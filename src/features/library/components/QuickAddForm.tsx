@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { saveRawContent } from '../actions/save-content';
 import { uploadSourceFile } from '../actions/upload-source-file';
 import { Button } from '@/shared/ui/Button';
+import { useTranslations } from 'next-intl';
 
 interface QuickAddFormProps {
     onSuccess?: () => void;
@@ -16,6 +17,8 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
     const [isDragOver, setIsDragOver] = useState(false);
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    const t = useTranslations('library.quickAdd');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,7 +45,7 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
         if (result.success) {
             setContent('');
             setFile(null);
-            setMessage({ type: 'success', text: 'Saved!' });
+            setMessage({ type: 'success', text: t('saved') });
             setTimeout(() => {
                 setMessage(null);
                 onSuccess?.();
@@ -60,7 +63,7 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
             setFile(droppedFile);
             setMessage(null);
         } else if (droppedFile) {
-            setMessage({ type: 'error', text: 'Only PDF files are supported' });
+            setMessage({ type: 'error', text: t('pdfOnly') });
         }
     };
 
@@ -68,8 +71,8 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
         <div className="w-full p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
             <div className="mb-4 flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-medium text-zinc-100 mb-1">Quick Add</h3>
-                    <p className="text-sm text-zinc-400">Capture ideas or upload sources.</p>
+                    <h3 className="text-lg font-medium text-zinc-100 mb-1">{t('title')}</h3>
+                    <p className="text-sm text-zinc-400">{t('description')}</p>
                 </div>
                 <div className="flex bg-zinc-950 rounded-lg p-1 border border-zinc-800">
                     <button
@@ -80,7 +83,7 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                             : 'text-zinc-400 hover:text-zinc-200'
                             }`}
                     >
-                        Write Note
+                        {t('writeNote')}
                     </button>
                     <button
                         type="button"
@@ -90,7 +93,7 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                             : 'text-zinc-400 hover:text-zinc-200'
                             }`}
                     >
-                        Upload PDF
+                        {t('uploadPdf')}
                     </button>
                 </div>
             </div>
@@ -100,7 +103,7 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="Paste text, code, or ideas here..."
+                        placeholder={t('placeholder')}
                         className="w-full h-48 p-4 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 resize-none font-mono text-sm"
                         disabled={isPending}
                         autoFocus
@@ -124,16 +127,16 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                                     onClick={() => setFile(null)}
                                     className="text-xs text-red-400 hover:text-red-300 underline"
                                 >
-                                    Remove
+                                    {t('remove')}
                                 </button>
                             </div>
                         ) : (
                             <div className="text-center p-4">
-                                <p className="text-zinc-400 text-sm mb-2">Drag & drop PDF here</p>
-                                <p className="text-zinc-600 text-xs mb-4">- or -</p>
+                                <p className="text-zinc-400 text-sm mb-2">{t('dragDrop')}</p>
+                                <p className="text-zinc-600 text-xs mb-4">{t('or')}</p>
                                 <label className="cursor-pointer">
                                     <span className="px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-md text-xs text-zinc-300 hover:text-zinc-100 transition-colors">
-                                        Browse Files
+                                        {t('browseFiles')}
                                     </span>
                                     <input
                                         type="file"
@@ -166,7 +169,7 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                         size="sm"
                         className="disabled:cursor-not-allowed"
                     >
-                        {activeTab === 'note' ? 'Save Note' : 'Upload PDF'}
+                        {activeTab === 'note' ? t('saveNote') : t('uploadPdf')}
                     </Button>
                 </div>
             </form>
