@@ -15,6 +15,11 @@ export async function deleteQuestion(userId: string, questionId: string) {
     }
 }
 
+export async function deleteQuestions(userId: string, questionIds: string[]) {
+    const deleted = await QuestionRepository.deleteMany(userId, questionIds);
+    return deleted;
+}
+
 export async function commitQuestions(userId: string, unitId: string, questions: GeneratorQuestion[]) {
     // 1. Verify Unit exists and fetch context (SubjectId)
     const unit = await ContentRepository.findUnitById(unitId);
@@ -34,11 +39,12 @@ export async function commitQuestions(userId: string, unitId: string, questions:
     return createdQuestions.length;
 }
 
-export async function updateQuestions(userId: string, questions: EditableQuestion[], deletedIds: string[]) {
-    const questionsToUpdate = questions.filter(q => q.id);
+export async function updateQuestions(userId: string, unitId: string, questions: EditableQuestion[], deletedIds: string[]) {
+    const existingQuestions = questions.filter(q => q.id);
+    const newQuestions = questions.filter(q => !q.id);
 
     // Check if there is anything to do
-    if (questionsToUpdate.length === 0 && deletedIds.length === 0) {
+    if (existingQuestions.length === 0 && newQuestions.length === 0 && deletedIds.length === 0) {
         return; // Nothing to do
     }
 
@@ -48,7 +54,15 @@ export async function updateQuestions(userId: string, questions: EditableQuestio
     }
 
     // Perform Updates
-    if (questionsToUpdate.length > 0) {
-        await QuestionRepository.updateBatch(userId, questionsToUpdate);
+    if (existingQuestions.length > 0) {
+        await QuestionRepository.updateBatch(userId, existingQuestions);
+    }
+
+    // Perform Creations
+    if (newQuestions.length > 0) {
+        // Reuse commitQuestions logic (findUnit -> createBatch)
+        // We can just call commitQuestions or reuse the logic.
+        // Calling commitQuestions is cleaner as it handles Unit verification
+        await commitQuestions(userId, unitId, newQuestions);
     }
 }

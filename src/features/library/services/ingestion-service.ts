@@ -1,4 +1,5 @@
 import { ContentRepository } from '@/features/library/repositories/content.repository';
+import { put } from '@vercel/blob';
 import { embedMany } from "ai";
 // @ts-ignore
 import pdf from 'pdf-parse-fork';
@@ -146,9 +147,18 @@ export async function saveRawSource(
 ) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // 1. Parse PDF to extract text (for RAG/embeddings)
     const { text } = await parsePdf(buffer);
 
-    return await ContentRepository.createSource(userId, title, text);
+    // 2. Upload PDF to Vercel Blob
+    const blob = await put(`sources/${userId}/${Date.now()}-${file.name}`, file, {
+        access: 'public',
+        contentType: 'application/pdf',
+    });
+
+    // 3. Save to database with both text and blob URL
+    return await ContentRepository.createSource(userId, title, text, blob.url);
 }
 
 export async function processSourceEmbeddings(

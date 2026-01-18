@@ -24,15 +24,17 @@ export function OpenEndedCard({
     const [userAnswer, setUserAnswer] = useState('');
 
     return (
-        <div className="w-full max-w-2xl mx-auto space-y-6 h-full flex flex-col">
-            {/* Question Header */}
-            <div className="text-center space-y-4 shrink-0">
-                <span className="text-xs font-bold px-2 py-1 rounded bg-indigo-950/40 text-indigo-400 border border-indigo-900/40 uppercase tracking-wider">
-                    Open Ended
-                </span>
-                <h2 className="text-xl md:text-2xl font-medium text-zinc-100 leading-tight">
-                    {question}
-                </h2>
+        <div className="w-full h-full flex flex-col md:flex-row gap-6 md:gap-12">
+            {/* Question Header (Left Panel) */}
+            <div className="flex-1 flex flex-col justify-center space-y-6 md:pr-6 md:border-r border-zinc-800/50">
+                <div className="space-y-4">
+                    <span className="text-xs font-bold px-2 py-1 rounded bg-indigo-950/40 text-indigo-400 border border-indigo-900/40 uppercase tracking-wider">
+                        Open Ended
+                    </span>
+                    <h2 className="text-xl md:text-2xl font-medium text-zinc-100 leading-tight">
+                        {question}
+                    </h2>
+                </div>
             </div>
 
             {/* Content Area */}

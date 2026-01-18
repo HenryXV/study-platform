@@ -29,6 +29,7 @@ model ContentSource {
   id        String       @id @default(cuid())
   title     String
   bodyText  String       @map("body_text")
+  fileUrl   String?
   status    SourceStatus @default(UNPROCESSED)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt

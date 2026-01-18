@@ -60,11 +60,12 @@ export const ContentRepository = {
         });
     },
 
-    async createSource(userId: string, title: string, bodyText: string) {
+    async createSource(userId: string, title: string, bodyText: string, fileUrl?: string) {
         return prisma.contentSource.create({
             data: {
                 title,
                 bodyText,
+                fileUrl,
                 status: 'UNPROCESSED',
                 userId,
             }

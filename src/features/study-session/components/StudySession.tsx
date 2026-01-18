@@ -48,7 +48,7 @@ export function StudySession({
     if (!currentCard) return null;
 
     return (
-        <div className="w-full max-w-2xl mx-auto p-6 flex flex-col items-center min-h-[50vh] relative">
+        <div className="w-full max-w-7xl mx-auto p-6 flex flex-col items-center min-h-[50vh] relative">
             {/* Crisis Banner */}
             {mode === 'crisis' && (
                 <div className="absolute -top-12 left-0 right-0 bg-red-950/30 border border-red-900/50 text-red-200 px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium animate-in slide-in-from-top-4">

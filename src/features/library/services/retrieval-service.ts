@@ -16,7 +16,7 @@ export async function findRelatedChunks(query: string, limit: number = 5, source
     });
 
     // 2. Perform vector search
-    const chunks = await findSimilarChunks(embedding, limit, 0.3, sourceId);
+    const chunks = await findSimilarChunks(embedding, limit, 0.3, 0.7, query, sourceId);
 
     return chunks;
 }

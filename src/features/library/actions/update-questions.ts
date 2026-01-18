@@ -10,7 +10,7 @@ import { DomainError } from '@/lib/errors';
 
 const DeletedIdsSchema = z.array(CuidSchema);
 
-export async function updateQuestions(questions: EditableQuestion[], deletedIds: string[] = []) {
+export async function updateQuestions(unitId: string, questions: EditableQuestion[], deletedIds: string[] = []) {
     const parseResult = z.array(QuestionSchema.extend({ id: z.string().optional() })).safeParse(questions);
     const deletedIdsResult = DeletedIdsSchema.safeParse(deletedIds);
 
@@ -22,16 +22,18 @@ export async function updateQuestions(questions: EditableQuestion[], deletedIds:
         return { success: false, message: "Invalid deleted IDs format" };
     }
 
-    const questionsToUpdate = parseResult.data.filter(q => q.id);
-    // Allow operation if there are deletions, even if no updates
-    if (questionsToUpdate.length === 0 && deletedIds.length === 0) {
+    const existingQuestions = parseResult.data.filter(q => q.id);
+    const newQuestions = parseResult.data.filter(q => !q.id);
+
+    // Check if there is anything to do
+    if (existingQuestions.length === 0 && newQuestions.length === 0 && deletedIds.length === 0) {
         return { success: false, message: "No questions to update or delete" };
     }
 
     try {
         const userId = await requireUser();
         // Cast parseResult.data to EditableQuestion[] because validated inputs are safe
-        await updateQuestionsService(userId, parseResult.data as EditableQuestion[], deletedIds);
+        await updateQuestionsService(userId, unitId, parseResult.data as EditableQuestion[], deletedIds);
 
         revalidatePath('/');
         return { success: true };
