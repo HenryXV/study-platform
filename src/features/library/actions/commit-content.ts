@@ -6,11 +6,13 @@ import { CuidSchema } from '@/lib/validation';
 import { z } from 'zod';
 import { requireUser } from '@/lib/auth';
 import { commitDraftToLibrary } from '../services/content-service';
+import { processSourceEmbeddings } from '../services/ingestion-service';
 import { DomainError } from '@/lib/errors';
 
 const DraftUnitSchema = z.object({
     title: z.string().min(1).max(500),
     type: z.enum(['TEXT', 'CODE']),
+    description: z.string().optional(),
 });
 
 const ApprovedDraftDataSchema = z.object({
@@ -34,8 +36,19 @@ export async function commitContent(sourceId: string, data: ApprovedDraftData) {
         const userId = await requireUser();
         const count = await commitDraftToLibrary(userId, sourceId, data);
 
+        // Process Embeddings for RAG (Chunking & Vectorization)
+        // We do this AFTER saving the units so that the source is fully established
+        try {
+            await processSourceEmbeddings(userId, sourceId);
+        } catch (embeddingError) {
+            console.error('Embeddings Generation Failed (Partial Success):', embeddingError);
+            // Return success but indicate embedding failure
+            revalidatePath('/');
+            return { success: true, count, embeddingFailed: true };
+        }
+
         revalidatePath('/');
-        return { success: true, count };
+        return { success: true, count, embeddingFailed: false };
 
     } catch (error) {
         if (error instanceof DomainError) {

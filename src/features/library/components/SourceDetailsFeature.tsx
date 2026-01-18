@@ -16,11 +16,17 @@ export async function SourceDetailsFeature({ params }: SourceDetailsFeatureProps
             id: true,
             title: true,
             bodyText: true,
+            fileUrl: true,
             status: true,
             units: {
                 orderBy: { createdAt: 'asc' },
                 include: {
                     questions: true
+                }
+            },
+            _count: {
+                select: {
+                    chunks: true
                 }
             }
         }

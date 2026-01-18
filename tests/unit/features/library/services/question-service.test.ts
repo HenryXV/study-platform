@@ -83,18 +83,36 @@ describe('Question Service', () => {
             const deletedIds = ['q99'];
 
             // Act
-            await updateQuestions(userId, updates as any, deletedIds);
+            await updateQuestions(userId, unitId, updates as any, deletedIds);
 
             // Assert
             expect(QuestionRepository.deleteMany).toHaveBeenCalledWith(userId, deletedIds);
             expect(QuestionRepository.updateBatch).toHaveBeenCalledWith(userId, updates);
         });
 
+        it('should create new questions when id is missing', async () => {
+            // Arrange
+            const mockUnit = { id: unitId, source: { subjectId: 'sub-1' } };
+            vi.mocked(ContentRepository.findUnitById).mockResolvedValue(mockUnit as any);
+            vi.mocked(QuestionRepository.createBatch).mockResolvedValue([] as any);
+
+            const newQuestions = [{ question: 'New Q', answer: 'A' }];
+
+            // Act
+            await updateQuestions(userId, unitId, newQuestions as any, []);
+
+            // Assert
+            expect(ContentRepository.findUnitById).toHaveBeenCalledWith(unitId);
+            expect(QuestionRepository.createBatch).toHaveBeenCalled();
+            expect(QuestionRepository.updateBatch).not.toHaveBeenCalled();
+        });
+
         it('should do nothing if inputs empty', async () => {
-            await updateQuestions(userId, [], []);
+            await updateQuestions(userId, unitId, [], []);
 
             expect(QuestionRepository.deleteMany).not.toHaveBeenCalled();
             expect(QuestionRepository.updateBatch).not.toHaveBeenCalled();
+            expect(QuestionRepository.createBatch).not.toHaveBeenCalled();
         });
     });
 });

@@ -3,8 +3,15 @@
 import { CuidSchema } from '@/lib/validation';
 import { requireUser } from '@/lib/auth';
 import { analyzeContent } from '../services/ai-service';
+import {
+    ProcessingOptionsSchema,
+    ProcessingOptions,
+} from '../schemas/processing-options';
 
-export async function analyzeContentPreview(sourceId: string) {
+export async function analyzeContentPreview(
+    sourceId: string,
+    options?: ProcessingOptions
+) {
     let userId: string;
     try {
         userId = await requireUser();
@@ -17,8 +24,14 @@ export async function analyzeContentPreview(sourceId: string) {
         return { success: false, message: 'Invalid source ID format' };
     }
 
+    // Validate and apply defaults
+    const optionsResult = ProcessingOptionsSchema.safeParse(options ?? {});
+    if (!optionsResult.success) {
+        return { success: false, message: 'Invalid processing options' };
+    }
+
     try {
-        const output = await analyzeContent(userId, sourceId);
+        const output = await analyzeContent(userId, sourceId, optionsResult.data);
         return {
             success: true,
             data: output

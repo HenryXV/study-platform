@@ -15,9 +15,11 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.9",
+    "@ai-sdk/google": "^3.0.10",
+    "@ai-sdk/react": "^3.0.41",
     "@clerk/nextjs": "^6.36.7",
     "@clerk/themes": "^2.4.47",
+    "@langchain/textsplitters": "^1.0.1",
     "@monaco-editor/react": "^4.7.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
@@ -25,7 +27,8 @@
     "@types/prismjs": "^1.26.5",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.1",
-    "ai": "^6.0.34",
+    "@vercel/blob": "^2.0.0",
+    "ai": "^6.0.39",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -33,6 +36,8 @@
     "framer-motion": "^12.26.2",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
+    "pdf-parse": "^2.4.5",
+    "pdf-parse-fork": "^1.2.0",
     "pg": "^8.17.0",
     "prismjs": "^1.30.0",
     "react": "19.2.3",
@@ -42,6 +47,7 @@
     "recharts": "^3.6.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "vercel": "^50.4.5",
     "zod": "^4.3.5"
   },
   "devDependencies": {
@@ -52,6 +58,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.2",

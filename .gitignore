@@ -49,3 +49,4 @@ playwright-report
 coverage
 
 study-user-stories.md
+.env*.local

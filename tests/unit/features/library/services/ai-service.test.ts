@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { analyzeContent, generateQuestions } from '@/features/library/services/ai-service';
 import { generateText } from 'ai';
+import { findRelatedChunks } from '@/features/library/services/retrieval-service';
 import { ContentRepository } from '@/features/library/repositories/content.repository';
 import { ratelimit } from '@/lib/ratelimit';
 
@@ -26,6 +27,14 @@ vi.mock('@/lib/ratelimit', () => ({
     },
 }));
 
+vi.mock('@/features/library/services/retrieval-service', () => ({
+    findRelatedChunks: vi.fn().mockResolvedValue([]),
+    // reRankChunks is local or exported? It's not exported in ai-service, but used there.
+    // Wait, reRankChunks is defined INSIDE ai-service.ts at the bottom.
+    // referencing it: `const reRankedChunks = await reRankChunks(searchQuery, relatedChunks);`
+    // However, findRelatedChunks is imported.
+}));
+
 describe('AI Service', () => {
     const userId = 'user-123';
     const sourceId = 'source-123';
@@ -35,6 +44,8 @@ describe('AI Service', () => {
         vi.resetAllMocks();
         // Default Rate Limit Success
         vi.mocked(ratelimit.limit).mockResolvedValue({ success: true } as any);
+        // Default Retrieval Success
+        vi.mocked(findRelatedChunks).mockResolvedValue([]);
     });
 
     describe('analyzeContent', () => {
@@ -87,7 +98,7 @@ describe('AI Service', () => {
             vi.mocked(ContentRepository.findUnitWithContext).mockResolvedValue(mockUnit as any);
 
             const mockOutput = {
-                questions: [{ question: 'Q1' }]
+                questions: [{ questionText: 'Q1', type: 'MULTIPLE_CHOICE', correctAnswer: 'A', explanation: 'Exp', topics: [] }]
             };
             vi.mocked(generateText).mockResolvedValue({ output: mockOutput } as any);
 
@@ -96,7 +107,7 @@ describe('AI Service', () => {
 
             // Assert
             expect(result).toHaveLength(1);
-            expect(result[0].question).toBe('Q1');
+            expect(result[0].questionText).toBe('Q1');
             // Topics fallback check
             expect(result[0].topics).toEqual(['Physics']);
         });

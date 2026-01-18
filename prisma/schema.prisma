@@ -5,12 +5,14 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/app/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/app/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [vector]
 }
 
 model User {
@@ -27,11 +29,13 @@ model ContentSource {
   id        String       @id @default(cuid())
   title     String
   bodyText  String       @map("body_text")
+  fileUrl   String?
   status    SourceStatus @default(UNPROCESSED)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  units StudyUnit[]
+  units  StudyUnit[]
+  chunks ContentChunk[]
 
   subjectId String?
   subject   Subject? @relation(fields: [subjectId], references: [id])
@@ -42,12 +46,25 @@ model ContentSource {
   @@index([userId])
 }
 
+model ContentChunk {
+  id         String                      @id @default(cuid())
+  content    String
+  pageNumber Int
+  embedding  Unsupported("vector(768)")?
+
+  sourceId String
+  source   ContentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+}
+
 model StudyUnit {
-  id        String   @id @default(cuid())
-  sourceId  String
-  type      UnitType
-  content   String
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  sourceId    String
+  type        UnitType
+  content     String
+  description String?
+  createdAt   DateTime @default(now())
 
   source    ContentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   questions Question[]

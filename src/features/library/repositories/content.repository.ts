@@ -4,7 +4,7 @@ import { Prisma } from '@/app/generated/prisma/client';
 export interface DraftData {
     suggestedSubject: string;
     suggestedTopics: string[];
-    units: { title: string; type: 'TEXT' | 'CODE' }[];
+    units: { title: string; type: 'TEXT' | 'CODE'; description?: string }[];
 }
 
 export const ContentRepository = {
@@ -44,11 +44,28 @@ export const ContentRepository = {
         });
     },
 
-    async createSource(userId: string, title: string, bodyText: string) {
+    async findSourceWithChunks(id: string, userId: string) {
+        return prisma.contentSource.findFirst({
+            where: { id, userId },
+            include: {
+                chunks: {
+                    orderBy: { pageNumber: 'asc' },
+                    select: {
+                        id: true,
+                        content: true,
+                        pageNumber: true
+                    }
+                }
+            }
+        });
+    },
+
+    async createSource(userId: string, title: string, bodyText: string, fileUrl?: string) {
         return prisma.contentSource.create({
             data: {
                 title,
                 bodyText,
+                fileUrl,
                 status: 'UNPROCESSED',
                 userId,
             }
@@ -109,6 +126,34 @@ export const ContentRepository = {
         });
     },
 
+    async updateUnit(userId: string, id: string, data: { content: string; description?: string }) {
+        // Verify ownership/existence first (implicit via where clause with user check if we had relation, 
+        // but here we might need to check source.userId if we want strict security at this level 
+        // OR rely on the fact that we can do a findFirst with relation check).
+
+        // However, Prisma doesn't easily let us update A based on B's relation in one atomic update 
+        // without a slightly complex where.
+        // Easiest is:
+        const unit = await prisma.studyUnit.findFirst({
+            where: {
+                id,
+                source: { userId }
+            }
+        });
+
+        if (!unit) {
+            return null; // or throw
+        }
+
+        return prisma.studyUnit.update({
+            where: { id },
+            data: {
+                content: data.content,
+                description: data.description
+            }
+        });
+    },
+
     /** Composed transaction - contains orchestration logic for draft commit flow */
     async executeCommitDraftTransaction(userId: string, sourceId: string, data: DraftData) {
         return prisma.$transaction(async (tx) => {
@@ -153,8 +198,9 @@ export const ContentRepository = {
             let createdCount = 0;
             const validUnits = data.units.map(u => ({
                 sourceId: sourceId,
-                type: (u.type === 'CODE') ? 'CODE' : 'TEXT', // Enforce strict type casting if needed
-                content: u.title
+                type: (u.type === 'CODE') ? 'CODE' : 'TEXT',
+                content: u.title,
+                description: u.description
             }) as Prisma.StudyUnitCreateManyInput);
 
             // Using createMany is more efficient if supported, but loop is fine for small batches.

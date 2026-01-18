@@ -5,6 +5,7 @@ import { Reorder } from 'framer-motion';
 export interface DraftUnit {
     title: string;
     type: 'TEXT' | 'CODE';
+    description?: string;
 }
 
 interface DraftUnitCardProps {
@@ -29,7 +30,7 @@ export function DraftUnitCard({ unit, index, onUpdate, onDelete }: DraftUnitCard
                         <GripVertical className="w-5 h-5" />
                     </div>
 
-                    <div className="flex-1 space-y-4">
+                    <div className="flex-1 space-y-3">
                         {/* Unit Header Inputs */}
                         <div className="flex gap-4">
                             <div className="flex-1">
@@ -43,12 +44,19 @@ export function DraftUnitCard({ unit, index, onUpdate, onDelete }: DraftUnitCard
                             <select
                                 value={unit.type}
                                 onChange={(e) => onUpdate(index, 'type', e.target.value as 'TEXT' | 'CODE')}
-                                className="bg-zinc-950 border border-zinc-800 rounded px-2 text-xs text-zinc-400 focus:outline-none"
+                                className="bg-zinc-950 border border-zinc-800 rounded px-2 text-xs text-zinc-400 focus:outline-none h-8"
                             >
                                 <option value="TEXT">TEXT</option>
                                 <option value="CODE">CODE</option>
                             </select>
                         </div>
+
+                        <textarea
+                            className="w-full bg-zinc-900/30 text-sm text-zinc-300 placeholder:text-zinc-700 focus:outline-none border border-transparent focus:border-indigo-500/30 rounded p-2 transition-colors resize-none h-16 block"
+                            value={unit.description || ''}
+                            onChange={(e) => onUpdate(index, 'description', e.target.value)}
+                            placeholder="Brief description of this concept (optional)"
+                        />
                     </div>
 
                     {/* Action Column */}
@@ -63,6 +71,6 @@ export function DraftUnitCard({ unit, index, onUpdate, onDelete }: DraftUnitCard
                     </div>
                 </div>
             </Card>
-        </Reorder.Item>
+        </Reorder.Item >
     );
 }

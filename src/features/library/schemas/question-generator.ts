@@ -7,8 +7,8 @@ export const QuestionSchema = z.object({
     type: QuestionTypeSchema,
     correctAnswer: z.string().min(1, "Correct answer is required"),
     options: z.array(z.string()).optional(),
-    explanation: z.string().optional(),
-    topics: z.array(z.string()).optional()
+    explanation: z.string(),
+    topics: z.array(z.string()),
 });
 
 export const ResultSchema = z.object({
