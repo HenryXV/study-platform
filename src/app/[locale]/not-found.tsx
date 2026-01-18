@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import { Button } from '@/shared/ui/Button';
 import { Ghost } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
-export default function NotFound() {
+export default async function NotFound() {
+    const t = await getTranslations('errors.notFound');
+
     return (
         <main className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-6 text-center">
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 max-w-md w-full shadow-2xl">
@@ -13,16 +16,16 @@ export default function NotFound() {
                 </div>
 
                 <h2 className="text-xl font-bold text-zinc-100 mb-2">
-                    Protocol Not Found
+                    {t('title')}
                 </h2>
 
                 <p className="text-zinc-400 mb-8 text-sm">
-                    The requested resource could not be located in the system archives. It may have been moved or deleted.
+                    {t('message')}
                 </p>
 
                 <Link href="/" className="w-full block">
                     <Button variant="outline" className="w-full">
-                        Return to Command
+                        {t('action')}
                     </Button>
                 </Link>
             </div>

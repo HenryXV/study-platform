@@ -1,0 +1,327 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "retry": "Try again",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search...",
+        "searchLibrary": "Search library...",
+        "noResults": "No results found",
+        "back": "Back",
+        "questions": "Questions",
+        "flexible": "Flexible",
+        "optional": "optional",
+        "selected": "selected",
+        "allTopics": "All topics",
+        "topicsSelected": "{count} topic(s) selected",
+        "noSubjects": "No subjects available",
+        "noTopics": "No topics available",
+        "noTopicsForSubjects": "No topics for selected subjects",
+        "startSession": "Start Session",
+        "chars": "chars",
+        "processing": "Processing...",
+        "all": "All",
+        "units": "units",
+        "selectMultiple": "Select Multiple",
+        "selectAll": "Select All",
+        "clear": "Clear",
+        "generate": "Generate",
+        "discard": "Discard",
+        "commitToLibrary": "Commit to Library",
+        "saveChanges": "Save Changes",
+        "addTopic": "Add topic..."
+    },
+    "dashboard": {
+        "title": "System Command",
+        "subtitle": "Select Protocol",
+        "weeklyConsistency": "Weekly Consistency",
+        "dayStreak": "day streak",
+        "last21Days": "Last 21 Days",
+        "subjectMastery": "Subject Mastery",
+        "noMasteryData": "No mastery data available yet.",
+        "menu": {
+            "maintenance": "Maintenance",
+            "deepFlow": "Deep Flow",
+            "emergency": "Emergency",
+            "custom": "Custom",
+            "designYourOwn": "Design your own",
+            "intense": "Intense",
+            "personalized": "Personalized"
+        },
+        "sessionPlanner": {
+            "title": "Design Your Session",
+            "description": "Customize what you want to study",
+            "subjects": "Subjects",
+            "topics": "Topics"
+        }
+    },
+    "menu": {
+        "study": "Study",
+        "cram": "Cram",
+        "library": "Library"
+    },
+    "library": {
+        "title": "My Knowledge Library",
+        "description": "Manage your raw materials and study units.",
+        "backToDashboard": "Back to Dashboard",
+        "archive": "Library Archive",
+        "viewArchive": "View Archive",
+        "archiveDescription": "Access your complete knowledge base, manage sources, and review material.",
+        "noRecentItems": "No recent items",
+        "recentSources": "Recent Sources",
+        "empty": "No sources yet",
+        "addSource": "Add Source",
+        "quickAdd": {
+            "title": "Quick Add",
+            "description": "Capture ideas or upload sources.",
+            "writeNote": "Write Note",
+            "uploadPdf": "Upload PDF",
+            "placeholder": "Paste text, code, or ideas here...",
+            "dragDrop": "Drag & drop PDF here",
+            "or": "- or -",
+            "browseFiles": "Browse Files",
+            "remove": "Remove",
+            "saved": "Saved!",
+            "saveNote": "Save Note",
+            "pdfOnly": "Only PDF files are supported"
+        },
+        "source": {
+            "units": "Atomic Units",
+            "questions": "Questions",
+            "commit": "Commit to Library",
+            "processing": "Processing...",
+            "rawSource": "Raw Source",
+            "pdfDocument": "PDF Document",
+            "rawText": "Raw Text",
+            "supervisorMode": "Supervisor Mode",
+            "examWorkbench": "Exam Workbench"
+        },
+        "inspector": {
+            "noUnits": "No Units Extracted",
+            "noUnitsDescription": "Process this content to generate study flashcards and code snippets.",
+            "analyzeAtomize": "Analyze & Atomize",
+            "embeddingsMissing": "Embeddings Missing",
+            "embeddingsDescription": "The content was saved, but the AI embeddings failed to generate. This affects search and RAG features.",
+            "retryProcessing": "Retry Processing",
+            "contentSaved": "Content saved and processed!",
+            "contentSavedRetry": "Content saved, but embeddings failed. Please retry.",
+            "savingQuestions": "Saving questions...",
+            "updatingQuestions": "Updating questions...",
+            "questionsAdded": "Added {count} questions to library",
+            "questionsUpdated": "Questions updated successfully",
+            "embeddingsSuccess": "Embeddings generated successfully!"
+        },
+        "generated": {
+            "deleteTitle": "Delete Unit",
+            "deleteMessage": "Are you sure you want to delete this unit? All associated questions will also be removed.",
+            "deleteConfirm": "Delete Unit",
+            "deleteBulkTitle": "Delete Selected Units",
+            "deleteBulkMessage": "Are you sure you want to delete {count} units? All associated questions will also be removed.",
+            "deleteBulkConfirm": "Delete {count} Units",
+            "unitsCount": "{count} units",
+            "noUnits": "No units found.",
+            "editUnit": "Edit Unit",
+            "saveChanges": "Save Changes",
+            "generateQuestions": "Generate questions"
+        },
+        "draft": {
+            "reviewTitle": "Review Draft",
+            "reviewSubtitle": "Verify AI-generated content before saving.",
+            "subject": "Subject",
+            "topics": "Topics (Press Enter)",
+            "generatedUnits": "Generated Units ({count})",
+            "addManualUnit": "Add Manual Unit",
+            "noUnits": "No units in draft. Add one manually.",
+            "newConcept": "New Concept"
+        },
+        "processing": {
+            "title": "Processing Options",
+            "description": "Configure how the AI analyzes and segments your content.",
+            "granularity": "Granularity",
+            "focusConstraint": "Focus Constraint",
+            "analyzeContent": "Analyze Content",
+            "broad": "Broad",
+            "broadDesc": "High-level overview",
+            "detailed": "Detailed",
+            "detailedDesc": "Comprehensive breakdown",
+            "atomic": "Atomic",
+            "atomicDesc": "Bite-sized facts"
+        },
+        "options": {
+            "title": "Question Options",
+            "description": "Configure how questions are generated for this unit.",
+            "count": "Question Count",
+            "types": "Question Types",
+            "examStyle": "Exam Style (Banca)",
+            "scope": "Scope / Focus",
+            "generate": "Generate Questions",
+            "atLeastOne": "At least one type must be selected.",
+            "standard": "General exam format",
+            "styledLike": "Questions styled like {banca} exams"
+        },
+        "editor": {
+            "questionType": "Question Type",
+            "topics": "Topics",
+            "prompt": "Question Prompt",
+            "promptPlaceholder": "Enter the question prompt here...",
+            "options": "Options",
+            "checkToMark": "Check to mark correct",
+            "addOption": "Add Option",
+            "modelAnswer": "Model Answer",
+            "modelPlaceholder": "Enter the expected answer or output...",
+            "explanation": "Explanation",
+            "explanationPlaceholder": "Explain the reasoning behind the correct answer...",
+            "addTopic": "Add topic...",
+            "removeTopic": "Remove topic",
+            "removeOption": "Remove option",
+            "option": "Option",
+            "markCorrectLabel": "Mark as correct"
+        },
+        "grid": {
+            "noMatches": "No matches found",
+            "noMatchesDesc": "No results for \"{query}\". Try a different term.",
+            "empty": "Library is empty",
+            "emptyDesc": "Start by adding your first note or snippet.",
+            "createSource": "Create Source",
+            "deleteTitle": "Delete Source",
+            "deleteMessage": "Are you sure you want to delete this content source? This will permanently remove all associated study units and flashcards.",
+            "deleteConfirm": "Delete Forever",
+            "filterBySubject": "Filter by Subject:"
+        }
+    },
+    "study": {
+        "title": "Study Session",
+        "activeSession": "Active Session",
+        "mode": "Mode",
+        "reviewingAhead": "Reviewing Ahead",
+        "crisisMode": "Crisis Mode Active: Just {count} cards to keep the streak!",
+        "targetedStudy": "Targeted Study",
+        "generalReview": "General Review",
+        "cardOf": "Card {current} of {total}",
+        "showAnswer": "Show Answer",
+        "forgot": "Forgot",
+        "hard": "Hard",
+        "easy": "Easy",
+        "expectedAnswer": "Expected Answer",
+        "complete": {
+            "title": "Session Complete",
+            "allReviewed": "All cards reviewed.",
+            "findingQuestions": "Finding Questions...",
+            "extendSession": "Extend Session (+10)",
+            "or": "or",
+            "saving": "Saving...",
+            "saveExit": "Save Progress & Exit"
+        },
+        "card": {
+            "terminalInput": "Terminal Input",
+            "yourSolution": "Your Solution",
+            "noCode": "// No code provided",
+            "multipleChoice": "Multiple Choice",
+            "correct": "Correct! Well done.",
+            "incorrect": "Incorrect. Review the answer above.",
+            "openEnded": "Open Ended",
+            "yourAnswer": "Your Answer",
+            "typePlaceholder": "Type your answer here...",
+            "modelAnswer": "Model Answer"
+        },
+        "explanation": {
+            "reveal": "Reveal Explanation",
+            "insight": "Insight",
+            "hideSource": "Hide Source",
+            "verifySource": "Verify Source",
+            "source": "Source",
+            "originalContent": "Original Content"
+        },
+        "rating": {
+            "again": "Again",
+            "hard": "Hard",
+            "good": "Good",
+            "easy": "Easy"
+        }
+    },
+    "errors": {
+        "notFound": {
+            "title": "Page Not Found",
+            "message": "The page you're looking for doesn't exist.",
+            "action": "Go Home"
+        },
+        "generic": {
+            "title": "Something went wrong",
+            "message": "An unexpected error occurred.",
+            "action": "Try again"
+        }
+    },
+    "landing": {
+        "hero": {
+            "titleStart": "Stop Reading.",
+            "titleEnd": "Start Testing.",
+            "subtitle": "Upload your PDFs. AI generates the exam. You master the content using Active Recall.",
+            "cta": "Initialize System",
+            "freeCredits": "Get 5 Free Credits",
+            "visual": {
+                "file": "Lecture_01.pdf",
+                "activeRecall": "ACTIVE_RECALL",
+                "question": "What is the time complexity of the process() function?"
+            }
+        },
+        "meta": {
+            "subtitle": "The Logic",
+            "title": "The Old Meta vs. The New Meta",
+            "table": {
+                "vector": "Vector",
+                "passive": "Passive Study (Old)",
+                "systemized": "Systemized Study (New)",
+                "rows": {
+                    "efficiency": {
+                        "name": "Efficiency",
+                        "passive": "Low (Rereading text)",
+                        "systemized": "High (Active Recall)"
+                    },
+                    "retention": {
+                        "name": "Retention",
+                        "passive": "Fades in 24 hours",
+                        "systemized": "Spaced Repetition (SR)"
+                    },
+                    "feedback": {
+                        "name": "Feedback",
+                        "passive": "False confidence",
+                        "systemized": "Immediate & Binary"
+                    },
+                    "mentalState": {
+                        "name": "Mental State",
+                        "passive": "Boredom / Distraction",
+                        "systemized": "Flow State / Gamified"
+                    }
+                }
+            }
+        },
+        "arcade": {
+            "title": "Pay Per Cram. No Subscriptions.",
+            "subtitle": "We don't want your monthly rent. We want you to pass.",
+            "tiers": {
+                "trial": {
+                    "name": "Trial",
+                    "description": "Test the system logic right now.",
+                    "credits": "5 Credits",
+                    "cta": "Initialize"
+                },
+                "refuel": {
+                    "name": "Refuel",
+                    "description": "Price of one coffee.",
+                    "credits": "25 Credits",
+                    "cta": "Purchase"
+                },
+                "marathon": {
+                    "name": "Marathon",
+                    "description": "Full exam coverage.",
+                    "credits": "100 Credits",
+                    "cta": "Purchase"
+                }
+            }
+        }
+    }
+}

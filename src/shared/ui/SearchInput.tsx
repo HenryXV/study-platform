@@ -4,11 +4,13 @@ import { Search, X } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDebounce } from '@/shared/hooks/use-debounce';
+import { useTranslations } from 'next-intl';
 
 export function SearchInput() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
+    const t = useTranslations('common');
 
     const initialQuery = searchParams.get('query')?.toString() || '';
     const [term, setTerm] = useState(initialQuery);
@@ -49,7 +51,7 @@ export function SearchInput() {
             <input
                 type="text"
                 className="w-full bg-zinc-900 border border-zinc-800 text-zinc-100 text-sm rounded-lg pl-10 pr-10 py-2 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all hover:border-zinc-700"
-                placeholder="Search library..."
+                placeholder={t('searchPlaceholder')}
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
             />

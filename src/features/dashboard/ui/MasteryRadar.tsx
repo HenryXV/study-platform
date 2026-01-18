@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
     ResponsiveContainer,
     RadarChart,
@@ -24,11 +25,12 @@ interface MasteryRadarProps {
 
 export function MasteryRadar({ data }: MasteryRadarProps) {
     const router = useRouter();
+    const t = useTranslations('dashboard');
 
     if (!data || data.length === 0) {
         return (
             <div className="w-full h-[300px] flex items-center justify-center border border-zinc-800 rounded-xl bg-zinc-900/50">
-                <p className="text-zinc-500 text-sm font-mono">No mastery data available yet.</p>
+                <p className="text-zinc-500 text-sm font-mono">{t('noMasteryData')}</p>
             </div>
         );
     }
@@ -50,7 +52,7 @@ export function MasteryRadar({ data }: MasteryRadarProps) {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent opacity-50"></div>
 
             <div className="absolute top-4 left-4 z-10">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500">Subject Mastery</h3>
+                <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-500">{t('subjectMastery')}</h3>
             </div>
 
             <ResponsiveContainer width="100%" height="100%">

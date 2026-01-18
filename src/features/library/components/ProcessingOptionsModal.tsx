@@ -10,6 +10,7 @@ import {
     ProcessingOptions,
     GRANULARITY_LABELS,
 } from '../schemas/processing-options';
+import { useTranslations } from 'next-intl';
 
 interface ProcessingOptionsModalProps {
     isOpen: boolean;
@@ -26,6 +27,18 @@ export function ProcessingOptionsModal({
     onConfirm,
     isLoading = false,
 }: ProcessingOptionsModalProps) {
+    const t = useTranslations('library.processing');
+    const tCommon = useTranslations('common');
+
+    // We need to reconstruct labels dynamically to use translations
+    const getLabels = (g: Granularity) => {
+        const key = g.toLowerCase();
+        return {
+            label: t(key as any),
+            description: t(`${key}Desc` as any)
+        };
+    };
+
     const [granularity, setGranularity] = useState<Granularity>('DETAILED');
     const [focus, setFocus] = useState('');
 
@@ -48,21 +61,21 @@ export function ProcessingOptionsModal({
                 <div className="space-y-1">
                     <h2 className="text-lg font-medium text-zinc-100 flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-indigo-400" />
-                        Processing Options
+                        {t('title')}
                     </h2>
                     <p className="text-sm text-zinc-400">
-                        Configure how the AI analyzes and segments your content.
+                        {t('description')}
                     </p>
                 </div>
 
                 {/* Granularity Selector */}
                 <div className="space-y-3">
                     <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
-                        Granularity
+                        {t('granularity')}
                     </label>
                     <div className="flex rounded-lg bg-zinc-800 p-1 gap-1">
                         {GRANULARITY_OPTIONS.map((g) => {
-                            const { label, description } = GRANULARITY_LABELS[g];
+                            const { label, description } = getLabels(g);
                             const isSelected = granularity === g;
 
                             return (
@@ -96,7 +109,7 @@ export function ProcessingOptionsModal({
                         htmlFor="focus-constraint"
                         className="text-xs font-medium text-zinc-400 uppercase tracking-wider"
                     >
-                        Focus Constraint <span className="text-zinc-600">(optional)</span>
+                        {t('focusConstraint')} <span className="text-zinc-600">({tCommon('optional')})</span>
                     </label>
                     <textarea
                         id="focus-constraint"
@@ -126,7 +139,7 @@ export function ProcessingOptionsModal({
                         disabled={isLoading}
                         className="flex-1"
                     >
-                        Cancel
+                        {tCommon('cancel')}
                     </Button>
                     <Button
                         onClick={handleConfirm}
@@ -134,7 +147,7 @@ export function ProcessingOptionsModal({
                         className="flex-1"
                     >
                         <Sparkles className="h-4 w-4 mr-2" />
-                        Analyze Content
+                        {t('analyzeContent')}
                     </Button>
                 </div>
             </div>

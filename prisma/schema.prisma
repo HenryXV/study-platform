@@ -16,13 +16,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  credits         Int      @default(5) // Starts with 5 free
+  lastDailyRefill DateTime @default(now()) // To track the daily reset
 
-  sessions StudySession[]
+  sessions     StudySession[]
+  transactions Transaction[]
+}
+
+model Transaction {
+  id             String   @id @default(cuid())
+  userId         String
+  amount         Float // R$ 4.90
+  creditsAdded   Int // +20
+  asaasPaymentId String   @unique // To deduplicate webhooks
+  status         String // PENDING, COMPLETED, FAILED
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model ContentSource {

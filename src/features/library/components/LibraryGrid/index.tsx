@@ -8,6 +8,7 @@ import { Button } from '@/shared/ui/Button';
 import { deleteContentSource } from '@/features/library/actions/delete-source';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal';
 import { LibraryItemCard } from './LibraryItemCard';
+import { useTranslations } from 'next-intl';
 
 interface LibraryGridProps {
     sources: LibraryItem[];
@@ -15,6 +16,7 @@ interface LibraryGridProps {
 }
 
 export function LibraryGrid({ sources, query }: LibraryGridProps) {
+    const t = useTranslations('library.grid');
     const [selectedSubject, setSelectedSubject] = useState<string>('All');
 
     // Deletion State
@@ -49,6 +51,10 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
         return ['All', ...Array.from(set)];
     }, [sources]);
 
+    const displaySubjects = useMemo(() => {
+        return subjects.map(s => s === 'All' ? { value: 'All', label: t('allSubjects') } : { value: s, label: s });
+    }, [subjects, t]);
+
     // Filter sources
     const filteredSources = useMemo(() => {
         if (selectedSubject === 'All') return sources;
@@ -62,9 +68,12 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
                 <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4">
                     <FileText className="w-8 h-8 text-zinc-600" />
                 </div>
-                <h3 className="text-xl font-medium text-zinc-300 mb-2">No matches found</h3>
+                <h3 className="text-xl font-medium text-zinc-300 mb-2">{t('noMatches')}</h3>
                 <p className="text-zinc-500">
-                    No results for <span className="text-zinc-300">"{query}"</span>. Try a different term.
+                    {t.rich('noMatchesDesc', {
+                        query: query,
+                        span: (chunks) => <span className="text-zinc-300">"{chunks}"</span>
+                    })}
                 </p>
             </div>
         );
@@ -77,10 +86,10 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
                 <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4">
                     <FileText className="w-8 h-8 text-zinc-600" />
                 </div>
-                <h3 className="text-xl font-medium text-zinc-300 mb-2">Library is empty</h3>
-                <p className="text-zinc-500 mb-6">Start by adding your first note or snippet.</p>
+                <h3 className="text-xl font-medium text-zinc-300 mb-2">{t('empty')}</h3>
+                <p className="text-zinc-500 mb-6">{t('emptyDesc')}</p>
                 <Link href="/">
-                    <Button variant="outline">Create Source</Button>
+                    <Button variant="outline">{t('createSource')}</Button>
                 </Link>
             </div>
         );
@@ -93,9 +102,9 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
                 isOpen={showDeleteModal}
                 onClose={cancelDelete}
                 onConfirm={confirmDelete}
-                title="Delete Source"
-                message="Are you sure you want to delete this content source? This will permanently remove all associated study units and flashcards."
-                confirmText="Delete Forever"
+                title={t('deleteTitle')}
+                message={t('deleteMessage')}
+                confirmText={t('deleteConfirm')}
                 isLoading={isPending}
             />
 
@@ -103,7 +112,7 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
             {subjects.length > 1 && (
                 <div className="mb-8 flex items-center gap-3">
                     <label htmlFor="subject-filter" className="text-sm text-zinc-400 font-medium">
-                        Filter by Subject:
+                        {t('filterBySubject')}
                     </label>
                     <div className="relative">
                         <select
@@ -112,8 +121,8 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
                             onChange={(e) => setSelectedSubject(e.target.value)}
                             className="appearance-none bg-zinc-900 border border-zinc-800 text-zinc-200 text-sm rounded-lg pl-3 pr-8 py-2 focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all cursor-pointer hover:border-zinc-700"
                         >
-                            {subjects.map(subject => (
-                                <option key={subject} value={subject}>{subject}</option>
+                            {displaySubjects.map(({ value, label }) => (
+                                <option key={value} value={value}>{label}</option>
                             ))}
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-500">
@@ -138,3 +147,4 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
         </div>
     );
 }
+

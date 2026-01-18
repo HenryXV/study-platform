@@ -10,3 +10,4 @@ trigger: always_on
 
 ** CRITICAL **
 Prioritize working with components in @src/shared/ui
+Always use the translation feature when creating new components, no hardcoded messages

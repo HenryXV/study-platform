@@ -5,6 +5,7 @@ import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Calendar, Trash2, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 interface LibraryItemCardProps {
     source: LibraryItem;
@@ -12,6 +13,8 @@ interface LibraryItemCardProps {
 }
 
 export function LibraryItemCard({ source, onDeleteClick }: LibraryItemCardProps) {
+    const t = useTranslations('library.grid');
+
     return (
         // Container is now just a div (via Card), not a Link wrapper
         <div className="group block h-full relative">
@@ -20,7 +23,7 @@ export function LibraryItemCard({ source, onDeleteClick }: LibraryItemCardProps)
                 <Link
                     href={`/library/${source.id}/studio`}
                     className="absolute inset-0 z-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg"
-                    aria-label={`View ${source.title}`}
+                    aria-label={t('viewSource', { title: source.title })}
                 />
 
                 <CardHeader className="pb-3 relative z-10 pointer-events-none">
@@ -36,7 +39,7 @@ export function LibraryItemCard({ source, onDeleteClick }: LibraryItemCardProps)
                                 </Badge>
                             ) : (
                                 <Badge variant={source.status === 'PROCESSED' ? 'success' : 'warning'}>
-                                    {source.status === 'PROCESSED' ? 'Processed' : 'Draft'}
+                                    {source.status === 'PROCESSED' ? t('processed') : t('draft')}
                                 </Badge>
                             )}
                         </div>
@@ -50,7 +53,7 @@ export function LibraryItemCard({ source, onDeleteClick }: LibraryItemCardProps)
                                 size="icon"
                                 onClick={(e) => onDeleteClick(e, source.id)}
                                 className="ml-1 text-zinc-600 hover:text-red-400 hover:bg-zinc-800"
-                                aria-label="Delete source"
+                                aria-label={t('deleteSource')}
                             >
                                 <Trash2 className="w-3.5 h-3.5" />
                             </Button>
@@ -76,7 +79,7 @@ export function LibraryItemCard({ source, onDeleteClick }: LibraryItemCardProps)
 
                 <CardFooter className="pt-4 border-t border-zinc-800/50 mt-auto justify-between relative z-10 pointer-events-none">
                     <span className="text-xs text-zinc-500 font-mono bg-zinc-950 py-1 px-2 rounded border border-zinc-800/50">
-                        {source._count.units} Units
+                        {t('unitsCount', { count: source._count.units })}
                     </span>
                     <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-400 transition-colors -translate-x-2 group-hover:translate-x-0 opacity-0 group-hover:opacity-100" />
                 </CardFooter>

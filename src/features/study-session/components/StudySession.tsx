@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/shared/ui/Button';
 import { CodeCard } from '../ui/CodeCard';
 import { MultipleChoiceCard } from '../ui/MultipleChoiceCard';
@@ -18,6 +19,8 @@ export function StudySession({
     mode?: string;
     initialCards: FlashCard[]
 }) {
+    const t = useTranslations('study');
+
     // Separate Logic (Hook) from UI State (Local)
     const {
         currentCard,
@@ -53,7 +56,7 @@ export function StudySession({
             {mode === 'crisis' && (
                 <div className="absolute -top-12 left-0 right-0 bg-red-950/30 border border-red-900/50 text-red-200 px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium animate-in slide-in-from-top-4">
                     <Flame className="w-4 h-4 text-red-500" />
-                    <span>Crisis Mode Active: Just {progress.total} cards to keep the streak!</span>
+                    <span>{t('crisisMode', { count: progress.total })}</span>
                 </div>
             )}
 
@@ -61,7 +64,7 @@ export function StudySession({
             {mode === 'cram' && (
                 <div className="absolute -top-12 left-0 right-0 bg-blue-950/30 border border-blue-900/50 text-blue-200 px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-medium animate-in slide-in-from-top-4">
                     <Flame className="w-4 h-4 text-blue-500" />
-                    <span>Targeted Study: {currentCard.subject?.name || 'General Review'}</span>
+                    <span>{t('targetedStudy')}: {currentCard.subject?.name || t('generalReview')}</span>
                 </div>
             )}
 
@@ -69,17 +72,17 @@ export function StudySession({
             <div className="w-full mb-8 flex justify-between items-start text-sm text-zinc-500 font-mono">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                        <span>Active Session</span>
+                        <span>{t('activeSession')}</span>
                         <span className={`px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold ${mode === 'deep' ? 'bg-orange-950/30 text-orange-400 border border-orange-900/30' :
                             mode === 'crisis' ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/30' :
                                 mode === 'cram' ? 'bg-blue-950/30 text-blue-400 border border-blue-900/30' :
                                     'bg-zinc-800 text-zinc-400 border border-zinc-700'
                             }`}>
-                            Mode: {mode}
+                            {t('mode')}: {mode}
                         </span>
                         {currentCard.isReviewAhead && (
                             <span className="px-2 py-0.5 rounded text-xs uppercase tracking-wider font-semibold bg-indigo-950/30 text-indigo-400 border border-indigo-900/30">
-                                Reviewing Ahead
+                                {t('reviewingAhead')}
                             </span>
                         )}
                     </div>
@@ -99,7 +102,7 @@ export function StudySession({
                         </div>
                     )}
                 </div>
-                <span>Card {progress.current} of {progress.total}</span>
+                <span>{t('cardOf', { current: progress.current, total: progress.total })}</span>
             </div>
 
             {/* Card Arena */}
@@ -151,7 +154,7 @@ export function StudySession({
                             ) : (
                                 // BACK
                                 <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                                    <span className="text-xs uppercase tracking-widest text-green-400 font-semibold">Expected Answer</span>
+                                    <span className="text-xs uppercase tracking-widest text-green-400 font-semibold">{t('expectedAnswer')}</span>
                                     <div className="text-xl md:text-2xl text-zinc-100 font-medium">
                                         {currentCard.answer}
                                     </div>
@@ -171,7 +174,7 @@ export function StudySession({
                         size="lg"
                         className="w-full max-w-sm h-auto py-4 font-semibold shadow-lg shadow-zinc-950/50"
                     >
-                        Show Answer
+                        {t('showAnswer')}
                     </Button>
                 ) : (
                     <div className="grid grid-cols-3 gap-4 w-full max-w-lg">
@@ -180,21 +183,21 @@ export function StudySession({
                             variant="danger"
                             className="h-auto py-3 flex-col"
                         >
-                            Forgot
+                            {t('forgot')}
                         </Button>
                         <Button
                             onClick={() => handleNext('HARD')}
                             variant="outline"
                             className="h-auto py-3 flex-col bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300"
                         >
-                            Hard
+                            {t('hard')}
                         </Button>
                         <Button
                             onClick={() => handleNext('EASY')}
                             variant="success"
                             className="h-auto py-3 flex-col"
                         >
-                            Easy
+                            {t('easy')}
                         </Button>
                     </div>
                 )}

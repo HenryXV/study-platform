@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Check, X } from 'lucide-react';
 import { ExplanationReveal } from './ExplanationReveal';
@@ -25,6 +26,7 @@ export function MultipleChoiceCard({
     unitId
 }: MultipleChoiceCardProps) {
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const t = useTranslations('study.card');
 
     // Reset local state when question changes (implied by isFlipped processing or parent key) 
     // BUT here we might reuse the component. Ideally parent uses key={card.id}.
@@ -41,7 +43,7 @@ export function MultipleChoiceCard({
             <div className="flex-1 flex flex-col justify-center space-y-6 md:pr-6 md:border-r border-zinc-800/50">
                 <div className="space-y-4">
                     <span className="text-xs font-bold px-2 py-1 rounded bg-amber-950/40 text-amber-400 border border-amber-900/40 uppercase tracking-wider">
-                        Multiple Choice
+                        {t('multipleChoice')}
                     </span>
                     <h2 className="text-xl md:text-2xl font-medium text-zinc-100 leading-tight">
                         {question}
@@ -95,8 +97,8 @@ export function MultipleChoiceCard({
                     <div className="mt-6 pt-6 border-t border-zinc-800/50 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <p className="text-zinc-500 text-sm mb-4">
                             {selectedOption === correctAnswer
-                                ? "Correct! Well done."
-                                : "Incorrect. Review the answer above."}
+                                ? t('correct')
+                                : t('incorrect')}
                         </p>
                         <ExplanationReveal explanation={explanation} unitId={unitId} />
                     </div>

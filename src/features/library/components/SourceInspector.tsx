@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Panel, Group, Separator } from 'react-resizable-panels';
 import { analyzeContentPreview } from '../actions/analyze-content';
 import { commitContent } from '../actions/commit-content';
@@ -43,6 +44,8 @@ interface SourceInspectorProps {
 
 export function SourceInspector({ source }: SourceInspectorProps) {
     const router = useRouter();
+    const t = useTranslations('library');
+    const tCommon = useTranslations('common');
     const [isPending, startTransition] = useTransition();
     const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -117,11 +120,11 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                 };
                 setDraftData(draft);
             } else {
-                toast.error(res.message || "Analysis failed");
+                toast.error(res.message || tCommon('error'));
                 console.error("Analysis failed");
             }
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "An error occurred during analysis");
+            toast.error(error instanceof Error ? error.message : tCommon('error'));
         } finally {
             setIsAnalyzing(false);
         }
@@ -138,12 +141,12 @@ export function SourceInspector({ source }: SourceInspectorProps) {
             });
 
             if (res.embeddingFailed) {
-                toast.warning("Content saved, but embeddings failed. Please retry.");
+                toast.warning(t('inspector.contentSavedRetry'));
             } else {
-                toast.success("Content saved and processed!");
+                toast.success(t('inspector.contentSaved'));
             }
         } else {
-            toast.error(res.message || "Failed to commit");
+            toast.error(res.message || tCommon('error'));
         }
     };
 
@@ -151,10 +154,10 @@ export function SourceInspector({ source }: SourceInspectorProps) {
         startTransition(async () => {
             const res = await retryEmbeddings(source.id);
             if (res.success) {
-                toast.success("Embeddings generated successfully!");
+                toast.success(t('inspector.embeddingsSuccess'));
                 router.refresh();
             } else {
-                toast.error(res.message || "Retry failed");
+                toast.error(res.message || tCommon('error'));
             }
         });
     };
@@ -179,10 +182,10 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                 setQuestionOptionsTarget(null); // Close modal only on success
                 setQuestionDraft({ unitId: questionOptionsTarget.unitId, questions: result.questions });
             } else {
-                toast.error(result.message || "Failed to generate questions");
+                toast.error(result.message || tCommon('error'));
             }
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "An error occurred");
+            toast.error(error instanceof Error ? error.message : tCommon('error'));
         } finally {
             setIsGeneratingQuestions(false);
         }
@@ -190,18 +193,18 @@ export function SourceInspector({ source }: SourceInspectorProps) {
 
     const handleQuestionCommit = async (finalQuestions: Question[], deletedIds: string[]) => {
         if (!questionDraft) return;
-        const toastId = toast.loading("Saving questions...");
+        const toastId = toast.loading(t('inspector.savingQuestions'));
         try {
             const result = await commitQuestions(questionDraft.unitId, finalQuestions);
             if (result.success) {
-                toast.success(`Added ${result.count} questions to library`, { id: toastId });
+                toast.success(t('inspector.questionsAdded', { count: result.count ?? 0 }), { id: toastId });
                 setQuestionDraft(null);
                 router.refresh();
             } else {
-                toast.error(result.message || "Failed to save questions", { id: toastId });
+                toast.error(result.message || tCommon('error'), { id: toastId });
             }
         } catch (error) {
-            toast.error("Failed to commit questions", { id: toastId });
+            toast.error(tCommon('error'), { id: toastId });
         }
     };
 
@@ -211,29 +214,29 @@ export function SourceInspector({ source }: SourceInspectorProps) {
     };
 
     const handleEditCommit = async (finalQuestions: EditableQuestion[], deletedIds: string[]) => {
-        const toastId = toast.loading("Updating questions...");
+        const toastId = toast.loading(t('inspector.updatingQuestions'));
         try {
             if (!questionEdit?.unitId) {
-                toast.error("Missing unit context");
+                toast.error(tCommon('error'));
                 return;
             }
             const result = await updateQuestions(questionEdit.unitId, finalQuestions, deletedIds);
             if (result.success) {
-                toast.success("Questions updated successfully", { id: toastId });
+                toast.success(t('inspector.questionsUpdated'), { id: toastId });
                 setQuestionEdit(null);
                 router.refresh();
             } else {
-                toast.error(result.message || "Failed to update questions", { id: toastId });
+                toast.error(result.message || tCommon('error'), { id: toastId });
             }
         } catch (error) {
-            toast.error("Failed to update questions", { id: toastId });
+            toast.error(tCommon('error'), { id: toastId });
         }
     };
 
     // Note: The parent container MUST manage the height (e.g., flex-1)
     return (
         <div className="flex-1 w-full flex flex-col bg-zinc-950 text-zinc-200 overflow-hidden min-h-0">
-            {/* Split Sreen Panels */}
+            {/* Split Screen Panels */}
             <div className="flex-1 min-h-0 flex flex-col">
                 <Group orientation={isMobile ? 'vertical' : 'horizontal'}>
 
@@ -247,17 +250,17 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                                         onChange={(e) => setViewMode(e.target.value as 'pdf' | 'raw')}
                                         className="appearance-none bg-transparent text-xs font-mono text-zinc-400 font-bold uppercase tracking-wider cursor-pointer pr-5 hover:text-zinc-200 transition-colors focus:outline-none"
                                     >
-                                        <option value="pdf" className="bg-zinc-900">PDF Document</option>
-                                        <option value="raw" className="bg-zinc-900">Raw Text</option>
+                                        <option value="pdf" className="bg-zinc-900">{t('source.pdfDocument')}</option>
+                                        <option value="raw" className="bg-zinc-900">{t('source.rawText')}</option>
                                     </select>
                                     <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-500 pointer-events-none" />
                                 </div>
                             ) : (
                                 <span className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider">
-                                    Raw Source
+                                    {t('source.rawSource')}
                                 </span>
                             )}
-                            <span className="text-xs font-mono text-zinc-500">{source.bodyText.length} chars</span>
+                            <span className="text-xs font-mono text-zinc-500">{source.bodyText.length} {tCommon('chars')}</span>
                         </div>
                         <div className="flex-1 overflow-auto custom-scrollbar bg-zinc-950 min-h-0">
                             {source.fileUrl && viewMode === 'pdf' ? (
@@ -278,7 +281,7 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                     <Panel defaultSize={75} minSize={20} className="flex flex-col">
                         <div className="h-10 border-b border-zinc-900 bg-zinc-900/40 flex items-center px-4 shrink-0">
                             <span className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider">
-                                {questionDraft || questionEdit ? 'Exam Workbench' : draftData ? 'Supervisor Mode' : 'Atomic Units'}
+                                {questionDraft || questionEdit ? t('source.examWorkbench') : draftData ? t('source.supervisorMode') : t('source.units')}
                             </span>
                         </div>
 
@@ -314,9 +317,9 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                                     {/* State 2: Empty / Unprocessed */}
                                     {(!source.units || source.units.length === 0) && (
                                         <div className="max-w-md mx-auto mt-20 p-6 border border-zinc-800 rounded-xl bg-zinc-900/50 text-center">
-                                            <h3 className="text-lg font-medium text-zinc-100 mb-2">No Units Extracted</h3>
+                                            <h3 className="text-lg font-medium text-zinc-100 mb-2">{t('inspector.noUnits')}</h3>
                                             <p className="text-sm text-zinc-400 mb-6">
-                                                Process this content to generate study flashcards and code snippets.
+                                                {t('inspector.noUnitsDescription')}
                                             </p>
 
                                             <Button
@@ -325,7 +328,7 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                                                 className="w-full"
                                                 isLoading={isAnalyzing}
                                             >
-                                                Analyze & Atomize
+                                                {t('inspector.analyzeAtomize')}
                                             </Button>
 
                                             {/* Processing Options Modal */}
@@ -346,16 +349,16 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                                                     <div className="h-12 w-12 rounded-full bg-amber-900/20 flex items-center justify-center mb-4 text-amber-500">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
                                                     </div>
-                                                    <h3 className="text-zinc-100 font-medium mb-2">Embeddings Missing</h3>
+                                                    <h3 className="text-zinc-100 font-medium mb-2">{t('inspector.embeddingsMissing')}</h3>
                                                     <p className="text-zinc-400 text-sm mb-6 max-w-xs">
-                                                        The content was saved, but the AI embeddings failed to generate. This affects search and RAG features.
+                                                        {t('inspector.embeddingsDescription')}
                                                     </p>
                                                     <Button
                                                         onClick={handleRetryEmbeddings}
                                                         isLoading={isPending}
                                                         className="w-full max-w-xs bg-amber-600 hover:bg-amber-700 text-white border-amber-500"
                                                     >
-                                                        Retry Processing
+                                                        {t('inspector.retryProcessing')}
                                                     </Button>
                                                 </div>
                                             ) : (

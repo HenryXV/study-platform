@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { getSubjects } from '../actions/get-subjects';
@@ -27,6 +28,8 @@ interface SessionPlannerModalProps {
 
 export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProps) {
     const router = useRouter();
+    const t = useTranslations('dashboard.sessionPlanner');
+    const tCommon = useTranslations('common');
 
     // Data state
     const [subjects, setSubjects] = useState<SubjectData[]>([]);
@@ -127,8 +130,8 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                         <Sparkles className="w-5 h-5 text-violet-400" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-semibold text-zinc-50">Design Your Session</h2>
-                        <p className="text-sm text-zinc-400">Customize what you want to study</p>
+                        <h2 className="text-xl font-semibold text-zinc-50">{t('title')}</h2>
+                        <p className="text-sm text-zinc-400">{t('description')}</p>
                     </div>
                 </div>
 
@@ -142,9 +145,9 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                         <div className="space-y-3">
                             <div className="flex items-center gap-2 text-sm font-medium text-zinc-300">
                                 <BookOpen className="w-4 h-4 text-zinc-500" />
-                                <span>Subjects</span>
+                                <span>{t('subjects')}</span>
                                 {selectedSubjects.size > 0 && (
-                                    <span className="text-xs text-zinc-500">({selectedSubjects.size} selected)</span>
+                                    <span className="text-xs text-zinc-500">({selectedSubjects.size} {tCommon('selected')})</span>
                                 )}
                             </div>
                             <div className="flex flex-wrap gap-2">
@@ -173,7 +176,7 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                                     );
                                 })}
                                 {subjects.length === 0 && (
-                                    <p className="text-sm text-zinc-500 italic">No subjects available</p>
+                                    <p className="text-sm text-zinc-500 italic">{tCommon('noSubjects')}</p>
                                 )}
                             </div>
                         </div>
@@ -182,8 +185,8 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                         <div className="space-y-3">
                             <div className="flex items-center gap-2 text-sm font-medium text-zinc-300">
                                 <Tag className="w-4 h-4 text-zinc-500" />
-                                <span>Topics</span>
-                                <span className="text-xs text-zinc-500">(optional)</span>
+                                <span>{t('topics')}</span>
+                                <span className="text-xs text-zinc-500">({tCommon('optional')})</span>
                             </div>
                             <div className="relative">
                                 <button
@@ -192,8 +195,8 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                                 >
                                     <span className="text-sm text-zinc-300">
                                         {selectedTopics.size > 0
-                                            ? `${selectedTopics.size} topic${selectedTopics.size > 1 ? 's' : ''} selected`
-                                            : 'All topics'
+                                            ? `${selectedTopics.size} topic${selectedTopics.size > 1 ? 's' : ''} ${tCommon('selected')}`
+                                            : tCommon('allTopics')
                                         }
                                     </span>
                                     <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isTopicDropdownOpen ? 'rotate-180' : ''}`} />
@@ -223,7 +226,7 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                                             })
                                         ) : (
                                             <p className="px-4 py-2 text-sm text-zinc-500 italic">
-                                                {selectedSubjects.size > 0 ? 'No topics for selected subjects' : 'No topics available'}
+                                                {selectedSubjects.size > 0 ? tCommon('noTopicsForSubjects') : tCommon('noTopics')}
                                             </p>
                                         )}
                                     </div>
@@ -260,7 +263,7 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 text-sm font-medium text-zinc-300">
                                     <SlidersHorizontal className="w-4 h-4 text-zinc-500" />
-                                    <span>Questions</span>
+                                    <span>{tCommon('questions')}</span>
                                 </div>
                                 <span className="text-lg font-semibold text-violet-400 tabular-nums">{questionCount}</span>
                             </div>
@@ -309,7 +312,7 @@ export function SessionPlannerModal({ isOpen, onClose }: SessionPlannerModalProp
                         className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-lg shadow-violet-500/20"
                     >
                         <Sparkles className="w-4 h-4 mr-2" />
-                        Start Session
+                        {tCommon('startSession')}
                     </Button>
                 </div>
             </div>
