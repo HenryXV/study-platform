@@ -155,6 +155,7 @@ export async function saveRawSource(
     const blob = await put(`sources/${userId}/${Date.now()}-${file.name}`, file, {
         access: 'public',
         contentType: 'application/pdf',
+        token: process.env.SYSTEMIZER_READ_WRITE_TOKEN,
     });
 
     // 3. Save to database with both text and blob URL
