@@ -18,7 +18,7 @@ export interface ApprovedDraftData {
 interface DraftSupervisorProps {
     initialData: ApprovedDraftData;
     onCancel: () => void;
-    onCommit: (data: ApprovedDraftData) => void;
+    onCommit: (data: ApprovedDraftData) => Promise<void> | void;
 }
 
 export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSupervisorProps) {
@@ -45,6 +45,7 @@ export function DraftSupervisor({ initialData, onCancel, onCommit }: DraftSuperv
             {
                 title: 'New Concept',
                 type: 'TEXT',
+                description: '',
             }
         ]);
     };

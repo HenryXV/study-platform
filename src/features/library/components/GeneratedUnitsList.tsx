@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Trash2, ChevronDown, ChevronRight, Sparkles, Loader2 } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronRight, Sparkles, Loader2, Edit2, Save, X } from 'lucide-react';
+import { updateStudyUnit } from '../actions/update-study-unit';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -17,6 +18,7 @@ interface StudyUnit {
     id: string;
     type: 'TEXT' | 'CODE';
     content: string; // Title/Concept Name
+    description: string | null;
     questions: { id: string; type: string; data: import('@/features/study-session/data/flash-cards').QuestionData }[];
 }
 
@@ -35,6 +37,11 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete }:
     const [draftQuestions, setDraftQuestions] = useState<Question[] | null>(null);
     const [draftUnitId, setDraftUnitId] = useState<string | null>(null);
     const [isGeneratingId, setIsGeneratingId] = useState<string | null>(null);
+
+    // Editing State
+    const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
+    const [editForm, setEditForm] = useState<{ content: string; description: string }>({ content: '', description: '' });
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleDeleteInit = (id: string) => {
         setDeletingId(id);
@@ -93,6 +100,36 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete }:
         action();
     }, []);
 
+    const handleEditClick = (unit: StudyUnit) => {
+        setEditingUnitId(unit.id);
+        setEditForm({ content: unit.content, description: unit.description || '' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingUnitId(null);
+        setEditForm({ content: '', description: '' });
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingUnitId) return;
+        setIsSaving(true);
+        const toastId = toast.loading("Updating unit...");
+
+        try {
+            const result = await updateStudyUnit(editingUnitId, editForm.content, editForm.description);
+            if (result.success) {
+                toast.success("Unit updated successfully", { id: toastId });
+                setEditingUnitId(null);
+            } else {
+                toast.error(result.message || "Failed to update unit", { id: toastId });
+            }
+        } catch (error) {
+            toast.error("An error occurred while updating", { id: toastId });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     if (units.length === 0) {
         return <p className="text-sm text-zinc-500 italic p-4">No units found.</p>;
     }
@@ -147,10 +184,43 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete }:
                                         </Badge>
                                         <span className="text-xs text-zinc-500 font-mono select-none">ID: {unit.id.slice(-4)}</span>
                                     </div>
-                                    <p className="text-sm text-zinc-200 font-medium leading-normal pl-8">
-                                        {unit.content}
-                                    </p>
+
+                                    {editingUnitId === unit.id ? (
+                                        <div className="pl-8 w-full max-w-2xl space-y-2 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                            <input
+                                                value={editForm.content}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
+                                                placeholder="Unit Title / Concept"
+                                                className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                                            />
+                                            <textarea
+                                                value={editForm.description}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                                                placeholder="Description (optional)"
+                                                className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 h-20 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isSaving}>Cancel</Button>
+                                                <Button size="sm" onClick={handleSaveEdit} disabled={isSaving}>
+                                                    {isSaving ? <Loader2 size={14} className="animate-spin mr-2" /> : <Save size={14} className="mr-2" />}
+                                                    Save Changes
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="pl-8">
+                                            <p className="text-sm text-zinc-200 font-medium leading-normal">
+                                                {unit.content}
+                                            </p>
+                                            {unit.description && (
+                                                <p className="text-sm text-zinc-400 mt-1 line-clamp-2">
+                                                    {unit.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
                                 </button>
+
 
                                 <div className={`flex items-center gap-1 transition-all ${isGenerating ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                                     <Button
@@ -168,6 +238,17 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete }:
                                     <Button
                                         variant="ghost"
                                         size="icon"
+                                        onClick={(e) => handleActionClick(e, () => handleEditClick(unit))}
+                                        className="h-7 w-7 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-950/20"
+                                        title="Edit Unit"
+                                        disabled={editingUnitId === unit.id}
+                                    >
+                                        <Edit2 size={14} />
+                                    </Button>
+
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
                                         onClick={(e) => handleActionClick(e, () => handleDeleteInit(unit.id))}
                                         className="h-7 w-7 text-zinc-500 hover:text-red-400 hover:bg-red-950/20"
                                         title="Delete Unit"
@@ -175,6 +256,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete }:
                                     >
                                         <Trash2 size={14} />
                                     </Button>
+
                                 </div>
                             </div>
 

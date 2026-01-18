@@ -96,7 +96,7 @@ describe('AI Service', () => {
 
             // Assert
             expect(result).toHaveLength(1);
-            expect(result[0].question).toBe('Q1');
+            expect(result[0].questionText).toBe('Q1');
             // Topics fallback check
             expect(result[0].topics).toEqual(['Physics']);
         });

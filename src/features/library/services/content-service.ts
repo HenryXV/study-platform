@@ -54,6 +54,17 @@ export async function fetchContentSource(userId: string, sourceId: string) {
     }
 }
 
+export async function getSourceWithChunks(userId: string, sourceId: string) {
+    try {
+        const source = await ContentRepository.findSourceWithChunks(sourceId, userId);
+        if (!source) throw new NotFoundError("Content source not found");
+        return source;
+    } catch (error) {
+        if (error instanceof DomainError) throw error;
+        throw new DomainError("Failed to fetch content source with chunks");
+    }
+}
+
 export async function deleteContentSource(userId: string, sourceId: string) {
     try {
         const deleted = await ContentRepository.deleteSource(userId, sourceId);

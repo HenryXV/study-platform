@@ -22,6 +22,11 @@ export async function SourceDetailsFeature({ params }: SourceDetailsFeatureProps
                 include: {
                     questions: true
                 }
+            },
+            _count: {
+                select: {
+                    chunks: true
+                }
             }
         }
     });

@@ -18,7 +18,7 @@ export function LibraryItemCard({ source, onDeleteClick }: LibraryItemCardProps)
             <Card className="h-full hover:border-zinc-700 hover:bg-zinc-800/50 transition-all relative flex flex-col group">
                 {/* Main Link Overlay */}
                 <Link
-                    href={`/library/${source.id}`}
+                    href={`/library/${source.id}/studio`}
                     className="absolute inset-0 z-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-lg"
                     aria-label={`View ${source.title}`}
                 />

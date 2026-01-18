@@ -9,3 +9,5 @@ trigger: always_on
 - Icons: Lucide React
 - ORM: Prisma
 - Database: PostgreSQL
+
+Service Layer Design -> Separates Server Actions -> Services -> Repository
