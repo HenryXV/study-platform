@@ -15,4 +15,4 @@ export type CreditPackage = typeof CREDIT_PACKAGES[number];
  * Starting bonus credits for new users.
  * Controlled by IP-based rate limiting to prevent abuse.
  */
-export const STARTING_BONUS_CREDITS = 20000;
+export const STARTING_BONUS_CREDITS = 2000;

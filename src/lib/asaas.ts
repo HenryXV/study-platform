@@ -1,13 +1,11 @@
 import "server-only";
 
 const ASAAS_API_URL = process.env.ASAAS_API_URL || "https://api-sandbox.asaas.com/v3";
-// Note: ASAAS_ACCESS_TOKEN should include the "$aact_" prefix in the env var
-const ASAAS_ACCESS_TOKEN = process.env.ASAAS_ACCESS_TOKEN;
+const ASAAS_ACCESS_TOKEN = "$" + process.env.ASAAS_ACCESS_TOKEN;
 
 if (!ASAAS_ACCESS_TOKEN) {
-    console.warn("[Asaas] Missing ASAAS_ACCESS_TOKEN in environment variables.");
+    console.warn("Missing ASAAS_ACCESS_TOKEN in environment variables.");
 }
-
 
 interface AsaasPaymentRequest {
     customer: string;
