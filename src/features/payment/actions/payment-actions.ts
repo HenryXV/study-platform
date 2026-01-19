@@ -6,11 +6,13 @@ import { paymentService } from "../payment-service";
 import { revalidatePath } from "next/cache";
 import { DomainError } from "@/lib/errors";
 
+import { isValidCpf } from "@/shared/utils/cpf-validator";
+
 // Validation schema for payment input
 const PaymentInputSchema = z.object({
     amount: z.number().positive("Amount must be positive").max(10000, "Amount exceeds maximum"),
     credits: z.number().positive("Credits must be positive").int("Credits must be an integer"),
-    cpf: z.string().length(14, "CPF must be in format XXX.XXX.XXX-XX"),
+    cpf: z.string().refine((val) => isValidCpf(val), "Invalid CPF"),
 });
 
 export interface CreatePixPaymentResult {

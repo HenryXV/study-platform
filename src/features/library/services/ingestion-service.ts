@@ -112,7 +112,7 @@ export async function chunkText(text: string): Promise<Chunk[]> {
  */
 async function generateEmbeddingsBatched(texts: string[]): Promise<number[][]> {
     const BATCH_SIZE = 50;
-    const DELAY_MS = 500;
+    const DELAY_MS = 100;
     const allEmbeddings: number[][] = [];
 
     for (let i = 0; i < texts.length; i += BATCH_SIZE) {

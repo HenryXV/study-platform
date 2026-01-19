@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { currentUser, auth } from "@clerk/nextjs/server";
 import { prisma } from "./prisma";
 import { User } from "@/app/generated/prisma/client";
@@ -30,8 +31,11 @@ export async function requireUser(): Promise<string> {
  * Retrieves the current authenticated user from the database.
  * If the user exists in Clerk but not in Prisma, it creates them.
  * Throws an error if the user is not authenticated.
+ * 
+ * Wrapped with React's cache() to deduplicate calls within the same SSR request.
+ * This prevents multiple Clerk API + DB roundtrips when called from multiple components.
  */
-export async function getCurrentUser(): Promise<User> {
+export const getCurrentUser = cache(async (): Promise<User> => {
     const clerkUser = await currentUser();
 
     if (!clerkUser) {
@@ -80,4 +84,5 @@ export async function getCurrentUser(): Promise<User> {
     });
 
     return newUser;
-}
+});
+
