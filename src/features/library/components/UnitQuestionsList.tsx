@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { BrainCircuit, X, Edit2, Check, Trash2, CheckSquare } from 'lucide-react';
 import { QuestionData } from '@/features/study-session/data/flash-cards';
 import { deleteQuestion } from '../actions/delete-question';
@@ -25,6 +26,8 @@ interface UnitQuestionsListProps {
 
 export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenEditor }: UnitQuestionsListProps) {
     const router = useRouter();
+    const t = useTranslations('library.questions');
+    const tCommon = useTranslations('common');
 
     // Single deletion state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -54,6 +57,8 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
         clearSelection();
     };
 
+    const editorT = useTranslations('library.editor');
+
     const handleEditClick = () => {
         if (onOpenEditor) {
             const editableQuestions: EditableQuestion[] = initialQuestions.map(q => {
@@ -73,6 +78,12 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
             });
             onOpenEditor(unitId, editableQuestions);
         }
+    };
+
+    // Mapping for internal types to translation keys
+    const typeMapping: Record<string, string> = {
+        'MULTI_CHOICE': 'MULTIPLE_CHOICE',
+        'SNIPPET': 'CODE'
     };
 
     // Single delete handlers
@@ -100,19 +111,19 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
     const handleBulkDelete = async () => {
         if (selectedIds.size === 0) return;
         setIsBulkDeleting(true);
-        const toastId = toast.loading(`Deleting ${selectedIds.size} questions...`);
+        const toastId = toast.loading(tCommon('processing'));
 
         try {
             const result = await deleteQuestionsBulk(Array.from(selectedIds));
             if (result.success) {
-                toast.success(result.message || `Deleted ${result.count} questions`, { id: toastId });
+                toast.success(result.message || t('questionsCount', { count: result.count ?? 0 }), { id: toastId });
                 exitSelectionMode();
                 router.refresh();
             } else {
-                toast.error(result.message || "Failed to delete", { id: toastId });
+                toast.error(result.message || tCommon('error'), { id: toastId });
             }
         } catch (error) {
-            toast.error("An error occurred", { id: toastId });
+            toast.error(tCommon('error'), { id: toastId });
         } finally {
             setIsBulkDeleting(false);
             setShowBulkDeleteModal(false);
@@ -126,9 +137,9 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                 isOpen={showDeleteModal}
                 onClose={cancelDelete}
                 onConfirm={confirmDelete}
-                title="Delete Question"
-                message="Are you sure you want to delete this question? This cannot be undone."
-                confirmText="Delete"
+                title={t('deleteTitle')}
+                message={t('deleteMessage')}
+                confirmText={tCommon('delete')}
                 isLoading={isDeleting}
             />
 
@@ -137,9 +148,9 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                 isOpen={showBulkDeleteModal}
                 onClose={() => setShowBulkDeleteModal(false)}
                 onConfirm={handleBulkDelete}
-                title="Delete Selected Questions"
-                message={`Are you sure you want to delete ${selectedIds.size} questions? This cannot be undone.`}
-                confirmText={`Delete ${selectedIds.size} Questions`}
+                title={t('deleteBulkTitle')}
+                message={t('deleteBulkMessage', { count: selectedIds.size })}
+                confirmText={t('deleteBulkConfirm', { count: selectedIds.size })}
                 isLoading={isBulkDeleting}
             />
 
@@ -147,7 +158,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                 <>
                     {/* Question List Header */}
                     <div className="flex items-center justify-between">
-                        <span className="text-xs text-zinc-500">{initialQuestions.length} questions</span>
+                        <span className="text-xs text-zinc-500">{t('questionsCount', { count: initialQuestions.length })}</span>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -172,12 +183,12 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                             {selectionMode ? (
                                 <>
                                     <X size={12} />
-                                    Cancel
+                                    {tCommon('cancel')}
                                 </>
                             ) : (
                                 <>
                                     <CheckSquare size={12} />
-                                    Select
+                                    {tCommon('select')}
                                 </>
                             )}
                         </Button>
@@ -186,6 +197,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                     <div className="space-y-2">
                         {initialQuestions.map((q) => {
                             const isSelected = selectedIds.has(q.id);
+                            const translatedType = editorT(`types.${typeMapping[q.type] || 'OPEN'}`);
 
                             return (
                                 <div
@@ -207,7 +219,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                                                         ? 'bg-indigo-500 border-indigo-500'
                                                         : 'border-zinc-600 bg-transparent hover:border-zinc-500'
                                                 )}
-                                                aria-label={isSelected ? "Deselect question" : "Select question"}
+                                                aria-label={isSelected ? tCommon('deselectQuestion') : tCommon('selectQuestion')}
                                             >
                                                 {isSelected && <Check size={10} className="text-white" />}
                                             </button>
@@ -223,7 +235,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                                                                 'text-amber-400 bg-amber-950/30'
                                                             }`}
                                                     >
-                                                        {q.type}
+                                                        {translatedType}
                                                     </Badge>
                                                 </div>
                                                 {!selectionMode && (
@@ -231,9 +243,9 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() => handleDeleteClick(q.id)}
-                                                        className="opacity-0 group-hover:opacity-100 h-6 w-6 hover:bg-red-950/30 text-zinc-500 hover:text-red-400 transition-all"
-                                                        title="Delete question"
-                                                        aria-label="Delete question"
+                                                        className="h-6 w-6 lg:opacity-0 lg:group-hover:opacity-100 hover:bg-red-950/30 text-zinc-500 hover:text-red-400 transition-all opacity-100"
+                                                        title={tCommon('delete')}
+                                                        aria-label={tCommon('delete')}
                                                     >
                                                         <X className="w-3 h-3" />
                                                     </Button>
@@ -250,13 +262,13 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                     {/* Floating Action Bar for Questions */}
                     {selectedIds.size > 0 && (
                         <div className="sticky bottom-0 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 mt-3 flex items-center gap-3">
-                            <span className="text-xs text-zinc-300 font-medium">{selectedIds.size} selected</span>
+                            <span className="text-xs text-zinc-300 font-medium">{tCommon('selected', { count: selectedIds.size })}</span>
                             <div className="h-3 w-px bg-zinc-700" />
                             <Button variant="ghost" size="sm" onClick={selectAll} className="text-xs h-6 px-2">
-                                All
+                                {tCommon('all')}
                             </Button>
                             <Button variant="ghost" size="sm" onClick={clearSelection} className="text-xs h-6 px-2">
-                                Clear
+                                {tCommon('clear')}
                             </Button>
                             <Button
                                 variant="danger"
@@ -265,7 +277,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                                 className="text-xs h-6 px-2 ml-auto"
                             >
                                 <Trash2 size={12} className="mr-1" />
-                                Delete
+                                {tCommon('delete')}
                             </Button>
                         </div>
                     )}
@@ -281,7 +293,7 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                     className="flex items-center gap-2 text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-colors"
                 >
                     <Edit2 className="w-3 h-3" />
-                    {initialQuestions.length === 0 ? "Add Questions" : "Edit Questions"}
+                    {initialQuestions.length === 0 ? t('addQuestions') : t('editQuestions')}
                 </Button>
             </div>
         </div>

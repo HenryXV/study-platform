@@ -17,7 +17,12 @@
         "questions": "Questions",
         "flexible": "Flexible",
         "optional": "optional",
-        "selected": "selected",
+        "selected": "{count} selected",
+        "select": "Select",
+        "selectUnit": "Select unit",
+        "deselectUnit": "Deselect unit",
+        "selectQuestion": "Select question",
+        "deselectQuestion": "Deselect question",
         "allTopics": "All topics",
         "topicsSelected": "{count} topic(s) selected",
         "noSubjects": "No subjects available",
@@ -117,10 +122,21 @@
             "supervisorMode": "Supervisor Mode",
             "examWorkbench": "Exam Workbench"
         },
+        "supervisor": {
+            "title": "Exam Workbench",
+            "questions": "Questions",
+            "finalize": "Finalize Exam",
+            "emptyQuestion": "Empty Question",
+            "noQuestions": "No questions yet",
+            "noSelection": "No question selected",
+            "createFirst": "Create First Question",
+            "validationError": "Please fix errors in question {index}"
+        },
         "inspector": {
             "noUnits": "No Units Extracted",
             "noUnitsDescription": "Process this content to generate study flashcards and code snippets.",
             "analyzeAtomize": "Analyze & Atomize",
+            "focusPlaceholder": "e.g. \"Focus on dates and historical events\" or \"Split by legal competencies\"",
             "embeddingsMissing": "Embeddings Missing",
             "embeddingsDescription": "The content was saved, but the AI embeddings failed to generate. This affects search and RAG features.",
             "retryProcessing": "Retry Processing",
@@ -142,8 +158,53 @@
             "unitsCount": "{count} units",
             "noUnits": "No units found.",
             "editUnit": "Edit Unit",
+            "unitTitlePlaceholder": "Enter unit title...",
+            "descriptionPlaceholder": "Enter unit description...",
             "saveChanges": "Save Changes",
             "generateQuestions": "Generate questions"
+        },
+        "citation": {
+            "jumpToPage": "Jump to Page {page}",
+            "page": "Page {page}"
+        },
+        "questions": {
+            "title": "Questions",
+            "addQuestions": "Add Questions",
+            "editQuestions": "Edit Questions",
+            "deleteTitle": "Delete Question",
+            "deleteMessage": "Are you sure you want to delete this question? This cannot be undone.",
+            "deleteConfirm": "Delete",
+            "deleteBulkTitle": "Delete Selected Questions",
+            "deleteBulkMessage": "Are you sure you want to delete {count} questions? This cannot be undone.",
+            "deleteBulkConfirm": "Delete {count} Questions",
+            "noQuestions": "No questions yet",
+            "questionsCount": "{count} questions"
+        },
+        "options": {
+            "title": "Question Generation Options",
+            "description": "Customize how AI generates questions for this unit.",
+            "count": "Number of Questions",
+            "types": "Question Types",
+            "atLeastOne": "Select at least one type",
+            "examStyle": "Exam Style / Banca",
+            "scope": "Focus / Scope",
+            "scopePlaceholder": "e.g. \"Focus strictly on Art. 8\" or \"Exceptions, not the rule.\"",
+            "generate": "Generate Questions",
+            "standard": "Standard professional tone",
+            "styledLike": "Styled like {banca}"
+        },
+        "processing": {
+            "title": "Transformation Options",
+            "description": "How should the AI process this content?",
+            "granularity": "Granularity",
+            "broad": "Broad",
+            "broadDesc": "Large chunks, core concepts",
+            "detailed": "Detailed",
+            "detailedDesc": "Balanced coverage",
+            "atomic": "Atomic",
+            "atomicDesc": "Maximum granularity",
+            "focusConstraint": "Custom Focus",
+            "analyzeContent": "Analyze Content"
         },
         "draft": {
             "reviewTitle": "Review Draft",
@@ -155,33 +216,14 @@
             "noUnits": "No units in draft. Add one manually.",
             "newConcept": "New Concept"
         },
-        "processing": {
-            "title": "Processing Options",
-            "description": "Configure how the AI analyzes and segments your content.",
-            "granularity": "Granularity",
-            "focusConstraint": "Focus Constraint",
-            "analyzeContent": "Analyze Content",
-            "broad": "Broad",
-            "broadDesc": "High-level overview",
-            "detailed": "Detailed",
-            "detailedDesc": "Comprehensive breakdown",
-            "atomic": "Atomic",
-            "atomicDesc": "Bite-sized facts"
-        },
-        "options": {
-            "title": "Question Options",
-            "description": "Configure how questions are generated for this unit.",
-            "count": "Question Count",
-            "types": "Question Types",
-            "examStyle": "Exam Style (Banca)",
-            "scope": "Scope / Focus",
-            "generate": "Generate Questions",
-            "atLeastOne": "At least one type must be selected.",
-            "standard": "General exam format",
-            "styledLike": "Questions styled like {banca} exams"
-        },
         "editor": {
+            "newQuestion": "New Question",
             "questionType": "Question Type",
+            "types": {
+                "MULTIPLE_CHOICE": "Multiple Choice",
+                "OPEN": "Open Ended",
+                "CODE": "Code Solution"
+            },
             "topics": "Topics",
             "prompt": "Question Prompt",
             "promptPlaceholder": "Enter the question prompt here...",

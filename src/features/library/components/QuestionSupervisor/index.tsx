@@ -7,6 +7,7 @@ import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/Badge';
 import { Question, EditableQuestion, QuestionSchema } from '@/features/library/schemas/question-generator';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { QuestionEditor } from './QuestionEditor';
 
 interface QuestionSupervisorProps {
@@ -17,6 +18,9 @@ interface QuestionSupervisorProps {
 }
 
 export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inline = false }: QuestionSupervisorProps) {
+    const t = useTranslations('library.supervisor');
+    const common = useTranslations('common');
+    const editorT = useTranslations('library.editor');
     const [questions, setQuestions] = useState<EditableQuestion[]>(initialQuestions);
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [errors, setErrors] = useState<Record<number, Record<string, string>>>({});
@@ -53,7 +57,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
 
     const handleAdd = () => {
         const newQ: Question = {
-            questionText: 'New Question',
+            questionText: editorT('newQuestion'),
             type: 'OPEN',
             correctAnswer: '',
             explanation: '',
@@ -85,7 +89,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
             setErrors(newErrors);
             if (firstInvalidIndex !== -1) {
                 setSelectedIndex(firstInvalidIndex);
-                toast.error(`Please fix errors in question ${firstInvalidIndex + 1}`);
+                toast.error(t('validationError', { index: firstInvalidIndex + 1 }));
             }
             return;
         }
@@ -106,20 +110,20 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
                     </div>
                     <div>
                         <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2">
-                            Exam Workbench
+                            {t('title')}
                         </h2>
                         <p className="text-xs text-zinc-500 font-mono uppercase tracking-wide">
-                            {questions.length} Questions
+                            {questions.length} {common('questions')}
                         </p>
                     </div>
                 </div>
                 <div className="flex gap-2">
                     <Button variant="ghost" onClick={onCancel}>
-                        Cancel
+                        {common('cancel')}
                     </Button>
                     <Button onClick={validateAndCommit} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-900/20">
                         <Save size={16} className="mr-2" />
-                        Finalize Exam
+                        {t('finalize')}
                     </Button>
                 </div>
             </div>
@@ -129,7 +133,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
                 {/* Left Sidebar: List */}
                 <div className="w-64 md:w-80 border-r border-zinc-800 bg-zinc-900/20 flex flex-col">
                     <div className="p-3 border-b border-zinc-800/50 flex justify-between items-center">
-                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Questions</span>
+                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{t('questions')}</span>
                         <Button size="icon" variant="ghost" onClick={handleAdd} className="h-6 w-6 hover:bg-zinc-800 hover:text-indigo-400">
                             <Plus size={14} />
                         </Button>
@@ -155,10 +159,12 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
                                         </span>
                                         <div className="flex flex-col truncate">
                                             <div className="flex items-center gap-2">
-                                                <span className="truncate font-medium">{q.questionText || "Empty Question"}</span>
+                                                <span className="truncate font-medium">{q.questionText || t('emptyQuestion')}</span>
                                                 {hasError && <AlertCircle size={12} className="text-red-500 shrink-0" />}
                                             </div>
-                                            <span className="text-xs uppercase opacity-70">{q.type}</span>
+                                            <span className="text-xs uppercase opacity-70">
+                                                {editorT(`types.${q.type}`)}
+                                            </span>
                                         </div>
                                     </div>
                                     {idx === selectedIndex && (
@@ -194,7 +200,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
                             <div className="flex flex-col items-center gap-2">
                                 <AlertCircle size={48} className="opacity-10 text-zinc-500" />
                                 <p className="text-zinc-500 font-medium">
-                                    {questions.length === 0 ? "No questions yet" : "No question selected"}
+                                    {questions.length === 0 ? t('noQuestions') : t('noSelection')}
                                 </p>
                             </div>
 
@@ -204,7 +210,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
                                     className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/20"
                                 >
                                     <Plus size={16} className="mr-2" />
-                                    Create First Question
+                                    {t('createFirst')}
                                 </Button>
                             )}
                         </div>

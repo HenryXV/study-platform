@@ -150,7 +150,7 @@ export function ProcessingOptionsModal({
                         id="focus-constraint"
                         value={focus}
                         onChange={(e) => handleFocusChange(e.target.value)}
-                        placeholder='e.g. "Focus on dates and historical events" or "Split by legal competencies"'
+                        placeholder={t('focusPlaceholder')}
                         className={cn(
                             'w-full h-20 bg-zinc-800 border border-zinc-700 rounded-lg p-3',
                             'text-sm text-zinc-100 placeholder:text-zinc-500',

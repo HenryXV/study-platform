@@ -318,7 +318,10 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
 
                                 {/* Actions (hidden in selection mode) */}
                                 {!selectionMode && (
-                                    <div className={`flex items-center gap-1 transition-all ${isGenerating ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                    <div className={cn(
+                                        "flex items-center gap-1 transition-all",
+                                        isGenerating ? 'opacity-100' : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100'
+                                    )}>
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -328,7 +331,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                             aria-label={t('generateQuestions')}
                                         >
                                             {isGenerating ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                            {t('generateQuestions')}
+                                            <span className="hidden sm:inline">{t('generateQuestions')}</span>
                                         </Button>
 
                                         <Button

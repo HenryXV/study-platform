@@ -224,7 +224,7 @@ export function QuestionOptionsModal({
                         id="scope-constraint"
                         value={scope}
                         onChange={(e) => handleScopeChange(e.target.value)}
-                        placeholder='e.g. "Focus strictly on Art. 8" or "Ask about the exceptions, not the rule."'
+                        placeholder={t('scopePlaceholder')}
                         className={cn(
                             'w-full h-16 bg-zinc-800 border border-zinc-700 rounded-lg p-3',
                             'text-sm text-zinc-100 placeholder:text-zinc-500',

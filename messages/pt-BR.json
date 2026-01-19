@@ -17,7 +17,12 @@
         "questions": "Questões",
         "flexible": "Flexível",
         "optional": "opcional",
-        "selected": "selecionado(s)",
+        "selected": "{count} selecionado(s)",
+        "select": "Selecionar",
+        "selectUnit": "Selecionar unidade",
+        "deselectUnit": "Desmarcar unidade",
+        "selectQuestion": "Selecionar questão",
+        "deselectQuestion": "Desmarcar questão",
         "allTopics": "Todos os tópicos",
         "topicsSelected": "{count} tópico(s) selecionado(s)",
         "noSubjects": "Nenhuma matéria disponível",
@@ -117,10 +122,21 @@
             "supervisorMode": "Modo Supervisor",
             "examWorkbench": "Bancada de Questões"
         },
+        "supervisor": {
+            "title": "Bancada de Questões",
+            "questions": "Questões",
+            "finalize": "Finalizar Exame",
+            "emptyQuestion": "Questão Vazia",
+            "noQuestions": "Nenhuma questão ainda",
+            "noSelection": "Nenhuma questão selecionada",
+            "createFirst": "Criar Primeira Questão",
+            "validationError": "Por favor, corrija os erros na questão {index}"
+        },
         "inspector": {
             "noUnits": "Nenhuma Unidade Extraída",
             "noUnitsDescription": "Processe este conteúdo para gerar flashcards e trechos de código.",
             "analyzeAtomize": "Analisar e Atomizar",
+            "focusPlaceholder": "ex: \"Focar em datas e eventos históricos\" ou \"Dividir por competências legais\"",
             "embeddingsMissing": "Embeddings Ausentes",
             "embeddingsDescription": "O conteúdo foi salvo, mas os embeddings de IA falharam. Isso afeta busca e recursos de RAG.",
             "retryProcessing": "Tentar Novamente",
@@ -142,8 +158,53 @@
             "unitsCount": "{count} unidades",
             "noUnits": "Nenhuma unidade encontrada.",
             "editUnit": "Editar Unidade",
+            "unitTitlePlaceholder": "Digite o título da unidade...",
+            "descriptionPlaceholder": "Digite a descrição da unidade...",
             "saveChanges": "Salvar Alterações",
             "generateQuestions": "Gerar questões"
+        },
+        "citation": {
+            "jumpToPage": "Ir para a Página {page}",
+            "page": "Página {page}"
+        },
+        "questions": {
+            "title": "Questões",
+            "addQuestions": "Adicionar Questões",
+            "editQuestions": "Editar Questões",
+            "deleteTitle": "Excluir Questão",
+            "deleteMessage": "Tem certeza que deseja excluir esta questão? Esta ação não pode ser desfeita.",
+            "deleteConfirm": "Excluir",
+            "deleteBulkTitle": "Excluir Questões Selecionadas",
+            "deleteBulkMessage": "Tem certeza que deseja excluir {count} questões? Esta ação não pode ser desfeita.",
+            "deleteBulkConfirm": "Excluir {count} Questões",
+            "noQuestions": "Nenhuma questão ainda",
+            "questionsCount": "{count} questões"
+        },
+        "options": {
+            "title": "Opções de Geração de Questões",
+            "description": "Personalize como a IA gera questões para esta unidade.",
+            "count": "Número de Questões",
+            "types": "Tipos de Questões",
+            "atLeastOne": "Selecione pelo menos um tipo",
+            "examStyle": "Estilo de Prova / Banca",
+            "scope": "Foco / Escopo",
+            "scopePlaceholder": "ex: \"Focar estritamente no Art. 8\" ou \"Exceções, não a regra.\"",
+            "generate": "Gerar Questões",
+            "standard": "Tom profissional padrão",
+            "styledLike": "Estilo da {banca}"
+        },
+        "processing": {
+            "title": "Opções de Transformação",
+            "description": "Como a IA deve processar este conteúdo?",
+            "granularity": "Granularidade",
+            "broad": "Ampla",
+            "broadDesc": "Blocos grandes, conceitos core",
+            "detailed": "Detalhada",
+            "detailedDesc": "Cobertura equilibrada",
+            "atomic": "Atômica",
+            "atomicDesc": "Granularidade máxima",
+            "focusConstraint": "Foco Personalizado",
+            "analyzeContent": "Analisar Conteúdo"
         },
         "draft": {
             "reviewTitle": "Revisar Rascunho",
@@ -155,33 +216,14 @@
             "noUnits": "Nenhuma unidade no rascunho. Adicione uma manualmente.",
             "newConcept": "Novo Conceito"
         },
-        "processing": {
-            "title": "Opções de Processamento",
-            "description": "Configure como a IA analisa e segmenta seu conteúdo.",
-            "granularity": "Granularidade",
-            "focusConstraint": "Restrição de Foco",
-            "analyzeContent": "Analisar Conteúdo",
-            "broad": "Amplo",
-            "broadDesc": "Visão geral de alto nível",
-            "detailed": "Detalhado",
-            "detailedDesc": "Detalhamento abrangente",
-            "atomic": "Atômico",
-            "atomicDesc": "Fatos em pequenas partes"
-        },
-        "options": {
-            "title": "Opções de Questões",
-            "description": "Configure como as questões são geradas para esta unidade.",
-            "count": "Quantidade de Questões",
-            "types": "Tipos de Questões",
-            "examStyle": "Estilo de Exame (Banca)",
-            "scope": "Escopo / Foco",
-            "generate": "Gerar Questões",
-            "atLeastOne": "Pelo menos um tipo deve ser selecionado.",
-            "standard": "Formato geral de exame",
-            "styledLike": "Questões estilo {banca}"
-        },
         "editor": {
+            "newQuestion": "Nova Questão",
             "questionType": "Tipo de Questão",
+            "types": {
+                "MULTIPLE_CHOICE": "Múltipla Escolha",
+                "OPEN": "Resposta Aberta",
+                "CODE": "Solução de Código"
+            },
             "topics": "Tópicos",
             "prompt": "Enunciado da Questão",
             "promptPlaceholder": "Digite o enunciado da questão aqui...",
