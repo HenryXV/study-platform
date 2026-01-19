@@ -1,6 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import createMiddleware from 'next-intl/middleware';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { locales, defaultLocale } from '@/i18n/routing';
 
 const intlMiddleware = createMiddleware({
@@ -16,10 +16,20 @@ const isPublicRoute = createRouteMatcher([
     '/sign-up(.*)',
     '/:locale/sign-in(.*)',
     '/:locale/sign-up(.*)',
+    '/api/webhooks(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, request: NextRequest) => {
-    // First, handle i18n routing
+    // 1. Skip i18n for for API routes
+    if (request.nextUrl.pathname.startsWith('/api')) {
+        // For protected routes, check auth
+        if (!isPublicRoute(request)) {
+            await auth.protect();
+        }
+        return NextResponse.next();
+    }
+
+    // 2. Handle i18n routing for UI routes
     const intlResponse = intlMiddleware(request);
 
     // For protected routes, check auth
