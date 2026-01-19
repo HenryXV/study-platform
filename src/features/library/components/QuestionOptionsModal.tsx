@@ -15,6 +15,7 @@ import {
     BANCA_OPTIONS,
 } from '../schemas/question-options';
 import { BancaType } from '../schemas/banca-profiles';
+import { AI_MODELS } from '../config/ai-models';
 import { useTranslations } from 'next-intl';
 
 interface QuestionOptionsModalProps {
@@ -37,6 +38,7 @@ export function QuestionOptionsModal({
     const [count, setCount] = useState<QuestionCount>('5');
     const [types, setTypes] = useState<QuestionTypeOption[]>(['MULTIPLE_CHOICE', 'OPEN', 'CODE']);
     const [banca, setBanca] = useState<BancaType>('STANDARD');
+    const [model, setModel] = useState<string>(AI_MODELS.FAST);
     const [scope, setScope] = useState('');
 
     const toggleType = (type: QuestionTypeOption) => {
@@ -55,6 +57,7 @@ export function QuestionOptionsModal({
             count,
             types,
             banca,
+            model,
             scope: scope.trim() || undefined,
         });
     };
@@ -175,6 +178,38 @@ export function QuestionOptionsModal({
                     <p className="text-xs text-zinc-500">
                         {banca === 'STANDARD' ? t('standard') : t('styledLike', { banca: BANCA_LABELS[banca] })}
                     </p>
+                </div>
+
+                {/* Model Selector */}
+                <div className="space-y-3">
+                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                        {tCommon('aiModel')}
+                    </label>
+                    <div className="grid grid-cols-1 gap-2">
+                        {[
+                            { value: AI_MODELS.CHEAP, key: 'cheap', icon: '⚡' },
+                            { value: AI_MODELS.FAST, key: 'fast', icon: '🚀' },
+                            { value: AI_MODELS.INTELLIGENT, key: 'intelligent', icon: '🧠' },
+                        ].map((m) => (
+                            <button
+                                key={m.value}
+                                type="button"
+                                onClick={() => setModel(m.value)}
+                                className={cn(
+                                    'flex items-center justify-between px-3 py-2.5 rounded-lg border text-sm transition-all',
+                                    model === m.value
+                                        ? 'bg-zinc-800 border-indigo-500/50 text-zinc-100 ring-1 ring-indigo-500/20'
+                                        : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300'
+                                )}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span>{m.icon}</span>
+                                    <span className="font-medium">{tCommon(`models.${m.key}.label` as any)}</span>
+                                </div>
+                                <span className="text-xs font-mono opacity-60">{tCommon(`models.${m.key}.description` as any)}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Scope/Focus Constraint */}

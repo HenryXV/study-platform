@@ -39,3 +39,11 @@ export class RateLimitError extends DomainError {
         this.name = 'RateLimitError';
     }
 }
+
+export class InsufficientCreditsError extends DomainError {
+    constructor(message = "Insufficient credits") {
+        super(message);
+        this.name = 'InsufficientCreditsError';
+    }
+}
+

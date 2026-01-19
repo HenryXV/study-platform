@@ -45,8 +45,8 @@ function cleanTableOfContents(text: string): string {
 export async function analyzeContent(
     userId: string,
     sourceId: string,
-    options: ProcessingOptions = { granularity: 'DETAILED' }
-) {
+    options: ProcessingOptions = { granularity: 'DETAILED', model: AI_MODELS.CHEAP }
+): Promise<{ output: any; usage: { promptTokens: number; completionTokens: number; totalTokens: number }; model: string }> {
     const { success } = await ratelimit.limit(userId);
     if (!success) {
         throw new Error("Rate limit exceeded. Try again later.");
@@ -62,8 +62,9 @@ export async function analyzeContent(
     const cleanText = cleanTableOfContents(source.bodyText);
 
     // 2. Call AI SDK
-    const { output } = await generateText({
-        model: AI_MODELS.CHEAP,
+    const { model } = options;
+    const { output, usage } = await generateText({
+        model: model || AI_MODELS.CHEAP, // Fallback purely for safety
         output: Output.object({
             schema: z.object({
                 suggestedSubject: z.string().describe("O assunto principal (e.g. 'Constitutional Law', 'React Architecture')"),
@@ -110,7 +111,15 @@ export async function analyzeContent(
         throw new Error('AI failed to generate valid units');
     }
 
-    return output;
+    return {
+        output,
+        usage: {
+            promptTokens: usage?.inputTokens ?? 0,
+            completionTokens: usage?.outputTokens ?? 0,
+            totalTokens: usage?.totalTokens ?? 0
+        },
+        model
+    };
 }
 
 export async function generateQuestions(
@@ -118,8 +127,8 @@ export async function generateQuestions(
     unitId: string,
     unitContent: string,
     unitType: 'TEXT' | 'CODE',
-    options: QuestionGenerationOptions = { count: '5', types: ['MULTIPLE_CHOICE', 'OPEN', 'CODE'], banca: 'STANDARD' }
-): Promise<Question[]> {
+    options: QuestionGenerationOptions = { count: '5', types: ['MULTIPLE_CHOICE', 'OPEN', 'CODE'], banca: 'STANDARD', model: AI_MODELS.CHEAP }
+): Promise<{ questions: Question[]; usage: { promptTokens: number; completionTokens: number; totalTokens: number }; model: string }> {
     const { success } = await ratelimit.limit(userId);
     if (!success) {
         throw new Error("Rate limit exceeded. Try again later.");
@@ -158,8 +167,8 @@ export async function generateQuestions(
     const scopeInstruction = options.scope ? `\n            SCOPE CONSTRAINT: "${options.scope}"` : '';
     const bancaProfile = BANCA_PROFILES[options.banca];
 
-    const { output } = await generateText({
-        model: AI_MODELS.FAST,
+    const { output, usage } = await generateText({
+        model: options.model || AI_MODELS.CHEAP, // Fallback purely for safety
         output: Output.object({ schema: ResultSchema }),
         prompt: `
             ${bancaProfile}
@@ -200,7 +209,15 @@ export async function generateQuestions(
         topics: q.topics && q.topics.length > 0 ? q.topics : unit.source.topics.map(t => t.name)
     }));
 
-    return questionsWithTopics;
+    return {
+        questions: questionsWithTopics,
+        usage: {
+            promptTokens: usage?.inputTokens ?? 0,
+            completionTokens: usage?.outputTokens ?? 0,
+            totalTokens: usage?.totalTokens ?? 0
+        },
+        model: options.model
+    };
 }
 
 async function reRankChunks(query: string, chunks: any[]) {

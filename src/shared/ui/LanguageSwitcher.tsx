@@ -18,7 +18,7 @@ export function LanguageSwitcher() {
         <Button
             variant="ghost"
             onClick={toggleLocale}
-            className="fixed top-4 right-4 z-50 text-2xl h-10 w-10 p-0 rounded-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-800 hover:bg-zinc-800"
+            className="text-2xl h-8 w-8 p-0 rounded-md hover:bg-zinc-800 transition-colors"
             aria-label="Switch Language"
         >
             {locale === 'en-US' ? '🇺🇸' : '🇧🇷'}

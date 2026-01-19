@@ -6,6 +6,7 @@ export type Granularity = z.infer<typeof GranularityEnum>;
 export const ProcessingOptionsSchema = z.object({
     granularity: GranularityEnum.default('DETAILED'),
     focus: z.string().max(140).optional(),
+    model: z.string().default('gemini-2.5-flash-lite'), // Defaults to CHEAP
 });
 
 export type ProcessingOptions = z.infer<typeof ProcessingOptionsSchema>;

@@ -17,6 +17,7 @@ export const QuestionGenerationOptionsSchema = z.object({
     types: z.array(QuestionTypeOptionEnum).min(1, 'Select at least one type').default(['MULTIPLE_CHOICE', 'OPEN', 'CODE']),
     banca: BancaEnum.default('STANDARD'),
     scope: z.string().max(100).optional(),
+    model: z.string().default('gemini-2.0-flash'), // Defaults to FAST
 });
 
 export type QuestionGenerationOptions = z.infer<typeof QuestionGenerationOptionsSchema>;

@@ -2,6 +2,7 @@ import { StudySession } from '@/features/study-session/components/StudySession';
 import { getQuestions } from '@/features/study-session/actions/get-questions';
 import { getSubjects } from '@/features/dashboard/actions/get-subjects';
 import { Sparkles } from 'lucide-react';
+import { Navbar } from '@/shared/ui/Navbar';
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -51,33 +52,36 @@ export async function ActiveSessionFeature({ searchParams: searchParamsPromise }
     const cards = await getQuestions(limit, { mode, subjectIds, topicIds });
 
     return (
-        <main className="min-h-screen bg-zinc-950 flex flex-col">
-            {/* Custom Session Banner */}
-            {mode === 'custom' && (
-                <div className="bg-blue-950/50 border-b border-blue-800/50 px-4 py-2.5">
-                    <div className="max-w-4xl mx-auto flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-blue-400" />
-                        <p className="text-sm text-blue-200">
-                            Custom Session:{' '}
-                            <strong className="text-blue-100">
-                                {subjectNames.length > 0
-                                    ? subjectNames.join(' + ')
-                                    : 'All Subjects'
-                                }
-                            </strong>
-                            {topicIds?.length ? (
-                                <span className="text-blue-300 ml-2">
-                                    ({topicIds.length} topic{topicIds.length > 1 ? 's' : ''})
-                                </span>
-                            ) : null}
-                        </p>
+        <>
+            <Navbar />
+            <main className="min-h-screen bg-zinc-950 flex flex-col">
+                {/* Custom Session Banner */}
+                {mode === 'custom' && (
+                    <div className="bg-blue-950/50 border-b border-blue-800/50 px-4 py-2.5">
+                        <div className="max-w-4xl mx-auto flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-blue-400" />
+                            <p className="text-sm text-blue-200">
+                                Custom Session:{' '}
+                                <strong className="text-blue-100">
+                                    {subjectNames.length > 0
+                                        ? subjectNames.join(' + ')
+                                        : 'All Subjects'
+                                    }
+                                </strong>
+                                {topicIds?.length ? (
+                                    <span className="text-blue-300 ml-2">
+                                        ({topicIds.length} topic{topicIds.length > 1 ? 's' : ''})
+                                    </span>
+                                ) : null}
+                            </p>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            <div className="flex-1 flex items-center justify-center">
-                <StudySession mode={mode} initialCards={cards} />
-            </div>
-        </main>
+                <div className="flex-1 flex items-center justify-center">
+                    <StudySession mode={mode} initialCards={cards} />
+                </div>
+            </main>
+        </>
     );
 }

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { SourceInspector } from '@/features/library/components/SourceInspector';
 import { notFound } from 'next/navigation';
 import { SourceMetrics } from '@/features/library/ui/SourceMetrics';
+import { Navbar } from '@/shared/ui/Navbar';
 
 interface SourceDetailsFeatureProps {
     params: Promise<{ id: string }>;
@@ -49,9 +50,12 @@ export async function SourceDetailsFeature({ params }: SourceDetailsFeatureProps
     };
 
     return (
-        <main className="h-screen bg-zinc-950 overflow-hidden flex flex-col">
-            <SourceMetrics source={source} />
-            <SourceInspector source={typedSource} />
-        </main>
+        <>
+            <Navbar variant="full" />
+            <main className="h-[calc(100vh-3.5rem)] bg-zinc-950 overflow-hidden flex flex-col">
+                <SourceMetrics source={source} />
+                <SourceInspector source={typedSource} />
+            </main>
+        </>
     );
 }

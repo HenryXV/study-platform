@@ -9,11 +9,18 @@ import { Badge } from '@/shared/ui/Badge';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { User } from '@/app/generated/prisma/client';
 
-export function DashboardMenu() {
+interface DashboardMenuProps {
+    user: User;
+}
+
+export function DashboardMenu({ user }: DashboardMenuProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const t = useTranslations('dashboard.menu');
     const tCommon = useTranslations('common');
+
+    const balance = Math.floor(user.credits / 1000);
 
     // Map option types to translation keys
     const getTitleKey = (type: MenuOption['type']): string => {
@@ -27,6 +34,7 @@ export function DashboardMenu() {
 
     return (
         <>
+            {/* Balance Badge */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full">
                 {DAILY_OPTIONS.map((option) => (
                     <Link

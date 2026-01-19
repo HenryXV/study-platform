@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { LibraryItem } from '@/features/library/actions/get-sources';
 import { FileText } from 'lucide-react';
 import { useState, useMemo, useTransition } from 'react';
@@ -9,6 +8,7 @@ import { deleteContentSource } from '@/features/library/actions/delete-source';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal';
 import { LibraryItemCard } from './LibraryItemCard';
 import { useTranslations } from 'next-intl';
+import { AddSourceButton } from '@/features/library/ui/AddSourceButton';
 
 interface LibraryGridProps {
     sources: LibraryItem[];
@@ -88,9 +88,7 @@ export function LibraryGrid({ sources, query }: LibraryGridProps) {
                 </div>
                 <h3 className="text-xl font-medium text-zinc-300 mb-2">{t('empty')}</h3>
                 <p className="text-zinc-500 mb-6">{t('emptyDesc')}</p>
-                <Link href="/">
-                    <Button variant="outline">{t('createSource')}</Button>
-                </Link>
+                <AddSourceButton />
             </div>
         );
     }

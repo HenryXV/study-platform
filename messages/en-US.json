@@ -7,8 +7,10 @@
         "confirm": "Confirm",
         "save": "Save",
         "delete": "Delete",
+        "insufficientCredits": "Insufficient credits. Please recharge to continue.",
         "edit": "Edit",
         "search": "Search...",
+        "searchPlaceholder": "Search...",
         "searchLibrary": "Search library...",
         "noResults": "No results found",
         "back": "Back",
@@ -33,7 +35,22 @@
         "discard": "Discard",
         "commitToLibrary": "Commit to Library",
         "saveChanges": "Save Changes",
-        "addTopic": "Add topic..."
+        "addTopic": "Add topic...",
+        "aiModel": "AI Model",
+        "models": {
+            "cheap": {
+                "label": "Flash Lite",
+                "description": "Fast & Efficient"
+            },
+            "fast": {
+                "label": "Flash 2.0",
+                "description": "Balanced"
+            },
+            "intelligent": {
+                "label": "Flash 3.0",
+                "description": "Deep Reasoning"
+            }
+        }
     },
     "dashboard": {
         "title": "System Command",
@@ -187,10 +204,16 @@
             "empty": "Library is empty",
             "emptyDesc": "Start by adding your first note or snippet.",
             "createSource": "Create Source",
+            "viewSource": "View {title}",
+            "processed": "Processed",
+            "draft": "Draft",
+            "unitsCount": "{count} units",
+            "deleteSource": "Delete Source",
             "deleteTitle": "Delete Source",
             "deleteMessage": "Are you sure you want to delete this content source? This will permanently remove all associated study units and flashcards.",
             "deleteConfirm": "Delete Forever",
-            "filterBySubject": "Filter by Subject:"
+            "filterBySubject": "Filter by Subject:",
+            "allSubjects": "All Subjects"
         }
     },
     "study": {

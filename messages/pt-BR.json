@@ -4,11 +4,13 @@
         "error": "Algo deu errado",
         "retry": "Tentar novamente",
         "cancel": "Cancelar",
-        "confirm": "Confirmar",
+        "confirm": "Confirm",
         "save": "Salvar",
         "delete": "Excluir",
+        "insufficientCredits": "Créditos insuficientes. Recarregue para continuar.",
         "edit": "Editar",
         "search": "Buscar...",
+        "searchPlaceholder": "Buscar...",
         "searchLibrary": "Buscar na biblioteca...",
         "noResults": "Nenhum resultado encontrado",
         "back": "Voltar",
@@ -33,7 +35,22 @@
         "discard": "Descartar",
         "commitToLibrary": "Salvar na Biblioteca",
         "saveChanges": "Salvar Alterações",
-        "addTopic": "Adicionar tópico..."
+        "addTopic": "Adicionar tópico...",
+        "aiModel": "Modelo de IA",
+        "models": {
+            "cheap": {
+                "label": "Flash Lite",
+                "description": "Rápido e Eficiente"
+            },
+            "fast": {
+                "label": "Flash 2.0",
+                "description": "Equilibrado"
+            },
+            "intelligent": {
+                "label": "Flash 3.0",
+                "description": "Raciocínio Profundo"
+            }
+        }
     },
     "dashboard": {
         "title": "Central de Comando",
@@ -187,10 +204,16 @@
             "empty": "A biblioteca está vazia",
             "emptyDesc": "Comece adicionando sua primeira nota ou trecho.",
             "createSource": "Criar Fonte",
+            "viewSource": "Ver {title}",
+            "processed": "Processado",
+            "draft": "Rascunho",
+            "unitsCount": "{count} unidades",
+            "deleteSource": "Excluir Fonte",
             "deleteTitle": "Excluir Fonte",
             "deleteMessage": "Tem certeza que deseja excluir esta fonte? Isso removerá permanentemente todas as unidades de estudo e flashcards associados.",
             "deleteConfirm": "Excluir Definitivamente",
-            "filterBySubject": "Filtrar por Matéria:"
+            "filterBySubject": "Filtrar por Matéria:",
+            "allSubjects": "Todas as Matérias"
         }
     },
     "study": {

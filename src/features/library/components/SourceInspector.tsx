@@ -120,7 +120,11 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                 };
                 setDraftData(draft);
             } else {
-                toast.error(res.message || tCommon('error'));
+                if (res.message === "INSUFFICIENT_COMPUTE") {
+                    toast.error(tCommon('insufficientCredits'));
+                } else {
+                    toast.error(res.message || tCommon('error'));
+                }
                 console.error("Analysis failed");
             }
         } catch (error) {
@@ -182,7 +186,11 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                 setQuestionOptionsTarget(null); // Close modal only on success
                 setQuestionDraft({ unitId: questionOptionsTarget.unitId, questions: result.questions });
             } else {
-                toast.error(result.message || tCommon('error'));
+                if (result.message === "INSUFFICIENT_COMPUTE") {
+                    toast.error(tCommon('insufficientCredits'));
+                } else {
+                    toast.error(result.message || tCommon('error'));
+                }
             }
         } catch (error) {
             toast.error(error instanceof Error ? error.message : tCommon('error'));

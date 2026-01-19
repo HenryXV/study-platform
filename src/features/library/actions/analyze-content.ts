@@ -7,6 +7,8 @@ import {
     ProcessingOptionsSchema,
     ProcessingOptions,
 } from '../schemas/processing-options';
+import * as CreditService from '../services/credit-service';
+import { calculateCost } from '../config/pricing-config';
 
 export async function analyzeContentPreview(
     sourceId: string,
@@ -31,7 +33,30 @@ export async function analyzeContentPreview(
     }
 
     try {
-        const output = await analyzeContent(userId, sourceId, optionsResult.data);
+        // Check sufficient balance (estimated 15CP for analysis)
+        const MIN_ESTIMATED_COST = 15;
+        const hasBalance = await CreditService.hasSufficientBalance(userId, MIN_ESTIMATED_COST);
+        if (!hasBalance) {
+            return { success: false, message: "INSUFFICIENT_COMPUTE" };
+        }
+
+        const result = await analyzeContent(userId, sourceId, optionsResult.data);
+        const { output, usage, model } = result;
+
+        // Bill the user
+        try {
+            const cost = calculateCost(model, usage.promptTokens, usage.completionTokens);
+            await CreditService.billUsage(userId, cost, {
+                action: 'ANALYZE_CONTENT_PREVIEW',
+                model,
+                inputTokens: usage.promptTokens,
+                outputTokens: usage.completionTokens,
+                resourceId: sourceId
+            });
+        } catch (billingError) {
+            console.error("Billing Failed:", billingError);
+        }
+
         return {
             success: true,
             data: output

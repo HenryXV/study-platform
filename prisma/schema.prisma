@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider        = "prisma-client"
   output          = "../src/app/generated/prisma"
@@ -16,131 +10,135 @@ datasource db {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  email           String   @unique
+  id              String         @id @default(cuid())
+  email           String         @unique
   name            String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  credits         Int      @default(5) // Starts with 5 free
-  lastDailyRefill DateTime @default(now()) // To track the daily reset
-
-  sessions     StudySession[]
-  transactions Transaction[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  credits         Int            @default(0)
+  asaasCustomerId String?        @unique
+  sessions        StudySession[]
+  transactions    Transaction[]
+  usageLogs       UsageLog[]
+  trialRedeemed   Boolean        @default(false)
 }
 
-model Transaction {
-  id             String   @id @default(cuid())
-  userId         String
-  amount         Float // R$ 4.90
-  creditsAdded   Int // +20
-  asaasPaymentId String   @unique // To deduplicate webhooks
-  status         String // PENDING, COMPLETED, FAILED
-  createdAt      DateTime @default(now())
+model UsageLog {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String // e.g. "GENERATE_QUESTIONS"
+  cost       Int // e.g. 1
+  resourceId String? // ID of the Unit/Source created
+  modelUsed  String? // "gemini-1.5-flash"
+  tokensIn   Int?
+  tokensOut  Int?
+  createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }
 
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String
+  amount        Float
+  status        String
+  createdAt     DateTime @default(now())
+  asaasId       String   @unique
+  creditsAmount Int
+  invoiceUrl    String?
+  pixCode       String?
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 model ContentSource {
-  id        String       @id @default(cuid())
+  id        String         @id @default(cuid())
   title     String
-  bodyText  String       @map("body_text")
-  fileUrl   String?
-  status    SourceStatus @default(UNPROCESSED)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
-  units  StudyUnit[]
-  chunks ContentChunk[]
-
+  bodyText  String         @map("body_text")
+  status    SourceStatus   @default(UNPROCESSED)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
   subjectId String?
-  subject   Subject? @relation(fields: [subjectId], references: [id])
-  topics    Topic[]
-
-  userId String
+  userId    String
+  fileUrl   String?
+  chunks    ContentChunk[]
+  subject   Subject?       @relation(fields: [subjectId], references: [id])
+  units     StudyUnit[]
+  topics    Topic[]        @relation("ContentSourceToTopic")
 
   @@index([userId])
 }
 
 model ContentChunk {
-  id         String                      @id @default(cuid())
+  id         String                 @id @default(cuid())
   content    String
   pageNumber Int
-  embedding  Unsupported("vector(768)")?
-
-  sourceId String
-  source   ContentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  embedding  Unsupported("vector")?
+  sourceId   String
+  source     ContentSource          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
   @@index([sourceId])
 }
 
 model StudyUnit {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   sourceId    String
   type        UnitType
   content     String
+  createdAt   DateTime      @default(now())
   description String?
-  createdAt   DateTime @default(now())
-
-  source    ContentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  questions Question[]
+  questions   Question[]
+  source      ContentSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
   @@index([sourceId])
 }
 
 model Subject {
-  id        String   @id @default(cuid())
-  // name      String   @unique // REMOVED global unique
+  id        String          @id @default(cuid())
   name      String
-  color     String // Stores a hex code or tailwind class
-  createdAt DateTime @default(now())
-
-  topics    Topic[]
+  color     String
+  createdAt DateTime        @default(now())
+  userId    String
   sources   ContentSource[]
   questions Question[]
-
-  userId String
+  topics    Topic[]
 
   @@unique([name, userId])
 }
 
 model Topic {
-  id        String @id @default(cuid())
+  id        String          @id @default(cuid())
   name      String
   subjectId String
-
+  userId    String
   subject   Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  sources   ContentSource[]
-  questions Question[]
-
-  userId String
+  sources   ContentSource[] @relation("ContentSourceToTopic")
+  questions Question[]      @relation("QuestionToTopic")
 
   @@unique([name, subjectId, userId])
   @@index([subjectId])
 }
 
 model Question {
-  id     String       @id @default(cuid())
-  unitId String
-  type   QuestionType
-  data   Json
-
-  // SRS Fields
+  id             String       @id @default(cuid())
+  unitId         String
+  type           QuestionType
+  data           Json
+  createdAt      DateTime     @default(now())
+  easeFactor     Float        @default(2.5)
+  interval       Int          @default(0)
   lastReviewed   DateTime?
-  nextReviewDate DateTime  @default(now())
-  interval       Int       @default(0)
-  easeFactor     Float     @default(2.5)
-  streak         Int       @default(0)
-
-  createdAt DateTime @default(now())
-
-  unit      StudyUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  subject   Subject?  @relation(fields: [subjectId], references: [id])
-  subjectId String?
-  topics    Topic[]
-
-  userId String
+  nextReviewDate DateTime     @default(now())
+  streak         Int          @default(0)
+  subjectId      String?
+  userId         String
+  subject        Subject?     @relation(fields: [subjectId], references: [id])
+  unit           StudyUnit    @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  topics         Topic[]      @relation("QuestionToTopic")
 
   @@index([unitId])
   @@index([userId])
@@ -151,10 +149,18 @@ model StudySession {
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model StudyLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  date          DateTime @default(now())
+  itemsReviewed Int      @default(0)
+
+  @@index([date])
 }
 
 enum SourceStatus {
@@ -172,13 +178,4 @@ enum QuestionType {
   SNIPPET
   CLOZE
   OPEN
-}
-
-model StudyLog {
-  id            String   @id @default(cuid())
-  userId        String?
-  date          DateTime @default(now())
-  itemsReviewed Int      @default(0)
-
-  @@index([date])
 }

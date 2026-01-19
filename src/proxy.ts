@@ -6,7 +6,7 @@ import { locales, defaultLocale } from '@/i18n/routing';
 const intlMiddleware = createMiddleware({
     locales,
     defaultLocale,
-    localePrefix: 'as-needed', // Only show prefix for non-default locales
+    localePrefix: 'always',
 });
 
 const isPublicRoute = createRouteMatcher([

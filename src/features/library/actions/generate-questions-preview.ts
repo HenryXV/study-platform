@@ -7,6 +7,8 @@ import {
     QuestionGenerationOptionsSchema,
     QuestionGenerationOptions,
 } from '../schemas/question-options';
+import * as CreditService from '../services/credit-service';
+import { calculateCost } from '../config/pricing-config';
 
 export async function generateQuestionsPreview(
     unitId: string,
@@ -25,8 +27,31 @@ export async function generateQuestionsPreview(
         return { success: false, message: 'Invalid question options' };
     }
 
+    // Check sufficient balance (estimated)
+    const MIN_ESTIMATED_COST = 10;
+    const hasBalance = await CreditService.hasSufficientBalance(userId, MIN_ESTIMATED_COST);
+    if (!hasBalance) {
+        return { success: false, message: "INSUFFICIENT_COMPUTE" };
+    }
+
     try {
-        const questions = await generateQuestions(userId, unitId, unitContent, unitType, optionsResult.data);
+        const result = await generateQuestions(userId, unitId, unitContent, unitType, optionsResult.data);
+        const { questions, usage, model } = result;
+
+        // Bill the user
+        try {
+            const cost = calculateCost(model, usage.promptTokens, usage.completionTokens);
+            await CreditService.billUsage(userId, cost, {
+                action: 'GENERATE_QUESTIONS_PREVIEW',
+                model,
+                inputTokens: usage.promptTokens,
+                outputTokens: usage.completionTokens,
+                resourceId: unitId
+            });
+        } catch (billingError) {
+            console.error("Billing Failed:", billingError);
+        }
+
         return { success: true, questions };
     } catch (error) {
         console.error("Question Preview Generation Failed:", error);

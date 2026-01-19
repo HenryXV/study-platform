@@ -10,6 +10,7 @@ import {
     ProcessingOptions,
     GRANULARITY_LABELS,
 } from '../schemas/processing-options';
+import { AI_MODELS } from '../config/ai-models';
 import { useTranslations } from 'next-intl';
 
 interface ProcessingOptionsModalProps {
@@ -40,11 +41,13 @@ export function ProcessingOptionsModal({
     };
 
     const [granularity, setGranularity] = useState<Granularity>('DETAILED');
+    const [model, setModel] = useState<string>(AI_MODELS.CHEAP);
     const [focus, setFocus] = useState('');
 
     const handleConfirm = () => {
         onConfirm({
             granularity,
+            model,
             focus: focus.trim() || undefined,
         });
     };
@@ -100,6 +103,38 @@ export function ProcessingOptionsModal({
                                 </button>
                             );
                         })}
+                    </div>
+                </div>
+
+                {/* Model Selector */}
+                <div className="space-y-3">
+                    <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                        {tCommon('aiModel')}
+                    </label>
+                    <div className="grid grid-cols-1 gap-2">
+                        {[
+                            { value: AI_MODELS.CHEAP, key: 'cheap', icon: '⚡' },
+                            { value: AI_MODELS.FAST, key: 'fast', icon: '🚀' },
+                            { value: AI_MODELS.INTELLIGENT, key: 'intelligent', icon: '🧠' },
+                        ].map((m) => (
+                            <button
+                                key={m.value}
+                                type="button"
+                                onClick={() => setModel(m.value)}
+                                className={cn(
+                                    'flex items-center justify-between px-3 py-2.5 rounded-lg border text-sm transition-all',
+                                    model === m.value
+                                        ? 'bg-zinc-800 border-indigo-500/50 text-zinc-100 ring-1 ring-indigo-500/20'
+                                        : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-300'
+                                )}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span>{m.icon}</span>
+                                    <span className="font-medium">{tCommon(`models.${m.key}.label` as any)}</span>
+                                </div>
+                                <span className="text-xs font-mono opacity-60">{tCommon(`models.${m.key}.description` as any)}</span>
+                            </button>
+                        ))}
                     </div>
                 </div>
 

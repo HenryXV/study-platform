@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { locales, type Locale } from "@/i18n/routing";
 import "../globals.css";
 import { Toaster } from "sonner";
-import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Study Platform",
+  title: "Systemizer",
   description: "Your intelligent study companion",
 };
 
@@ -51,7 +51,6 @@ export default async function LocaleLayout({ children, params }: Props) {
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <NextIntlClientProvider messages={messages}>
-            <LanguageSwitcher />
             {children}
           </NextIntlClientProvider>
           <Toaster />
