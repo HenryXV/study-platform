@@ -3,6 +3,7 @@ import { Prisma } from "@/app/generated/prisma/client";
 
 /**
  * Creates a ContentSource and its associated ContentChunks in a single transaction.
+ * Uses batch SQL insert for optimal performance.
  */
 export async function createSourceWithChunks(
   userId: string,
@@ -21,15 +22,18 @@ export async function createSourceWithChunks(
       },
     });
 
-    // B. Insert Chunks with Vectors
-    for (const chunk of chunks) {
-      const id = crypto.randomUUID();
-      const vectorString = `[${chunk.embedding.join(",")}]`;
+    // B. Insert Chunks with Vectors - batch insert for performance
+    if (chunks.length > 0) {
+      const values = chunks.map(chunk => {
+        const id = crypto.randomUUID();
+        const vectorString = `[${chunk.embedding.join(",")}]`;
+        return `('${id}', '${chunk.content.replace(/'/g, "''")}', ${chunk.pageNumber}, '${vectorString}'::vector, '${source.id}')`;
+      }).join(',');
 
-      await tx.$executeRaw`
-          INSERT INTO "ContentChunk" ("id", "content", "pageNumber", "embedding", "sourceId")
-          VALUES (${id}, ${chunk.content}, ${chunk.pageNumber}, ${vectorString}::vector, ${source.id})
-        `;
+      await tx.$executeRawUnsafe(`
+        INSERT INTO "ContentChunk" ("id", "content", "pageNumber", "embedding", "sourceId")
+        VALUES ${values}
+      `);
     }
 
     return source;
@@ -86,21 +90,25 @@ export async function findSimilarChunks(
 
 /**
  * Adds chunks to an existing Source.
+ * Uses batch SQL insert for optimal performance.
  */
 export async function addChunksToSource(
   sourceId: string,
   chunks: { content: string; pageNumber: number; embedding: number[] }[]
 ) {
   return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-    // A. Insert Chunks with Vectors
-    for (const chunk of chunks) {
-      const id = crypto.randomUUID();
-      const vectorString = `[${chunk.embedding.join(",")}]`;
+    // A. Insert Chunks with Vectors - batch insert for performance
+    if (chunks.length > 0) {
+      const values = chunks.map(chunk => {
+        const id = crypto.randomUUID();
+        const vectorString = `[${chunk.embedding.join(",")}]`;
+        return `('${id}', '${chunk.content.replace(/'/g, "''")}', ${chunk.pageNumber}, '${vectorString}'::vector, '${sourceId}')`;
+      }).join(',');
 
-      await tx.$executeRaw`
-          INSERT INTO "ContentChunk" ("id", "content", "pageNumber", "embedding", "sourceId")
-          VALUES (${id}, ${chunk.content}, ${chunk.pageNumber}, ${vectorString}::vector, ${sourceId})
-        `;
+      await tx.$executeRawUnsafe(`
+        INSERT INTO "ContentChunk" ("id", "content", "pageNumber", "embedding", "sourceId")
+        VALUES ${values}
+      `);
     }
 
     // B. Update Source Status

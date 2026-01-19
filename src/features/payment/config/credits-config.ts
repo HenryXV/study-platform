@@ -3,8 +3,8 @@
  * Centralized configuration for pricing consistency.
  */
 export const CREDIT_PACKAGES = [
-    { credits: 10000, amount: 9.90, label: "Starter" },
-    { credits: 30000, amount: 24.90, label: "Pro" },
+    { credits: 1, amount: 0.20, label: "Starter" },
+    { credits: 3, amount: 1.00, label: "Pro" },
     { credits: 60000, amount: 49.90, label: "Expert" },
 ];
 

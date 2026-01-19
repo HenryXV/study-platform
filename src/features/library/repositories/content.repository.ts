@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@/app/generated/prisma/client';
 
 export interface DraftData {
     suggestedSubject: string;
@@ -157,7 +156,7 @@ export const ContentRepository = {
     /** Composed transaction - contains orchestration logic for draft commit flow */
     async executeCommitDraftTransaction(userId: string, sourceId: string, data: DraftData) {
         return prisma.$transaction(async (tx) => {
-            // 1. Handle Subject
+            // 1. Handle Subject - single upsert
             const subject = await tx.subject.upsert({
                 where: {
                     name_userId: {
@@ -168,15 +167,14 @@ export const ContentRepository = {
                 update: {},
                 create: {
                     name: data.suggestedSubject,
-                    color: "bg-blue-100 text-blue-800", // Default color
+                    color: "bg-blue-100 text-blue-800",
                     userId,
                 },
             });
 
-            // 2. Handle Topics
-            const topics = [];
-            for (const topicName of data.suggestedTopics) {
-                const topic = await tx.topic.upsert({
+            // 2. Handle Topics - parallel upserts instead of sequential loop
+            const topicPromises = data.suggestedTopics.map(topicName =>
+                tx.topic.upsert({
                     where: {
                         name_subjectId_userId: {
                             name: topicName,
@@ -190,27 +188,24 @@ export const ContentRepository = {
                         subjectId: subject.id,
                         userId
                     },
-                });
-                topics.push(topic);
-            }
+                })
+            );
+            const topics = await Promise.all(topicPromises);
 
-            // 3. Create Study Units
-            let createdCount = 0;
-            const validUnits = data.units.map(u => ({
+            // 3. Create Study Units - use createMany for bulk insert (much more efficient)
+            const unitsData = data.units.map(u => ({
                 sourceId: sourceId,
-                type: (u.type === 'CODE') ? 'CODE' : 'TEXT',
+                type: (u.type === 'CODE' ? 'CODE' : 'TEXT') as 'CODE' | 'TEXT',
                 content: u.title,
-                description: u.description
-            }) as Prisma.StudyUnitCreateManyInput);
+                description: u.description ?? null
+            }));
 
-            // Using createMany is more efficient if supported, but loop is fine for small batches.
-            // Using loop to match original logic logic or simple create.
-            for (const unitData of validUnits) {
-                await tx.studyUnit.create({ data: unitData });
-                createdCount++;
-            }
+            const { count: createdCount } = await tx.studyUnit.createMany({
+                data: unitsData,
+                skipDuplicates: true
+            });
 
-            // 4. Update Source Status
+            // 4. Update Source Status - single update with relation connect
             await tx.contentSource.update({
                 where: { id: sourceId },
                 data: {

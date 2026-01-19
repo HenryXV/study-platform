@@ -130,9 +130,9 @@ export const QuestionRepository = {
 
     async createBatch(userId: string, unitId: string, subjectId: string | null, questions: GeneratorQuestion[]) {
         return prisma.$transaction(async (tx) => {
-            const results = [];
-            for (const q of questions) {
-                const created = await tx.question.create({
+            // Create all questions in parallel instead of sequential loop
+            const createPromises = questions.map(q =>
+                tx.question.create({
                     data: {
                         userId,
                         unitId,
@@ -161,56 +161,63 @@ export const QuestionRepository = {
                             explanation: q.explanation || ''
                         }
                     }
-                });
-                results.push(created);
-            }
-            return results;
+                })
+            );
+            return Promise.all(createPromises);
         });
     },
 
     async updateBatch(userId: string, questions: EditableQuestion[]) {
         return prisma.$transaction(async (tx) => {
-            for (const q of questions) {
-                if (!q.id) continue;
+            // Filter out questions without IDs
+            const validQuestions = questions.filter(q => q.id);
 
-                // Fetch context for ownership and subjectId
-                const current = await tx.question.findFirst({
-                    where: { id: q.id, userId },
-                    select: { subjectId: true }
-                });
+            // Fetch all ownership/context data in parallel
+            const contextPromises = validQuestions.map(q =>
+                tx.question.findFirst({
+                    where: { id: q.id!, userId },
+                    select: { id: true, subjectId: true }
+                })
+            );
+            const contexts = await Promise.all(contextPromises);
 
-                if (!current) continue;
-
-                await tx.question.update({
-                    where: { id: q.id },
-                    data: {
-                        type: mapType(q.type),
+            // Build update promises only for questions that exist and user owns
+            const updatePromises = validQuestions
+                .map((q, i) => ({ question: q, context: contexts[i] }))
+                .filter(({ context }) => context !== null)
+                .map(({ question: q, context }) =>
+                    tx.question.update({
+                        where: { id: q.id! },
                         data: {
-                            question: q.questionText,
-                            answer: q.correctAnswer,
-                            options: q.options || [],
-                            explanation: q.explanation || ''
-                        },
-                        topics: (current.subjectId && q.topics) ? {
-                            set: [],
-                            connectOrCreate: q.topics.map(t => ({
-                                where: {
-                                    name_subjectId_userId: {
+                            type: mapType(q.type),
+                            data: {
+                                question: q.questionText,
+                                answer: q.correctAnswer,
+                                options: q.options || [],
+                                explanation: q.explanation || ''
+                            },
+                            topics: (context!.subjectId && q.topics) ? {
+                                set: [],
+                                connectOrCreate: q.topics.map(t => ({
+                                    where: {
+                                        name_subjectId_userId: {
+                                            name: t,
+                                            subjectId: context!.subjectId!,
+                                            userId
+                                        }
+                                    },
+                                    create: {
                                         name: t,
-                                        subjectId: current.subjectId!,
+                                        subjectId: context!.subjectId!,
                                         userId
                                     }
-                                },
-                                create: {
-                                    name: t,
-                                    subjectId: current.subjectId!,
-                                    userId
-                                }
-                            }))
-                        } : undefined
-                    }
-                });
-            }
+                                }))
+                            } : undefined
+                        }
+                    })
+                );
+
+            return Promise.all(updatePromises);
         });
     }
 };
