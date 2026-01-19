@@ -16,9 +16,14 @@ export async function uploadSourceFile(formData: FormData): Promise<UploadResult
     }
 
     const file = formData.get('file') as File | null;
+    const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
     if (!file) {
         return { success: false, message: 'No file provided' };
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+        return { success: false, message: 'File size exceeds 20MB limit' };
     }
 
     if (file.type !== 'application/pdf') {

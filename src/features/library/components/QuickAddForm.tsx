@@ -6,6 +6,8 @@ import { uploadSourceFile } from '../actions/upload-source-file';
 import { Button } from '@/shared/ui/Button';
 import { useTranslations } from 'next-intl';
 
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+
 interface QuickAddFormProps {
     onSuccess?: () => void;
 }
@@ -60,6 +62,10 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
         setIsDragOver(false);
         const droppedFile = e.dataTransfer.files[0];
         if (droppedFile?.type === 'application/pdf') {
+            if (droppedFile.size > MAX_FILE_SIZE) {
+                setMessage({ type: 'error', text: `${t('pdfOnly')} (Max 20MB)` });
+                return;
+            }
             setFile(droppedFile);
             setMessage(null);
         } else if (droppedFile) {
@@ -144,7 +150,13 @@ export function QuickAddForm({ onSuccess }: QuickAddFormProps) {
                                         className="hidden"
                                         onChange={(e) => {
                                             const selected = e.target.files?.[0];
-                                            if (selected) setFile(selected);
+                                            if (selected) {
+                                                if (selected.size > MAX_FILE_SIZE) {
+                                                    setMessage({ type: 'error', text: `${t('description')} (Max 20MB)` });
+                                                    return;
+                                                }
+                                                setFile(selected);
+                                            }
                                             e.target.value = ''; // Reset input
                                         }}
                                     />
