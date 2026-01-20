@@ -44,11 +44,11 @@
         "aiModel": "AI Model",
         "models": {
             "cheap": {
-                "label": "Flash Lite",
+                "label": "Flash 2.0 (Recommended)",
                 "description": "Fast & Efficient"
             },
             "fast": {
-                "label": "Flash 2.0",
+                "label": "Flash 2.5",
                 "description": "Balanced"
             },
             "intelligent": {
@@ -204,6 +204,7 @@
             "atomic": "Atomic",
             "atomicDesc": "Maximum granularity",
             "focusConstraint": "Custom Focus",
+            "focusPlaceholder": "e.g. \"Focus on dates and historical events\" or \"Split by legal competencies\"",
             "analyzeContent": "Analyze Content"
         },
         "draft": {

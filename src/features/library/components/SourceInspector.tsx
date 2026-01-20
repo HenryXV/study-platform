@@ -4,12 +4,10 @@ import { useState, useTransition, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Panel, Group, Separator } from 'react-resizable-panels';
-import { analyzeContentPreview } from '../actions/analyze-content';
-import { commitContent } from '../actions/commit-content';
+import { analyzeAndPersistContent } from '../actions/analyze-content';
 import { deleteUnit } from '../actions/delete-unit';
 import { retryEmbeddings } from '../actions/retry-embeddings';
 import { GeneratedUnitsList } from './GeneratedUnitsList';
-import { DraftSupervisor, ApprovedDraftData } from './DraftSupervisor';
 import { QuestionSupervisor } from './QuestionSupervisor';
 import { ProcessingOptionsModal } from './ProcessingOptionsModal';
 import { QuestionOptionsModal } from './QuestionOptionsModal';
@@ -53,7 +51,6 @@ export function SourceInspector({ source }: SourceInspectorProps) {
     const [showOptionsModal, setShowOptionsModal] = useState(false);
 
     // Workflow State
-    const [draftData, setDraftData] = useState<ApprovedDraftData | null>(null);
     const [expandedUnits, setExpandedUnits] = useState<Set<string>>(new Set());
 
     // Simple responsive check (could be moved to a hook)
@@ -95,30 +92,19 @@ export function SourceInspector({ source }: SourceInspectorProps) {
         router.refresh();
     };
 
-    // Step 1: Analyze (Preview) - Now accepts ProcessingOptions from modal
+    // Step 1: Analyze & Persist (No more Draft Step)
     const handleAnalyze = async (options: ProcessingOptions) => {
         setShowOptionsModal(false);
         setIsAnalyzing(true);
         try {
-            const res = await analyzeContentPreview(source.id, options);
-            if (res.success && res.data) {
-                // Transform the raw AI output into the Draft structure (checking types)
-                // The AI SDK output is already validated by Zod in the action, 
-                // but we cast it here for TS convenience in the UI component
-                const raw = res.data;
-
-                // Map to ensure it fits DraftUnit interface if strictly needed, 
-                // though it matches the Zod schema 1:1 currently.
-                const draft: ApprovedDraftData = {
-                    suggestedSubject: raw.suggestedSubject,
-                    suggestedTopics: raw.suggestedTopics,
-                    units: raw.units.map((u: any) => ({
-                        title: u.title,
-                        description: u.description,
-                        type: u.type as 'TEXT' | 'CODE',
-                    }))
-                };
-                setDraftData(draft);
+            const res = await analyzeAndPersistContent(source.id, options);
+            if (res.success) {
+                if (res.embeddingFailed) {
+                    toast.warning(t('inspector.contentSavedRetry'));
+                } else {
+                    toast.success(t('inspector.contentSaved'));
+                }
+                router.refresh();
             } else {
                 if (res.message === "INSUFFICIENT_COMPUTE") {
                     toast.error(tCommon('insufficientCredits'));
@@ -131,26 +117,6 @@ export function SourceInspector({ source }: SourceInspectorProps) {
             toast.error(error instanceof Error ? error.message : tCommon('error'));
         } finally {
             setIsAnalyzing(false);
-        }
-    };
-
-    // Step 2: Commit (Save)
-    const handleCommit = async (data: ApprovedDraftData) => {
-        const res = await commitContent(source.id, data);
-
-        if (res.success) {
-            startTransition(() => {
-                setDraftData(null); // Clear draft mode
-                router.refresh();   // Show real data
-            });
-
-            if (res.embeddingFailed) {
-                toast.warning(t('inspector.contentSavedRetry'));
-            } else {
-                toast.success(t('inspector.contentSaved'));
-            }
-        } else {
-            toast.error(res.message || tCommon('error'));
         }
     };
 
@@ -289,7 +255,7 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                     <Panel defaultSize={75} minSize={20} className="flex flex-col">
                         <div className="h-10 border-b border-zinc-900 bg-zinc-900/40 flex items-center px-4 shrink-0">
                             <span className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider">
-                                {questionDraft || questionEdit ? t('source.examWorkbench') : draftData ? t('source.supervisorMode') : t('source.units')}
+                                {questionDraft || questionEdit ? t('source.examWorkbench') : t('source.units')}
                             </span>
                         </div>
 
@@ -311,15 +277,6 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                                     onCommit={handleEditCommit}
                                     inline
                                 />
-                            ) : draftData ? (
-                                /* State 1: Draft Supervisor (Reviewing AI Output) */
-                                <div className="p-6">
-                                    <DraftSupervisor
-                                        initialData={draftData}
-                                        onCancel={() => setDraftData(null)}
-                                        onCommit={handleCommit}
-                                    />
-                                </div>
                             ) : (
                                 <>
                                     {/* State 2: Empty / Unprocessed */}

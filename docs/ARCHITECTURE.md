@@ -10,19 +10,23 @@ graph TB
     API --> Service["Services (Business Logic)"]
     Service --> Repo["Repositories (Data Access)"]
     Repo --> DB[("Postgres / Prisma")]
+    DB --> Vector["pgvector (Embeddings)"]
     
     API --> Auth["Clerk Auth"]
     API --> Cache["Upstash Redis (Rate Limiting)"]
+    API --> Payment["Asaas (Pix Gateway)"]
     
     subgraph "Features"
         Dashboard
         Library
         StudySession
+        PaymentSystem
     end
     
     Client --> Dashboard
     Client --> Library
     Client --> StudySession
+    Client --> PaymentSystem
 ```
 
 ### 1.2 The "Systemizer" Map
@@ -67,7 +71,10 @@ The "Brain" of the application is an **Ingestion-Atomization-Interrogation** pip
 
 ```mermaid
 graph TD
-    Raw[Raw Input] -->|Ingest| Analyzer[Analyzer Agent]
+    Raw[Raw Input] -->|Ingest| Chunker[Semantic Chunker]
+    Chunker -->|Embed| VectorDB[(pgvector)]
+    
+    VectorDB -->|RAG Retrieval| Analyzer[Analyzer Agent]
     Analyzer -->|"Zod: { units: [] }"| Preview[Draft Units]
     Preview -->|User Verification| DB_Unit[(StudyUnit DB)]
     
@@ -75,7 +82,17 @@ graph TD
     Interrogator -->|"Zod: { questions: [] }"| Q_Bank[(QuestionBank DB)]
 ```
 
-### 3.2 The "Analyzer" (Atomization)
+### 3.2 The RAG Pipeline (Ingestion)
+*   **Goal:** Convert high-entropy PDF/Text into searchable vector space, enabling Semantic Search.
+*   **Implementation:** `features/library/services/ingestion-service.ts`
+*   **Strategy:**
+    *   **PDF Parsing:** Uses `pdf-parse-fork` with a custom renderer to inject Form Feeds (`\f`) between pages. This allows us to preserve the concept of "Page Numbers" even in a raw text stream.
+    *   **High-Fidelity Chunking:** We use `RecursiveCharacterTextSplitter` from LangChain with strict parameters:
+        *   **Chunk Size:** 1000 characters (approx 200-300 tokens). Large enough to capture a full concept/paragraph.
+        *   **Overlap:** 200 characters. Ensures context isn't severed at the chunk boundary.
+    *   **Vector Storage:** Embeddings are generated via Vercel AI SDK (`embedMany`) and stored in Postgres using the `pgvector` extension.
+
+### 3.3 The "Analyzer" (Atomization)
 *   **Goal:** Break large documents into atomic concepts without user effort.
 *   **Implementation:** `features/library/actions/analyze-content.ts`
 *   **Strategy:**
@@ -86,7 +103,7 @@ graph TD
             *   `TEXT`: Theory, definitions, history.
             *   `CODE`: Syntax, implementation detail (triggers specialized Monaco editor).
 
-### 3.3 The "Interrogator" (Active Recall)
+### 3.4 The "Interrogator" (Active Recall)
 *   **Goal:** Prove competence through "Ruthless" testing.
 *   **Implementation:** `features/library/actions/generate-questions-preview.ts`
 *   **Strategy:**
@@ -97,7 +114,7 @@ graph TD
         *   `correctAnswer`: The source of truth.
         *   `explanation`: Why the answer is correct (for feedback).
 
-### 3.4 Rate Limiting & Cost Control
+### 3.5 Rate Limiting & Cost Control
 To prevent API abuse and cost overrun, the Intelligence Layer is protected by a strict sliding window limiter:
 *   **Limits:** 10 AI requests per 10 minutes per user.
 *   **Storage:** Redis-backed (`@upstash/ratelimit`).
@@ -105,57 +122,99 @@ To prevent API abuse and cost overrun, the Intelligence Layer is protected by a 
 
 ---
 
-## 4. Data Core (The "Systemizer" Memory)
+## 4. The Financial Layer (Credits & Assets)
+
+To make the business model viable, the application uses an internal economy ("Credits") to abstract real money from usage. This allows us to charge for value (generations) without incurring credit card processing fees for every micro-transaction.
+
+### 4.1 Internal Economy
+*   **Credits:** stored internally on the `User` model.
+*   **Usage Tracking:** Every AI call creates a `UsageLog` entry.
+    *   Records `cost`, `tokensIn`, `tokensOut`, and `modelUsed`.
+    *   Allows purely auditable history of where credits went.
+*   **Bonus System:** New users are granted starting credits (configured in `credits-config.ts`) to allow the "Aha!" moment before a paywall.
+
+### 4.2 Payment Integration (Asaas Pix)
+We integrate with **Asaas** for Brazilian instant payments (Pix).
+*   **Implementation:** `features/payment/payment-service.ts`
+*   **Flow:**
+    1.  User selects a package (Starter/Pro/Expert).
+    2.  System acts as a "Reseller": Creates an Asaas Customer (if needed) and issues a Pix Charge.
+    3.  Frontend displays the QR Code.
+    4.  **Webhook:** Asaas hits `/api/webhooks/asaas` when payment is confirmed.
+    5.  **Atomic Transaction:** We use `prisma.$transaction` to ensure ensuring data integrity:
+        *   Verify Transaction exists.
+        *   Update Transaction Status -> `COMPLETED`.
+        *   User.credits -> `User.credits + package.credits`.
+
+---
+
+## 5. Data Core (The "Systemizer" Memory)
 
 The database schema is designed to enforce strict ownership and hierarchical processing. We do not use unstructured JSON blobs for core data; everything is relational.
 
-### 4.1 Entity Relationship Diagram
+### 5.1 Entity Relationship Diagram
 
 ```mermaid
 erDiagram
     User ||--o{ ContentSource : owns
     User ||--o{ StudySession : has
-    
+    User ||--o{ Transaction : initiates
+    User ||--o{ UsageLog : generates
+
     Subject ||--o{ ContentSource : categorizes
     Subject ||--o{ Topic : contains
-    
+
+    ContentSource ||--|{ ContentChunk : "split into"
     ContentSource ||--|{ StudyUnit : "atomized into"
     StudyUnit ||--|{ Question : "generates"
-    
+
     Question }|--|| Topic : "tagged with"
-    
+
     ContentSource {
         string status "UNPROCESSED | PROCESSED"
         string bodyText "Raw Input"
     }
-    
+
+    ContentChunk {
+        string content "Text Segment"
+        int pageNumber
+        vector embedding "1024 dims"
+    }
+
     StudyUnit {
         string type "TEXT | CODE"
         string content "Atomic Concept"
     }
-    
-    Question {
-        string type "MULTI_CHOICE | SNIPPET | OPEN"
-        json data "Strict Zod Schema"
-        datetime nextReviewDate "SRS Schedule"
+
+    Transaction {
+        string status "PENDING | COMPLETED"
+        float amount "BRL Value"
+        int creditsAmount "Internal Currency"
+    }
+
+    UsageLog {
+        string action "GENERATE_QUESTIONS"
+        int cost "Credit Cost"
     }
 ```
 
-### 4.2 Key Models
+### 5.2 Key Models
 | Model | Purpose | "Systemizer" Rationale |
 | :--- | :--- | :--- |
 | **ContentSource** | The raw material (PDF, Notes, URL). | Immutable "Source of Truth." If the AI hallucinates, we can always trace back to this original text. |
+| **ContentChunk** | Semantic vector segment. | Enables RAG. Stores the `vector(1024)` embedding for similarity search. |
 | **StudyUnit** | An atomic concept extracted from the source. | Breaks "Big Data" into "Small Data." Solves the "Interrogation" problem by isolating specific facts. |
-| **Question** | The active recall test. | The only mutable entity (SRS stats update here). Separating `Question` from `Unit` allows multiple angles of attack on the same concept. |
+| **Transaction** | Financial record. | Links the internal Credit economy to the external Banking reality (Asaas). |
+| **UsageLog** | Audit trail. | Explains to the user exactly where their credits went (no "vanishing credits" mystery). |
 
 
 ---
 
-## 5. Application Layer (Next.js 16)
+## 6. Application Layer (Next.js 16)
 
 We rely on standard Next.js 16 patterns to keep the implementation boring and predictable.
 
-### 5.1 Project Structure
+### 6.1 Project Structure
 *   `src/app/` **(Routes):** Minimal logic. Responsible for layout and metadata only. Imports feature components.
 *   `src/features/` **(Domain Modules):** 
     *   `features/[name]/actions`: Entry points (Validation, Auth, Rate Limiting).
@@ -165,7 +224,7 @@ We rely on standard Next.js 16 patterns to keep the implementation boring and pr
     *   `features/[name]/schemas`: Zod contracts.
 *   `src/shared/ui/` **(Design System):** "Dumb" UI components (Card, Button, Badge).
 
-### 5.2 Server Actions Pattern (3-Layer Architecture)
+### 6.2 Server Actions Pattern (3-Layer Architecture)
 We separate concerns to keep business logic testable:
 
 1.  **Action Layer (The Controller):**
@@ -182,13 +241,13 @@ We separate concerns to keep business logic testable:
     *   Handles Transactions.
     *   Returns strict typed objects.
 
-## 6. Security & Access Control
+## 7. Security & Access Control
 
-### 6.1 Authentication (Clerk)
+### 7.1 Authentication (Clerk)
 We delegate identity management to Clerk to avoid rolling our own crypto.
 *   **Lazy Creation:** We use a "Just-in-Time" user creation pattern (`auth.ts`). When a user logs in via Clerk, we check if they exist in our Postgres DB. If not, we create them instantly. This prevents sync issues.
 
-### 6.2 Row Level Security (RLS)
+### 7.2 Row Level Security (RLS)
 Since we use Prisma (which doesn't have native RLS like Supabase), we enforce "Software RLS" in every query.
 *   **Rule:** Every `findMany` or `findFirst` MUST include `where: { userId }`.
 *   **Enforcement:** Code reviews and standard patterns.

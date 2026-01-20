@@ -44,11 +44,11 @@
         "aiModel": "Modelo de IA",
         "models": {
             "cheap": {
-                "label": "Flash Lite",
+                "label": "Flash 2.0 (Recomendado)",
                 "description": "Rápido e Eficiente"
             },
             "fast": {
-                "label": "Flash 2.0",
+                "label": "Flash 2.5",
                 "description": "Equilibrado"
             },
             "intelligent": {
@@ -204,6 +204,7 @@
             "atomic": "Atômica",
             "atomicDesc": "Granularidade máxima",
             "focusConstraint": "Foco Personalizado",
+            "focusPlaceholder": "ex: \"Focar em datas e eventos históricos\" ou \"Dividir por competências legais\"",
             "analyzeContent": "Analisar Conteúdo"
         },
         "draft": {

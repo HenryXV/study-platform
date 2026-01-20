@@ -1,8 +1,11 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { CuidSchema } from '@/lib/validation';
 import { requireUser } from '@/lib/auth';
 import { analyzeContent } from '../services/ai-service';
+import { commitDraftToLibrary } from '../services/content-service';
+import { processSourceEmbeddings } from '../services/ingestion-service';
 import {
     ProcessingOptionsSchema,
     ProcessingOptions,
@@ -10,7 +13,7 @@ import {
 import * as CreditService from '../services/credit-service';
 import { calculateCost } from '../config/pricing-config';
 
-export async function analyzeContentPreview(
+export async function analyzeAndPersistContent(
     sourceId: string,
     options?: ProcessingOptions
 ) {
@@ -40,14 +43,15 @@ export async function analyzeContentPreview(
             return { success: false, message: "INSUFFICIENT_COMPUTE" };
         }
 
+        // 1. Generate Content
         const result = await analyzeContent(userId, sourceId, optionsResult.data);
         const { output, usage, model } = result;
 
-        // Bill the user
+        // 2. Bill the user
         try {
             const cost = calculateCost(model, usage.promptTokens, usage.completionTokens);
             await CreditService.billUsage(userId, cost, {
-                action: 'ANALYZE_CONTENT_PREVIEW',
+                action: 'ANALYZE_CONTENT_PREVIEW', // Keeping action name for analytics consistency or update if needed
                 model,
                 inputTokens: usage.promptTokens,
                 outputTokens: usage.completionTokens,
@@ -55,15 +59,47 @@ export async function analyzeContentPreview(
             });
         } catch (billingError) {
             console.error("Billing Failed:", billingError);
+            // We continue even if billing logging fails, but in strict fintech we might want to rollback
         }
 
-        return {
-            success: true,
-            data: output
-        };
+        // 3. Persist Immediately
+        try {
+            // Transform AI output to fit draft structure if needed, 
+            // currently analyzeContent output.units matches expectations
+            const draftData = {
+                suggestedSubject: output.suggestedSubject,
+                suggestedTopics: output.suggestedTopics,
+                units: output.units.map((u: any) => ({
+                    title: u.title,
+                    description: u.description,
+                    type: u.type as 'TEXT' | 'CODE',
+                }))
+            };
+
+            await commitDraftToLibrary(userId, sourceId, draftData);
+
+            // 4. Process Embeddings (Background-ish)
+            try {
+                await processSourceEmbeddings(userId, sourceId);
+            } catch (embeddingError) {
+                console.error('Embeddings Generation Failed (Partial Success):', embeddingError);
+                revalidatePath('/');
+                return { success: true, embeddingFailed: true };
+            }
+
+            revalidatePath('/');
+            return {
+                success: true,
+                embeddingFailed: false
+            };
+
+        } catch (persistError) {
+            console.error('Persistence Failed:', persistError);
+            return { success: false, message: 'Analysis succeeded but failed to save results.' };
+        }
 
     } catch (error) {
-        console.error('AI Preview Failed:', error);
-        return { success: false, message: 'Failed to generate preview' };
+        console.error('AI Processing Failed:', error);
+        return { success: false, message: 'Failed to process content' };
     }
 }
