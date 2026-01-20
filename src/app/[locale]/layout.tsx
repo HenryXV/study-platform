@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -54,6 +55,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             {children}
           </NextIntlClientProvider>
           <Toaster />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>

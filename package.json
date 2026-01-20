@@ -27,6 +27,7 @@
     "@types/prismjs": "^1.26.5",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.1",
+    "@vercel/analytics": "^1.6.1",
     "@vercel/blob": "^2.0.0",
     "ai": "^6.0.39",
     "class-variance-authority": "^0.7.1",
