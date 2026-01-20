@@ -1,10 +1,10 @@
 export const AI_MODELS = {
-    CHEAP: 'gemini-2.5-flash-lite',
+    CHEAP: 'gemini-2.0-flash',
     // Fast model for heavy lifting (parsing, chunking, large context)
     FAST: 'gemini-2.5-flash',
     // High intelligence model for complex reasoning and creative generation
     INTELLIGENT: 'gemini-3-flash',
-    EMBEDDING: 'multimodal-embedding-002'
+    EMBEDDING: 'voyage/voyage-3.5'
 } as const;
 
 export type AiModelType = typeof AI_MODELS;

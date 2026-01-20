@@ -5,6 +5,7 @@ import { embedMany } from "ai";
 import pdf from 'pdf-parse-fork';
 import { addChunksToSource } from "@/features/library/repositories/library-repository";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { AI_MODELS } from '../config/ai-models';
 
 /**
  * Custom renderer to ensure we get a "Form Feed" (\f) delimiter between pages.
@@ -149,7 +150,7 @@ async function generateEmbeddingsBatched(texts: string[]): Promise<number[][]> {
         CONCURRENCY_LIMIT,
         async (batch) => {
             const { embeddings } = await embedMany({
-                model: "voyage/voyage-3.5",
+                model: AI_MODELS.EMBEDDING,
                 values: batch,
             });
             return embeddings;

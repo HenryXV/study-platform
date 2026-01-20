@@ -97,12 +97,13 @@ export async function analyzeContent(
             3. **Ignorar Metadados:** Ignore preambulos, copyright notices, ou paginas de sumarios, exceto se contenham material de estudo.
 
             OUTPUT REGRAS:
+            - **Idioma:** Todo o conteúdo (enunciado, opções, explicação) deve estar em PORTUGUÊS DO BRASIL (pt-BR) culto.
             - **Title:** Descritivo e Profissional. (Se Lei, inclua o Artigo: "Tema (Arts. X-Y)").
             - **Description (CRITICAL):** Escreva um resumo curto (até 200 caracteres), rica em palavras-chave, de o que esta unidade cobre. 
               *Ruim:* "Esta unidade fala sobre Artigo 5."
               *Bom:* "Cobre direitos individuais, habeas corpus, direitos de propriedade, e a inviolabilidade da casa."
 
-            TEXT PARA ANALISAR:
+            TEXTO PARA ANALISAR:
             ${cleanText}
         `,
     });
