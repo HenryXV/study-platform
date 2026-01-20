@@ -25,13 +25,12 @@ export function LandingFooter() {
                     <div>
                         <h3 className="text-sm font-semibold text-zinc-200 tracking-wider uppercase mb-4">{t('links')}</h3>
                         <ul className="space-y-3">
-                            <li><a href="#" className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors">Twitter</a></li>
-                            <li><a href="#" className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors">GitHub</a></li>
-                            <li><a href="#" className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors">Discord</a></li>
+                            <li><a href="https://github.com/HenryXV/study-platform" className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors">GitHub</a></li>
                         </ul>
                     </div>
 
                     {/* Legal */}
+                    {/*
                     <div>
                         <h3 className="text-sm font-semibold text-zinc-200 tracking-wider uppercase mb-4">{t('legal')}</h3>
                         <ul className="space-y-3">
@@ -39,6 +38,7 @@ export function LandingFooter() {
                             <li><a href="#" className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors">{t('terms')}</a></li>
                         </ul>
                     </div>
+                    */}
                 </div>
 
                 <div className="mt-12 pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-4">
