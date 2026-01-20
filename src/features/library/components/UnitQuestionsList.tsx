@@ -4,6 +4,7 @@ import { BrainCircuit, X, Edit2, Check, Trash2, CheckSquare } from 'lucide-react
 import { QuestionData } from '@/features/study-session/data/flash-cards';
 import { deleteQuestion } from '../actions/delete-question';
 import { deleteQuestionsBulk } from '../actions/delete-questions-bulk';
+
 import { useRouter } from 'next/navigation';
 import { ConfirmModal } from '@/shared/ui/ConfirmModal';
 import { Button } from '@/shared/ui/Button';
@@ -130,6 +131,10 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
         }
     };
 
+
+
+
+
     return (
         <div className="pl-4 pr-2 py-3 border-l-2 border-zinc-800 ml-2 space-y-3">
             {/* Single Delete Modal */}
@@ -159,39 +164,44 @@ export function UnitQuestionsList({ unitId, questions: initialQuestions, onOpenE
                     {/* Question List Header */}
                     <div className="flex items-center justify-between">
                         <span className="text-xs text-zinc-500">{t('questionsCount', { count: initialQuestions.length })}</span>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                                if (selectionMode) {
-                                    exitSelectionMode();
-                                } else {
-                                    setSelectionMode(true);
-                                    // Auto-select first item
-                                    if (initialQuestions.length > 0) {
-                                        setSelectedIds(new Set([initialQuestions[0].id]));
+
+                        <div className="flex items-center gap-2">
+
+
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    if (selectionMode) {
+                                        exitSelectionMode();
+                                    } else {
+                                        setSelectionMode(true);
+                                        // Auto-select first item
+                                        if (initialQuestions.length > 0) {
+                                            setSelectedIds(new Set([initialQuestions[0].id]));
+                                        }
                                     }
-                                }
-                            }}
-                            className={cn(
-                                "text-xs h-6 px-2 gap-1",
-                                selectionMode
-                                    ? "text-zinc-400"
-                                    : "text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/30"
-                            )}
-                        >
-                            {selectionMode ? (
-                                <>
-                                    <X size={12} />
-                                    {tCommon('cancel')}
-                                </>
-                            ) : (
-                                <>
-                                    <CheckSquare size={12} />
-                                    {tCommon('select')}
-                                </>
-                            )}
-                        </Button>
+                                }}
+                                className={cn(
+                                    "text-xs h-6 px-2 gap-1",
+                                    selectionMode
+                                        ? "text-zinc-400"
+                                        : "text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/30"
+                                )}
+                            >
+                                {selectionMode ? (
+                                    <>
+                                        <X size={12} />
+                                        {tCommon('cancel')}
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckSquare size={12} />
+                                        {tCommon('select')}
+                                    </>
+                                )}
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="space-y-2">

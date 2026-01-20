@@ -38,6 +38,7 @@ interface AsaasCustomerRequest {
     phone?: string;
     mobilePhone?: string;
     externalReference?: string;
+    notificationDisabled?: boolean;
 }
 
 interface AsaasCustomerResponse {

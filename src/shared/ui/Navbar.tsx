@@ -1,3 +1,4 @@
+import { FeedbackWidget } from "@/features/feedback/components/FeedbackWidget";
 import { LanguageSwitcher } from "@/shared/ui/LanguageSwitcher";
 import { UserButton } from "@clerk/nextjs";
 import { CreditsWidget } from "@/features/payment/components/CreditsWidget";
@@ -41,6 +42,7 @@ export async function Navbar({ variant = "constrained" }: NavbarProps) {
                         </>
                     )}
 
+                    <FeedbackWidget />
                     <LanguageSwitcher />
 
                     {user && (

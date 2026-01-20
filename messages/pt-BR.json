@@ -256,6 +256,18 @@
             "deleteConfirm": "Excluir Definitivamente",
             "filterBySubject": "Filtrar por Matéria:",
             "allSubjects": "Todas as Matérias"
+        },
+        "export": {
+            "title": "Exportar",
+            "exportAll": "Exportar Tudo",
+            "unitNotFound": "Unidade de Estudo não encontrada",
+            "success": "Exportado com sucesso",
+            "error": "Falha na exportação",
+            "formats": {
+                "json": "JSON",
+                "txt": "Texto (TXT)",
+                "csv": "CSV"
+            }
         }
     },
     "study": {
@@ -321,16 +333,53 @@
         }
     },
     "landing": {
+        "header": {
+            "signIn": "Entrar",
+            "cta": "Começar Agora"
+        },
+        "footer": {
+            "about": "Systemizer",
+            "description": "A plataforma de estudo com active recall.",
+            "links": "Links",
+            "legal": "Legal",
+            "privacy": "Política de Privacidade",
+            "terms": "Termos de Uso",
+            "copyright": "© 2026 Systemizer. Todos os direitos reservados."
+        },
         "hero": {
             "titleStart": "Pare de Ler.",
             "titleEnd": "Comece a Testar.",
             "subtitle": "Envie seus PDFs. A IA gera a prova. Você domina o conteúdo usando Active Recall.",
             "cta": "Inicializar Sistema",
-            "freeCredits": "Receba 5 Créditos Grátis",
+            "freeCredits": "Receba 2000 Créditos Grátis",
             "visual": {
                 "file": "Palestra_01.pdf",
                 "activeRecall": "ACTIVE_RECALL",
                 "question": "Qual a complexidade de tempo da função process()?"
+            }
+        },
+        "socialProof": {
+            "trustedBy": "Confiado por estudantes das melhores instituições",
+            "stats": {
+                "users": "Estudantes Ativos",
+                "questions": "Questões Geradas"
+            }
+        },
+        "benefits": {
+            "title": "Tudo o que você precisa para dominar qualquer conteúdo",
+            "items": {
+                "ai": {
+                    "title": "Análise por IA",
+                    "description": "Nossa IA quebra PDFs complexos em unidades de estudo atômicas automaticamente."
+                },
+                "recall": {
+                    "title": "Motor de Active Recall",
+                    "description": "Algoritmos inteligentes garantem que você nunca esqueça o que aprendeu."
+                },
+                "mobile": {
+                    "title": "Estude em Qualquer Lugar",
+                    "description": "Sincronize seu progresso entre desktop e mobile para estudar onde estiver."
+                }
             }
         },
         "meta": {
@@ -364,6 +413,52 @@
                 }
             }
         },
+        "testimonials": {
+            "title": "Não acredite apenas em nós",
+            "items": [
+                {
+                    "name": "Sarah M.",
+                    "role": "Estudante de Direito",
+                    "text": "Essa plataforma mudou completamente como eu estudo para a OAB. O active recall é brutal mas eficaz."
+                },
+                {
+                    "name": "Carlos R.",
+                    "role": "Estudante de Medicina",
+                    "text": "Eu costumava apenas ler. Agora me testo constantemente. Minha retenção dobrou."
+                },
+                {
+                    "name": "Jessica T.",
+                    "role": "Engenharia",
+                    "text": "A habilidade de enviar um PDF e receber questões é mágica. Me poupa horas de preparação."
+                }
+            ]
+        },
+        "faq": {
+            "title": "Perguntas Frequentes",
+            "items": [
+                {
+                    "q": "Como funciona o sistema de créditos?",
+                    "a": "Você compra créditos para processar processar PDFs e gerar questões. Os créditos são consumidos com base no tamanho do arquivo e respostas geradas. Sem assinaturas mensais."
+                },
+                {
+                    "q": "Posso baixar minhas questões?",
+                    "a": "Sim, você pode exportar suas questões ou usar nosso sistema de revisão."
+                },
+                {
+                    "q": "Tem teste grátis?",
+                    "a": "Sim! Você recebe 2000 créditos gratuitamente ao se cadastrar para testar o sistema."
+                },
+                {
+                    "q": "Quais formatos são suportados?",
+                    "a": "Atualmente suportamos arquivos PDF e textos simples."
+                }
+            ]
+        },
+        "finalCta": {
+            "title": "Pronto para sistematizar seu estudo?",
+            "subtitle": "Junte-se a milhares de estudantes que mudaram para o active recall.",
+            "cta": "Começar a Aprender Agora"
+        },
         "arcade": {
             "title": "Pague Por Cram. Sem Assinaturas.",
             "subtitle": "Não queremos seu aluguel mensal. Queremos que você passe.",
@@ -371,22 +466,39 @@
                 "trial": {
                     "name": "Teste",
                     "description": "Teste a lógica do sistema agora.",
-                    "credits": "5 Créditos",
+                    "credits": "2000 Créditos",
                     "cta": "Inicializar"
                 },
                 "refuel": {
                     "name": "Reabastecer",
                     "description": "Preço de um café.",
-                    "credits": "25 Créditos",
+                    "credits": "10000 Créditos",
                     "cta": "Comprar"
                 },
                 "marathon": {
                     "name": "Maratona",
                     "description": "Cobertura completa da prova.",
-                    "credits": "100 Créditos",
+                    "credits": "30000 Créditos",
                     "cta": "Comprar"
                 }
             }
+        }
+    },
+    "feedback": {
+        "button": "Feedback",
+        "cancel": "Cancelar",
+        "title": "Enviar Feedback",
+        "description": "Encontrou um bug ou tem uma sugestão? Conte para nós.",
+        "type": "Tipo",
+        "message": "Mensagem",
+        "messagePlaceholder": "Descreva o que aconteceu...",
+        "submit": "Enviar Feedback",
+        "success": "Obrigado pelo seu feedback!",
+        "error": "Erro ao enviar feedback.",
+        "types": {
+            "BUG": "Bug / Erro",
+            "FEATURE": "Sugestão de Recurso",
+            "OTHER": "Outro"
         }
     }
 }

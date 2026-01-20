@@ -256,6 +256,18 @@
             "deleteConfirm": "Delete Forever",
             "filterBySubject": "Filter by Subject:",
             "allSubjects": "All Subjects"
+        },
+        "export": {
+            "title": "Export",
+            "exportAll": "Export All",
+            "unitNotFound": "Study Unit not found",
+            "success": "Exported successfully",
+            "error": "Failed to export",
+            "formats": {
+                "json": "JSON",
+                "txt": "Text (TXT)",
+                "csv": "CSV"
+            }
         }
     },
     "study": {
@@ -321,16 +333,53 @@
         }
     },
     "landing": {
+        "header": {
+            "signIn": "Sign In",
+            "cta": "Get Started"
+        },
+        "footer": {
+            "about": "Systemizer",
+            "description": "The active recall study platform.",
+            "links": "Links",
+            "legal": "Legal",
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service",
+            "copyright": "© 2026 Systemizer. All rights reserved."
+        },
         "hero": {
             "titleStart": "Stop Reading.",
             "titleEnd": "Start Testing.",
             "subtitle": "Upload your PDFs. AI generates the exam. You master the content using Active Recall.",
             "cta": "Initialize System",
-            "freeCredits": "Get 5 Free Credits",
+            "freeCredits": "Get 2000 Free Credits",
             "visual": {
                 "file": "Lecture_01.pdf",
                 "activeRecall": "ACTIVE_RECALL",
                 "question": "What is the time complexity of the process() function?"
+            }
+        },
+        "socialProof": {
+            "trustedBy": "Trusted by students from top institutions",
+            "stats": {
+                "users": "Active Learners",
+                "questions": "Questions Generated"
+            }
+        },
+        "benefits": {
+            "title": "Everything you need to master any subject",
+            "items": {
+                "ai": {
+                    "title": "AI Powered Analysis",
+                    "description": "Our AI breaks down complex PDFs into atomic study units automatically."
+                },
+                "recall": {
+                    "title": "Active Recall Engine",
+                    "description": "Smart algorithms that ensure you never forget what you've learned."
+                },
+                "mobile": {
+                    "title": "Study Anywhere",
+                    "description": "Seamlessly sync progress between desktop and mobile for on-the-go cramming."
+                }
             }
         },
         "meta": {
@@ -364,6 +413,52 @@
                 }
             }
         },
+        "testimonials": {
+            "title": "Don't just take our word for it",
+            "items": [
+                {
+                    "name": "Sarah M.",
+                    "role": "Law Student",
+                    "text": "This platform completely changed how I study for the Bar. The active recall is brutal but effective."
+                },
+                {
+                    "name": "Carlos R.",
+                    "role": "Med Student",
+                    "text": "I used to just read my notes. Now I test myself constantly. My retention has doubled."
+                },
+                {
+                    "name": "Jessica T.",
+                    "role": "Engineering",
+                    "text": "The ability to just upload a PDF and get questions is magic. Saves me hours of prep time."
+                }
+            ]
+        },
+        "faq": {
+            "title": "Frequently Asked Questions",
+            "items": [
+                {
+                    "q": "How does the credit system work?",
+                    "a": "You buy credits to process PDFs and generate questions. Credits are consumed based on file size and answers generated. No monthly subscriptions."
+                },
+                {
+                    "q": "Can I download my questions?",
+                    "a": "Yes, you can export your questions or just use our built-in review system."
+                },
+                {
+                    "q": "Is there a free trial?",
+                    "a": "Yes! You get 2000 free credits when you sign up to test the system on your own documents."
+                },
+                {
+                    "q": "What file formats are supported?",
+                    "a": "Currently we support PDF files and plain text. We are working on support for Word and images."
+                }
+            ]
+        },
+        "finalCta": {
+            "title": "Ready to systemize your study?",
+            "subtitle": "Join thousands of students who have switched to active recall.",
+            "cta": "Start Learning Now"
+        },
         "arcade": {
             "title": "Pay Per Cram. No Subscriptions.",
             "subtitle": "We don't want your monthly rent. We want you to pass.",
@@ -371,22 +466,39 @@
                 "trial": {
                     "name": "Trial",
                     "description": "Test the system logic right now.",
-                    "credits": "5 Credits",
+                    "credits": "2000 Credits",
                     "cta": "Initialize"
                 },
                 "refuel": {
                     "name": "Refuel",
                     "description": "Price of one coffee.",
-                    "credits": "25 Credits",
+                    "credits": "10000 Credits",
                     "cta": "Purchase"
                 },
                 "marathon": {
                     "name": "Marathon",
                     "description": "Full exam coverage.",
-                    "credits": "100 Credits",
+                    "credits": "30000 Credits",
                     "cta": "Purchase"
                 }
             }
+        }
+    },
+    "feedback": {
+        "button": "Feedback",
+        "cancel": "Cancel",
+        "title": "Submit Feedback",
+        "description": "Found a bug or have a suggestion? Let us know.",
+        "type": "Type",
+        "message": "Message",
+        "messagePlaceholder": "Describe what happened...",
+        "submit": "Submit Feedback",
+        "success": "Thanks for your feedback!",
+        "error": "Failed to submit feedback.",
+        "types": {
+            "BUG": "Bug / Error",
+            "FEATURE": "Feature Request",
+            "OTHER": "Other"
         }
     }
 }

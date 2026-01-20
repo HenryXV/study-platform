@@ -16,7 +16,7 @@ export function ArcadeSection() {
         },
         {
             name: t('tiers.refuel.name'),
-            price: 'R$ 4,90',
+            price: 'R$ 9,90',
             description: t('tiers.refuel.description'),
             credits: t('tiers.refuel.credits'),
             cta: t('tiers.refuel.cta'),
@@ -24,7 +24,7 @@ export function ArcadeSection() {
         },
         {
             name: t('tiers.marathon.name'),
-            price: 'R$ 14,90',
+            price: 'R$ 24,90',
             description: t('tiers.marathon.description'),
             credits: t('tiers.marathon.credits'),
             cta: t('tiers.marathon.cta'),

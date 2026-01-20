@@ -1,9 +1,9 @@
-'use client';
-
 import { useState, useCallback } from 'react';
-import { Trash2, ChevronDown, ChevronRight, Sparkles, Loader2, Edit2, Save, Check, X, CheckSquare } from 'lucide-react';
+import { Trash2, ChevronDown, ChevronRight, Sparkles, Loader2, Edit2, Save, Check, X, CheckSquare, Download, FileJson, FileText, FileSpreadsheet } from 'lucide-react';
 import { updateStudyUnit } from '../actions/update-study-unit';
 import { deleteUnitsBulk } from '../actions/delete-units-bulk';
+import { exportUnitData } from '../actions/export-unit';
+import { exportAllUnits } from '../actions/export-all-units';
 import { Badge } from '@/shared/ui/Badge';
 import { Button } from '@/shared/ui/Button';
 import { Card } from '@/shared/ui/Card';
@@ -35,6 +35,7 @@ interface GeneratedUnitsListProps {
 export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, onOpenSupervisor, onOpenEditor }: GeneratedUnitsListProps) {
     const router = useRouter();
     const t = useTranslations('library.generated');
+    const tExport = useTranslations('library.export');
     const tCommon = useTranslations('common');
 
     // Single delete state
@@ -54,6 +55,11 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
     const [editingUnitId, setEditingUnitId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState<{ content: string; description: string }>({ content: '', description: '' });
     const [isSaving, setIsSaving] = useState(false);
+
+    // Export State
+    const [isExporting, setIsExporting] = useState<string | null>(null); // unitId or 'ALL'
+    const [showExportMenuId, setShowExportMenuId] = useState<string | null>(null); // unitId
+    const [showExportAllMenu, setShowExportAllMenu] = useState(false);
 
     // Selection helpers
     const toggleSelection = (id: string) => {
@@ -156,6 +162,40 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
         }
     };
 
+    const handleExport = async (unitId: string | undefined, format: 'json' | 'txt' | 'csv') => {
+        const isBulk = !unitId;
+        setIsExporting(isBulk ? 'ALL' : unitId);
+        setShowExportMenuId(null);
+        setShowExportAllMenu(false);
+
+        try {
+            const result = isBulk
+                ? await exportAllUnits(undefined, format)
+                : await exportUnitData(unitId!, format);
+
+            if (result.success && result.data && result.filename && result.contentType) {
+                // Client-side download
+                const blob = new Blob([result.data], { type: result.contentType });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                toast.success(tExport('success'));
+            } else {
+                toast.error(result.error || tExport('error'));
+            }
+        } catch (error) {
+            console.error('Export failed:', error);
+            toast.error(tExport('error'));
+        } finally {
+            setIsExporting(null);
+        }
+    };
+
     if (units.length === 0) {
         return <p className="text-sm text-zinc-500 italic p-4">{t('noUnits')}</p>;
     }
@@ -187,39 +227,86 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
             {/* Header Toolbar */}
             <div className="flex items-center justify-between mb-4">
                 <span className="text-sm text-zinc-400">{t('unitsCount', { count: units.length })}</span>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                        if (selectionMode) {
-                            exitSelectionMode();
-                        } else {
-                            setSelectionMode(true);
-                            // Auto-select first item
-                            if (units.length > 0) {
-                                setSelectedIds(new Set([units[0].id]));
+                <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowExportAllMenu(!showExportAllMenu)}
+                            disabled={isExporting === 'ALL'}
+                            className="text-xs gap-1.5 text-zinc-400 hover:text-green-400 hover:bg-green-950/20"
+                        >
+                            {isExporting === 'ALL' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                            {tExport('exportAll')}
+                        </Button>
+
+                        {showExportAllMenu && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-40"
+                                    onClick={() => setShowExportAllMenu(false)}
+                                />
+                                <div className="absolute top-full right-0 mt-2 min-w-[140px] bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
+                                    <button
+                                        onClick={() => handleExport(undefined, 'json')}
+                                        className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
+                                    >
+                                        <FileJson size={14} className="text-yellow-500" />
+                                        JSON
+                                    </button>
+                                    <button
+                                        onClick={() => handleExport(undefined, 'txt')}
+                                        className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
+                                    >
+                                        <FileText size={14} className="text-blue-500" />
+                                        TXT
+                                    </button>
+                                    <button
+                                        onClick={() => handleExport(undefined, 'csv')}
+                                        className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
+                                    >
+                                        <FileSpreadsheet size={14} className="text-green-500" />
+                                        CSV
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                            if (selectionMode) {
+                                exitSelectionMode();
+                            } else {
+                                setSelectionMode(true);
+                                // Auto-select first item
+                                if (units.length > 0) {
+                                    setSelectedIds(new Set([units[0].id]));
+                                }
                             }
-                        }
-                    }}
-                    className={cn(
-                        "text-xs gap-1.5",
-                        selectionMode
-                            ? "text-zinc-400"
-                            : "text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/30"
-                    )}
-                >
-                    {selectionMode ? (
-                        <>
-                            <X size={14} />
-                            {tCommon('cancel')}
-                        </>
-                    ) : (
-                        <>
-                            <CheckSquare size={14} />
-                            {tCommon('selectMultiple')}
-                        </>
-                    )}
-                </Button>
+                        }}
+                        className={cn(
+                            "text-xs gap-1.5",
+                            selectionMode
+                                ? "text-zinc-400"
+                                : "text-indigo-400 hover:text-indigo-300 hover:bg-indigo-950/30"
+                        )}
+                    >
+                        {selectionMode ? (
+                            <>
+                                <X size={14} />
+                                {tCommon('cancel')}
+                            </>
+                        ) : (
+                            <>
+                                <CheckSquare size={14} />
+                                {tCommon('selectMultiple')}
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
 
             <div className="space-y-3 pb-20">
@@ -230,7 +317,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
 
                     return (
                         <Card key={unit.id} className={cn(
-                            "group hover:border-zinc-700 transition-all shadow-sm overflow-hidden",
+                            "group hover:border-zinc-700 transition-all shadow-sm overflow-visible",
                             isSelected && "border-indigo-500/50 bg-indigo-950/10"
                         )}>
                             {/* Header / Main Content */}
@@ -322,6 +409,67 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                         "flex items-center gap-1 transition-all",
                                         isGenerating ? 'opacity-100' : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100'
                                     )}>
+                                        {/* Export Button for each Unit */}
+                                        <div className="relative">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowExportMenuId(showExportMenuId === unit.id ? null : unit.id);
+                                                }}
+                                                className="h-7 w-7 text-zinc-500 hover:text-green-400 hover:bg-green-950/20"
+                                                title={tExport('title')}
+                                                disabled={!!isExporting}
+                                            >
+                                                {isExporting === unit.id ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                                            </Button>
+
+                                            {showExportMenuId === unit.id && (
+                                                <>
+                                                    <div
+                                                        className="fixed inset-0 z-40"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setShowExportMenuId(null);
+                                                        }}
+                                                    />
+                                                    <div className="absolute top-full right-0 mt-2 min-w-[140px] bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleExport(unit.id, 'json');
+                                                            }}
+                                                            className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
+                                                        >
+                                                            <FileJson size={14} className="text-yellow-500" />
+                                                            JSON
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleExport(unit.id, 'txt');
+                                                            }}
+                                                            className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
+                                                        >
+                                                            <FileText size={14} className="text-blue-500" />
+                                                            TXT
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleExport(unit.id, 'csv');
+                                                            }}
+                                                            className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white flex items-center gap-2"
+                                                        >
+                                                            <FileSpreadsheet size={14} className="text-green-500" />
+                                                            CSV
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -361,7 +509,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
 
                             {/* Expanded Questions Area */}
                             {isExpanded && !selectionMode && (
-                                <div className="border-t border-zinc-800 bg-zinc-950/30 p-4 pt-2">
+                                <div className="border-t border-zinc-800 bg-zinc-950/30 p-4 pt-2 rounded-b-xl">
                                     <UnitQuestionsList
                                         unitId={unit.id}
                                         questions={unit.questions || []}

@@ -90,6 +90,7 @@ export const paymentService = {
                         name: userName,
                         email: userEmail,
                         cpfCnpj: cpf,
+                        notificationDisabled: true,
                     });
 
                     asaasCustomerId = customer.id;

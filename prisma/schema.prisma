@@ -21,6 +21,23 @@ model User {
   transactions    Transaction[]
   usageLogs       UsageLog[]
   trialRedeemed   Boolean        @default(false)
+  feedbacks       Feedback[]
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String? // Optional: allows anonymous reports if they can't login
+  type      String // "BUG", "FEATURE", "OTHER"
+  message   String   @db.Text
+  url       String? // The specific page where the bug happened
+  metadata  Json? // { browser: "Chrome", os: "Windows", width: 1920 }
+  status    String   @default("OPEN") // "OPEN", "RESOLVED", "IGNORED"
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
 }
 
 model UsageLog {
