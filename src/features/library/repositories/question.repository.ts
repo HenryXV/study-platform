@@ -130,7 +130,34 @@ export const QuestionRepository = {
 
     async createBatch(userId: string, unitId: string, subjectId: string | null, questions: GeneratorQuestion[]) {
         return prisma.$transaction(async (tx) => {
-            // Create all questions in parallel instead of sequential loop
+            // 1. Extract all unique topics across all questions
+            const allTopics = Array.from(new Set(
+                questions.flatMap(q => q.topics || [])
+            ));
+
+            // 2. Ensure all topics exist (upsert them all first)
+            // This prevents race conditions in "connectOrCreate" inside the parallel loop below
+            if (subjectId && allTopics.length > 0) {
+                await Promise.all(allTopics.map(topicName =>
+                    tx.topic.upsert({
+                        where: {
+                            name_subjectId_userId: {
+                                name: topicName,
+                                subjectId: subjectId,
+                                userId
+                            }
+                        },
+                        create: {
+                            name: topicName,
+                            subjectId: subjectId,
+                            userId
+                        },
+                        update: {} // No-op if exists
+                    })
+                ));
+            }
+
+            // 3. Create all questions in parallel, now just connecting to existing/created topics
             const createPromises = questions.map(q =>
                 tx.question.create({
                     data: {
@@ -139,15 +166,8 @@ export const QuestionRepository = {
                         type: mapType(q.type),
                         subjectId: subjectId,
                         topics: (subjectId && q.topics?.length) ? {
-                            connectOrCreate: q.topics.map(topicName => ({
-                                where: {
-                                    name_subjectId_userId: {
-                                        name: topicName,
-                                        subjectId: subjectId,
-                                        userId
-                                    }
-                                },
-                                create: {
+                            connect: q.topics.map(topicName => ({
+                                name_subjectId_userId: {
                                     name: topicName,
                                     subjectId: subjectId,
                                     userId
@@ -181,6 +201,46 @@ export const QuestionRepository = {
             );
             const contexts = await Promise.all(contextPromises);
 
+            // Pre-process topics for update
+            // We need to know which subjectId applies to which topic
+            const topicOperations: { name: string, subjectId: string }[] = [];
+            validQuestions.forEach((q, i) => {
+                const context = contexts[i];
+                if (context && context.subjectId && q.topics) {
+                    q.topics.forEach(t => {
+                        topicOperations.push({ name: t, subjectId: context.subjectId! });
+                    });
+                }
+            });
+
+            // unique topic+subject combinations
+            const uniqueTopicOps = Array.from(new Set(topicOperations.map(op => `${op.name}|${op.subjectId}`)))
+                .map(s => {
+                    const [name, subjectId] = s.split('|');
+                    return { name, subjectId };
+                });
+
+            // Upsert all needed topics first
+            if (uniqueTopicOps.length > 0) {
+                await Promise.all(uniqueTopicOps.map(op =>
+                    tx.topic.upsert({
+                        where: {
+                            name_subjectId_userId: {
+                                name: op.name,
+                                subjectId: op.subjectId,
+                                userId
+                            }
+                        },
+                        create: {
+                            name: op.name,
+                            subjectId: op.subjectId,
+                            userId
+                        },
+                        update: {}
+                    })
+                ));
+            }
+
             // Build update promises only for questions that exist and user owns
             const updatePromises = validQuestions
                 .map((q, i) => ({ question: q, context: contexts[i] }))
@@ -197,16 +257,9 @@ export const QuestionRepository = {
                                 explanation: q.explanation || ''
                             },
                             topics: (context!.subjectId && q.topics) ? {
-                                set: [],
-                                connectOrCreate: q.topics.map(t => ({
-                                    where: {
-                                        name_subjectId_userId: {
-                                            name: t,
-                                            subjectId: context!.subjectId!,
-                                            userId
-                                        }
-                                    },
-                                    create: {
+                                set: [], // Clear existing relations
+                                connect: q.topics.map(t => ({
+                                    name_subjectId_userId: {
                                         name: t,
                                         subjectId: context!.subjectId!,
                                         userId
