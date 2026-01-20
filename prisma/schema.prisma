@@ -91,12 +91,12 @@ model ContentSource {
 }
 
 model ContentChunk {
-  id         String                 @id @default(cuid())
+  id         String                       @id @default(cuid())
   content    String
   pageNumber Int
-  embedding  Unsupported("vector")?
+  embedding  Unsupported("vector(1024)")?
   sourceId   String
-  source     ContentSource          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  source     ContentSource                @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
   @@index([sourceId])
 }

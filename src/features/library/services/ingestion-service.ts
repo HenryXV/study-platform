@@ -108,28 +108,55 @@ export async function chunkText(text: string): Promise<Chunk[]> {
 }
 
 /**
- * Helper to generate embeddings in batches with delay.
+ * Helper to run promises with a concurrency limit.
  */
-async function generateEmbeddingsBatched(texts: string[]): Promise<number[][]> {
-    const BATCH_SIZE = 50;
-    const DELAY_MS = 100;
-    const allEmbeddings: number[][] = [];
+async function mapWithConcurrency<T, R>(
+    items: T[],
+    concurrency: number,
+    fn: (item: T) => Promise<R>
+): Promise<R[]> {
+    const results: R[] = new Array(items.length);
+    const iterator = items.entries();
 
-    for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-        const batch = texts.slice(i, i + BATCH_SIZE);
-
-        const { embeddings } = await embedMany({
-            model: "google/text-multilingual-embedding-002",
-            values: batch,
+    const workers = new Array(Math.min(concurrency, items.length))
+        .fill(iterator)
+        .map(async (iter) => {
+            for (const [index, item] of iter) {
+                results[index] = await fn(item);
+            }
         });
 
-        allEmbeddings.push(...embeddings);
+    await Promise.all(workers);
+    return results;
+}
 
-        // Add delay after each request (except potentially the last one, but strict reading "after each" implies safe to do so)
-        if (i + BATCH_SIZE < texts.length) {
-            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
-        }
+/**
+ * Helper to generate embeddings in parallel batches with concurrency limit.
+ */
+async function generateEmbeddingsBatched(texts: string[]): Promise<number[][]> {
+    const BATCH_SIZE = 100;
+    const CONCURRENCY_LIMIT = 10;
+    const batches: string[][] = [];
+
+    // Prepare batches
+    for (let i = 0; i < texts.length; i += BATCH_SIZE) {
+        batches.push(texts.slice(i, i + BATCH_SIZE));
     }
+
+    // Process batches with concurrency limit
+    const batchResults = await mapWithConcurrency(
+        batches,
+        CONCURRENCY_LIMIT,
+        async (batch) => {
+            const { embeddings } = await embedMany({
+                model: "voyage/voyage-3.5",
+                values: batch,
+            });
+            return embeddings;
+        }
+    );
+
+    const allEmbeddings = batchResults.flat();
 
     if (allEmbeddings.length !== texts.length) {
         throw new Error(`Integrity check failed: Expected ${texts.length} embeddings, got ${allEmbeddings.length}`);
@@ -187,16 +214,7 @@ export async function processSourceEmbeddings(
         embedding: embeddings[i],
     }));
 
-    // Use the NEW repository method
-    // We need to import it first, but I'll assume I can fix imports after appending
-    // Actually, I should probably use replace_file_content to properly add imports and the function
-    // But since I am appending, I will just reference it and fix imports in next step
-    // Wait, I cannot use it if not imported.
-    // I already imported createSourceWithChunks from SAME file.
-    // I need to update imports.
 
-    // For now, I will return the data and let the caller save? No, the service should do it.
-    // I will depend on a subsequent tool call to fix the import.
 
     return await addChunksToSource(sourceId, chunksWithEmbeddings);
 }

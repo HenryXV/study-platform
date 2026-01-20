@@ -11,7 +11,7 @@ export async function findRelatedChunks(query: string, limit: number = 5, source
 
     // 1. Generate embedding for the query
     const { embedding } = await embed({
-        model: "google/text-multilingual-embedding-002",
+        model: "voyage/voyage-3.5",
         value: query,
     });
 

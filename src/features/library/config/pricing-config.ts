@@ -2,9 +2,9 @@ export { AI_MODELS } from './ai-models';
 import { AI_MODELS } from './ai-models';
 
 export const MODEL_RATES = {
-    [AI_MODELS.CHEAP]: { input: 20, output: 60 },
-    [AI_MODELS.FAST]: { input: 30, output: 300 },
-    [AI_MODELS.INTELLIGENT]: { input: 60, output: 350 },
+    [AI_MODELS.CHEAP]: { input: 2, output: 8 },
+    [AI_MODELS.FAST]: { input: 6, output: 50 },
+    [AI_MODELS.INTELLIGENT]: { input: 10, output: 60 },
 } as const;
 
 /**
