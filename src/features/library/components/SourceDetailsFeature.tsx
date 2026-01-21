@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { requireUser } from '@/lib/auth';
 import { SourceInspector } from '@/features/library/components/SourceInspector';
 import { notFound } from 'next/navigation';
 import { SourceMetrics } from '@/features/library/ui/SourceMetrics';
@@ -10,9 +11,10 @@ interface SourceDetailsFeatureProps {
 
 export async function SourceDetailsFeature({ params }: SourceDetailsFeatureProps) {
     const { id } = await params;
+    const userId = await requireUser();
 
-    const source = await prisma.contentSource.findUnique({
-        where: { id },
+    const source = await prisma.contentSource.findFirst({
+        where: { id, userId },
         select: {
             id: true,
             title: true,

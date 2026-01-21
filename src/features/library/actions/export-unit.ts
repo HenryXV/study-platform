@@ -3,6 +3,8 @@
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import type { QuestionModel as Question } from '@/app/generated/prisma/models';
+import { requireUser } from '@/lib/auth';
+import { ContentRepository } from '../repositories/content.repository';
 
 type ExportFormat = 'json' | 'txt' | 'csv';
 
@@ -16,10 +18,14 @@ interface ExportResult {
 
 export async function exportUnitData(unitId: string, format: ExportFormat): Promise<ExportResult> {
     try {
+        const userId = await requireUser();
         const t = await getTranslations('library.export');
 
-        const unit = await prisma.studyUnit.findUnique({
-            where: { id: unitId },
+        const unit = await prisma.studyUnit.findFirst({
+            where: {
+                id: unitId,
+                source: { userId }
+            },
             include: {
                 questions: {
                     orderBy: {

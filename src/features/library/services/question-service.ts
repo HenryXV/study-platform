@@ -22,7 +22,7 @@ export async function deleteQuestions(userId: string, questionIds: string[]) {
 
 export async function commitQuestions(userId: string, unitId: string, questions: GeneratorQuestion[]) {
     // 1. Verify Unit exists and fetch context (SubjectId)
-    const unit = await ContentRepository.findUnitById(unitId);
+    const unit = await ContentRepository.findUnitById(unitId, userId);
 
     if (!unit) {
         throw new NotFoundError("Unit not found");

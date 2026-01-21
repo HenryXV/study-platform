@@ -176,15 +176,13 @@ export async function fetchOvertimeQuestions(
  */
 export async function fetchUnitContent(userId: string, unitId: string) {
     try {
-        const unit = await ContentRepository.findUnitById(unitId);
+        const unit = await ContentRepository.findUnitById(unitId, userId);
 
         if (!unit) {
             throw new NotFoundError("Unit not found");
         }
 
-        if (unit.source.userId !== userId) {
-            throw new AuthorizationError("Unauthorized access to unit");
-        }
+        // Security check enforced by Repo (implicit)
 
         return {
             content: unit.content,

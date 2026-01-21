@@ -7,9 +7,12 @@ export interface DraftData {
 }
 
 export const ContentRepository = {
-    async findUnitById(id: string) {
+    async findUnitById(id: string, userId: string) {
         return prisma.studyUnit.findUnique({
-            where: { id },
+            where: {
+                id,
+                source: { userId } // Enforce ownership via relation
+            },
             include: {
                 source: {
                     select: {
@@ -23,9 +26,12 @@ export const ContentRepository = {
         });
     },
 
-    async findUnitWithContext(id: string) {
+    async findUnitWithContext(id: string, userId: string) {
         return prisma.studyUnit.findUnique({
-            where: { id },
+            where: {
+                id,
+                source: { userId } // Enforce ownership via relation
+            },
             include: {
                 source: {
                     include: {

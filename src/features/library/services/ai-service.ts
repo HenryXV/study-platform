@@ -136,16 +136,13 @@ export async function generateQuestions(
     }
 
     // Fetch Unit Context from Repository
-    const unit = await ContentRepository.findUnitWithContext(unitId);
+    const unit = await ContentRepository.findUnitWithContext(unitId, userId);
 
     if (!unit) {
         throw new Error("Unit not found");
     }
 
-    // Security check enforced
-    if (unit.source.userId !== userId) {
-        throw new Error("Unauthorized");
-    }
+    // Security check enforced by Repo (implicit in query)
 
     const searchQuery = `${unit.content}: ${unit.description || ''}`;
 
