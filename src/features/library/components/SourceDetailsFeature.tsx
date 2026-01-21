@@ -20,7 +20,7 @@ export async function SourceDetailsFeature({ params }: SourceDetailsFeatureProps
             fileUrl: true,
             status: true,
             units: {
-                orderBy: { createdAt: 'asc' },
+                orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
                 include: {
                     questions: true
                 }

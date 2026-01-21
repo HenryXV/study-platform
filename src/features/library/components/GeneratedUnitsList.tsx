@@ -366,6 +366,11 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                                 {unit.type}
                                             </Badge>
                                             <span className="text-xs text-zinc-500 font-mono select-none">ID: {unit.id.slice(-4)}</span>
+                                            {unit.questions && unit.questions.length > 0 && (
+                                                <Badge variant="secondary" className="bg-zinc-800 text-zinc-400 border-zinc-700 h-5 px-1.5 text-[10px] gap-1">
+                                                    <span className="font-bold">{unit.questions.length}</span> {t('questions')}
+                                                </Badge>
+                                            )}
                                         </div>
 
                                         {editingUnitId === unit.id ? (

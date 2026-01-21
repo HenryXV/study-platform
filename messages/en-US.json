@@ -161,7 +161,8 @@
             "unitTitlePlaceholder": "Enter unit title...",
             "descriptionPlaceholder": "Enter unit description...",
             "saveChanges": "Save Changes",
-            "generateQuestions": "Generate questions"
+            "generateQuestions": "Generate questions",
+            "questions": "Questions"
         },
         "citation": {
             "jumpToPage": "Jump to Page {page}",

@@ -161,7 +161,8 @@
             "unitTitlePlaceholder": "Digite o título da unidade...",
             "descriptionPlaceholder": "Digite a descrição da unidade...",
             "saveChanges": "Salvar Alterações",
-            "generateQuestions": "Gerar questões"
+            "generateQuestions": "Gerar questões",
+            "questions": "Questões"
         },
         "citation": {
             "jumpToPage": "Ir para a Página {page}",
