@@ -13,8 +13,8 @@ graph TB
     DB --> Vector["pgvector (Embeddings)"]
     
     API --> Auth["Clerk Auth"]
-    API --> Cache["Upstash Redis (Rate Limiting)"]
     API --> Payment["Asaas (Pix Gateway)"]
+    API --> Credits["Credit System (Usage Control)"]
     
     subgraph "Features"
         Dashboard
@@ -59,13 +59,19 @@ Many study apps rely on black-box algorithms. We implemented a custom, verifiabl
 
 ### 2.3 Performance & UX Patterns
 *   **Optimistic UI:** When a user completes a review, the UI updates instantly (via React Query cache invalidation) while the server action runs in the background.
-*   **Edge-Ready Rate Limiting:** We protect the "Intelligence Layer" with Redis-backed rate limiting (`10 req / 10 min`) to prevent API cost spirals while allowing bursts of legitimate activity.
+*   **Credit-Based Usage Control:** We protect the "Intelligence Layer" with credit balance checks. Users must have sufficient credits before any AI operation executes, providing natural cost control while allowing unlimited activity for paying users.
 
 ---
 
 ## 3. The Intelligence Layer
 
-The "Brain" of the application is an **Ingestion-Atomization-Interrogation** pipeline. It is agnostic of the underlying LLM (currently transitioning between Gemini and Claude) but strict about the *structure* of data it produces. All AI inputs are "High Entropy" (raw text) and all outputs are "Strictly Typed JSON" (Zod Schema).
+The "Brain" of the application is an **Ingestion-Atomization-Interrogation** pipeline. It uses a tiered Gemini model approach (`ai-models.ts`) but remains strict about the *structure* of data it produces. All AI inputs are "High Entropy" (raw text) and all outputs are "Strictly Typed JSON" (Zod Schema).
+
+**Model Tiers:**
+*   **CHEAP (`gemini-2.0-flash`):** Default for most operations, balances cost and quality.
+*   **FAST (`gemini-2.5-flash`):** Heavy lifting tasks like parsing large documents.
+*   **INTELLIGENT (`gemini-3-flash`):** Complex reasoning and creative generation.
+*   **EMBEDDING (`voyage/voyage-3.5`):** Vector embeddings for semantic search.
 
 ### 3.1 Pipeline Architecture
 
@@ -109,16 +115,18 @@ graph TD
 *   **Strategy:**
     *   **Prompt Persona:** "Ruthless Examiner" - instructed to create distractors that are plausible/tricky.
     *   **Context Injection:** Feeds `Subject` + `Topic` tags to the LLM to prevent generic questions.
+    *   **Banca Profiles:** Supports Brazilian exam board styles (FGV, CESPE, VUNESP, FCC, CESGRANRIO) via `banca-profiles.ts`, allowing users to practice with questions matching their target exams.
     *   **Output Schema (`QuestionSchema`):**
         *   `type`: `MULTIPLE_CHOICE | OPEN | CODE`
         *   `correctAnswer`: The source of truth.
         *   `explanation`: Why the answer is correct (for feedback).
 
-### 3.5 Rate Limiting & Cost Control
-To prevent API abuse and cost overrun, the Intelligence Layer is protected by a strict sliding window limiter:
-*   **Limits:** 10 AI requests per 10 minutes per user.
-*   **Storage:** Redis-backed (`@upstash/ratelimit`).
-*   **Pattern:** `ratelimit.limit(userId)` wraps every generation action.
+### 3.5 Credit-Based Usage Control
+Instead of traditional rate limiting, the Intelligence Layer uses the Credit System as a natural throttle:
+*   **Pattern:** `hasSufficientBalance(userId, estimatedCost)` is called before every AI operation.
+*   **Billing:** `billUsage(userId, cost, details)` deducts credits and logs usage after successful generation.
+*   **Implementation:** `features/library/services/credit-service.ts`
+*   **Benefit:** Paying users have unlimited burst capacity; free users are gently gated by their credit balance.
 
 ---
 
@@ -148,7 +156,23 @@ We integrate with **Asaas** for Brazilian instant payments (Pix).
 
 ---
 
-## 5. Data Core (The "Systemizer" Memory)
+## 5. Auxiliary Features
+
+### 5.1 Feedback System
+A lightweight in-app feedback mechanism for bug reports and feature requests.
+*   **Implementation:** `features/feedback/` (actions, services, repository pattern).
+*   **Schema:** `Feedback` model with `type` (BUG, FEATURE, OTHER), `status` tracking, and optional `metadata` for browser/OS context.
+*   **Widget:** Floating `FeedbackWidget` accessible from the Navbar.
+
+### 5.2 Data Export
+Users can export their study units and questions for offline use or backup.
+*   **Implementation:** `features/library/actions/export-unit.ts`, `export-all-units.ts`
+*   **Formats:** JSON (structured), TXT (human-readable), CSV (spreadsheet-compatible).
+*   **Security:** Enforces `userId` ownership check before export.
+
+---
+
+## 6. Data Core (The "Systemizer" Memory)
 
 The database schema is designed to enforce strict ownership and hierarchical processing. We do not use unstructured JSON blobs for core data; everything is relational.
 
@@ -159,6 +183,7 @@ erDiagram
     User ||--o{ ContentSource : owns
     User ||--o{ StudySession : has
     User ||--o{ Transaction : initiates
+    User ||--o{ Feedback : submits
     User ||--o{ UsageLog : generates
 
     Subject ||--o{ ContentSource : categorizes
@@ -210,7 +235,7 @@ erDiagram
 
 ---
 
-## 6. Application Layer (Next.js 16)
+## 7. Application Layer (Next.js 16)
 
 We rely on standard Next.js 16 patterns to keep the implementation boring and predictable.
 
@@ -241,7 +266,7 @@ We separate concerns to keep business logic testable:
     *   Handles Transactions.
     *   Returns strict typed objects.
 
-## 7. Security & Access Control
+## 8. Security & Access Control
 
 ### 7.1 Authentication (Clerk)
 We delegate identity management to Clerk to avoid rolling our own crypto.

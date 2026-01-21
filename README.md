@@ -33,7 +33,9 @@ Most study tools are too flexible. They ask "What do you want to do?" which trig
     1.  **Multiple Choice:** With plausible distractors.
     2.  **Cloze Deletion:** For memorizing syntax.
     3.  **Code Scenarios:** Execute code in a real Monaco Editor.
+*   **Banca Profiles:** Practice with question styles from Brazilian exam boards (FGV, CESPE, VUNESP, FCC, CESGRANRIO).
 *   **Deterministic Scheduling:** A custom SM-2 algorithm manages your review intervals.
+*   **Export:** Download your study units as JSON, TXT, or CSV for offline use.
 
 ---
 
@@ -41,17 +43,21 @@ Most study tools are too flexible. They ask "What do you want to do?" which trig
 We use a Type-Safe, production-grade stack to ensure reliability.
 
 *   **Framework:** Next.js 16 (App Router)
-*   **Database:** PostgreSQL + Prisma (Strict Schema)
+*   **Database:** PostgreSQL + Prisma + pgvector (RAG-enabled)
 *   **Auth:** Clerk (Lazy Creation Pattern)
-*   **AI:** Vercel AI SDK (Model Agnostic)
+*   **AI:** Gemini (2.0/2.5/3 Flash) + Voyage 3.5 Embeddings
+*   **Payments:** Asaas (Brazilian Pix Gateway)
 *   **Styling:** Tailwind CSS + shadcn/ui
 
 ## Getting Started
 
 ### Prerequisites
 *   Node.js 20+
-*   PostgreSQL Database (Local or Neon)
-*   Clerk Account keys
+*   PostgreSQL Database with pgvector extension (Local or Supabase)
+*   Clerk Account (Auth)
+*   Google AI API Key (Gemini models)
+*   Voyage API Key (Embeddings)
+*   Asaas API Key (Payments - optional for dev)
 
 ### Installation
 
