@@ -415,17 +415,16 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                         <div className="relative">
                                             <Button
                                                 variant="ghost"
-                                                size="sm"
+                                                size="icon"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setShowExportMenuId(showExportMenuId === unit.id ? null : unit.id);
                                                 }}
-                                                className="h-7 text-zinc-500 hover:text-green-400 hover:bg-green-950/20 px-2 sm:px-0 sm:w-7"
+                                                className="h-7 w-7 text-zinc-500 hover:text-green-400 hover:bg-green-950/20"
                                                 title={tExport('title')}
                                                 disabled={!!isExporting}
                                             >
                                                 {isExporting === unit.id ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
-                                                <span className="ml-1.5 inline sm:hidden">{tExport('title')}</span>
                                             </Button>
 
                                             {showExportMenuId === unit.id && (
@@ -487,26 +486,24 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
 
                                         <Button
                                             variant="ghost"
-                                            size="sm"
+                                            size="icon"
                                             onClick={(e) => handleActionClick(e, () => handleEditClick(unit))}
-                                            className="h-7 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-950/20 px-2 sm:px-0 sm:w-7"
+                                            className="h-7 w-7 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-950/20"
                                             title={t('editUnit')}
                                             disabled={editingUnitId === unit.id}
                                         >
                                             <Edit2 size={14} />
-                                            <span className="ml-1.5 inline sm:hidden">{t('editUnit')}</span>
                                         </Button>
 
                                         <Button
                                             variant="ghost"
-                                            size="sm"
+                                            size="icon"
                                             onClick={(e) => handleActionClick(e, () => handleDeleteInit(unit.id))}
-                                            className="h-7 text-zinc-500 hover:text-red-400 hover:bg-red-950/20 px-2 sm:px-0 sm:w-7"
+                                            className="h-7 w-7 text-zinc-500 hover:text-red-400 hover:bg-red-950/20"
                                             title={t('deleteTitle')}
                                             aria-label={t('deleteTitle')}
                                         >
                                             <Trash2 size={14} />
-                                            <span className="ml-1.5 inline sm:hidden">{t('deleteTitle')}</span>
                                         </Button>
                                     </div>
                                 )}
