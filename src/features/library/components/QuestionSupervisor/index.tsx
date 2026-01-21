@@ -25,6 +25,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [errors, setErrors] = useState<Record<number, Record<string, string>>>({});
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
+    const [showMobileEditor, setShowMobileEditor] = useState(false);
 
     const handleUpdate = (updated: EditableQuestion) => {
         const newQuestions = [...questions];
@@ -66,6 +67,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
         };
         setQuestions([...questions, newQ]);
         setSelectedIndex(questions.length);
+        setShowMobileEditor(true);
     };
 
     const validateAndCommit = () => {
@@ -105,6 +107,14 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
             {/* Header */}
             <div className="shrink-0 p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
                 <div className="flex items-center gap-3">
+                    {/* Back Button for Mobile Editor */}
+                    <div className={`md:hidden ${showMobileEditor ? 'flex' : 'hidden'} mr-1`}>
+                        <Button variant="ghost" size="sm" onClick={() => setShowMobileEditor(false)} className="gap-1 group px-2 -ml-2">
+                            <ChevronRight size={18} className="rotate-180 text-zinc-500 group-hover:text-zinc-300" />
+                            <span className="text-zinc-500 group-hover:text-zinc-300 font-medium">Back</span>
+                        </Button>
+                    </div>
+
                     <div className="h-8 w-8 rounded bg-indigo-500/10 flex items-center justify-center text-indigo-400">
                         <Layout size={18} />
                     </div>
@@ -131,11 +141,12 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
             {/* Workbench Body */}
             <div className="flex-1 flex overflow-hidden">
                 {/* Left Sidebar: List */}
-                <div className="w-64 md:w-80 border-r border-zinc-800 bg-zinc-900/20 flex flex-col">
+                <div className={`${showMobileEditor ? 'hidden md:flex' : 'flex'} w-full md:w-80 border-r border-zinc-800 bg-zinc-900/20 flex-col`}>
                     <div className="p-3 border-b border-zinc-800/50 flex justify-between items-center">
                         <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">{t('questions')}</span>
-                        <Button size="icon" variant="ghost" onClick={handleAdd} className="h-6 w-6 hover:bg-zinc-800 hover:text-indigo-400">
+                        <Button size="sm" variant="ghost" onClick={handleAdd} className="hover:bg-zinc-800 hover:text-indigo-400 gap-2 h-8 px-2 md:h-6 md:w-6 md:px-0">
                             <Plus size={14} />
+                            <span className="md:hidden">Add</span>
                         </Button>
                     </div>
                     <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -146,8 +157,11 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
                                     key={idx}
                                     role="button"
                                     tabIndex={0}
-                                    onClick={() => setSelectedIndex(idx)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedIndex(idx); } }}
+                                    onClick={() => {
+                                        setSelectedIndex(idx);
+                                        setShowMobileEditor(true);
+                                    }}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedIndex(idx); setShowMobileEditor(true); } }}
                                     className={`group flex items-center justify-between p-3 rounded-md text-sm border cursor-pointer transition-all ${idx === selectedIndex
                                         ? 'bg-zinc-800 border-zinc-700 text-zinc-100 shadow-sm'
                                         : 'border-transparent text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
@@ -184,7 +198,7 @@ export function QuestionSupervisor({ initialQuestions, onCancel, onCommit, inlin
                 </div>
 
                 {/* Right Panel: Editor */}
-                <div className="flex-1 flex flex-col bg-zinc-950 overflow-hidden relative">
+                <div className={`${showMobileEditor ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-zinc-950 overflow-hidden relative`}>
                     {selectedQuestion ? (
                         <div className="flex-1 overflow-y-auto p-8">
                             <div className="max-w-3xl mx-auto space-y-6">

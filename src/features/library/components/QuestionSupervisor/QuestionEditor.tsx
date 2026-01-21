@@ -22,9 +22,9 @@ export function QuestionEditor({ question, onUpdate, errors }: QuestionEditorPro
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
             {/* Top Controls */}
-            <div className="flex gap-4 items-start">
-                <div className="w-1/3">
-                    <label htmlFor="question-type" className="text-xs text-zinc-500 font-mono uppercase block mb-1.5 flex justify-between">
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+                <div className="w-full md:w-1/3">
+                    <label htmlFor="question-type" className="text-xs text-zinc-500 font-mono uppercase mb-1.5 flex justify-between">
                         {t('questionType')}
                         {getError('type') && <span className="text-red-400">{getError('type')}</span>}
                     </label>
@@ -39,7 +39,7 @@ export function QuestionEditor({ question, onUpdate, errors }: QuestionEditorPro
                         <option value="CODE">{t('types.CODE')}</option>
                     </select>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                     <label className="text-xs text-zinc-500 font-mono uppercase block mb-1.5">{t('topics')}</label>
                     <div className="bg-zinc-900/50 border border-zinc-800 rounded-md p-2 min-h-[42px] flex flex-wrap gap-2 items-center">
                         {(question.topics || []).map((topic, i) => (

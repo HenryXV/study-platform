@@ -321,108 +321,111 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                             isSelected && "border-indigo-500/50 bg-indigo-950/10"
                         )}>
                             {/* Header / Main Content */}
-                            <div className="flex items-start justify-between p-4 gap-3">
-                                {/* Selection Checkbox */}
-                                {selectionMode && (
-                                    <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); toggleSelection(unit.id); }}
-                                        className={cn(
-                                            'h-5 w-5 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors',
-                                            isSelected
-                                                ? 'bg-indigo-500 border-indigo-500'
-                                                : 'border-zinc-600 bg-transparent hover:border-zinc-500'
-                                        )}
-                                        aria-label={isSelected ? tCommon('deselectUnit') : tCommon('selectUnit')}
-                                    >
-                                        {isSelected && <Check size={12} className="text-white" />}
-                                    </button>
-                                )}
-
-                                {/* Main Expand Toggle */}
-                                <button
-                                    onClick={() => !selectionMode && onToggle(unit.id)}
-                                    disabled={selectionMode}
-                                    className={cn(
-                                        "flex flex-col gap-2 overflow-hidden flex-1 text-left focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500/50 rounded-lg -m-2 p-2 transition-colors",
-                                        !selectionMode && "hover:bg-zinc-900/40"
-                                    )}
-                                    aria-expanded={isExpanded}
-                                >
-                                    <div className="flex items-center gap-2">
-                                        {!selectionMode && (
-                                            <div className="h-5 w-5 flex items-center justify-center text-zinc-500">
-                                                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                                            </div>
-                                        )}
-                                        <Badge
-                                            variant="outline"
-                                            className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wider ${unit.type === 'CODE'
-                                                ? 'text-purple-400 border-purple-900/40 bg-purple-950/40'
-                                                : 'text-blue-400 border-blue-900/40 bg-blue-950/40'
-                                                }`}
-                                        >
-                                            {unit.type}
-                                        </Badge>
-                                        <span className="text-xs text-zinc-500 font-mono select-none">ID: {unit.id.slice(-4)}</span>
-                                    </div>
-
-                                    {editingUnitId === unit.id ? (
-                                        <div className="pl-8 w-full max-w-2xl space-y-2 cursor-default" onClick={(e) => e.stopPropagation()}>
-                                            <input
-                                                value={editForm.content}
-                                                onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
-                                                placeholder={t('unitTitlePlaceholder')}
-                                                className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors"
-                                            />
-                                            <textarea
-                                                value={editForm.description}
-                                                onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                                                placeholder={t('descriptionPlaceholder')}
-                                                className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 h-20 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
-                                            />
-                                            <div className="flex justify-end gap-2">
-                                                <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isSaving}>{tCommon('cancel')}</Button>
-                                                <Button size="sm" onClick={handleSaveEdit} disabled={isSaving}>
-                                                    {isSaving ? <Loader2 size={14} className="animate-spin mr-2" /> : <Save size={14} className="mr-2" />}
-                                                    {t('saveChanges')}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className={selectionMode ? "" : "pl-8"}>
-                                            <p className="text-sm text-zinc-200 font-medium leading-normal">
-                                                {unit.content}
-                                            </p>
-                                            {unit.description && (
-                                                <p className="text-sm text-zinc-400 mt-1 line-clamp-2">
-                                                    {unit.description}
-                                                </p>
+                            <div className="flex flex-col sm:flex-row items-start sm:justify-between p-4 gap-3">
+                                <div className="flex w-full items-start gap-3 flex-1 min-w-0">
+                                    {/* Selection Checkbox */}
+                                    {selectionMode && (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); toggleSelection(unit.id); }}
+                                            className={cn(
+                                                'h-5 w-5 rounded border flex items-center justify-center shrink-0 mt-0.5 transition-colors',
+                                                isSelected
+                                                    ? 'bg-indigo-500 border-indigo-500'
+                                                    : 'border-zinc-600 bg-transparent hover:border-zinc-500'
                                             )}
-                                        </div>
+                                            aria-label={isSelected ? tCommon('deselectUnit') : tCommon('selectUnit')}
+                                        >
+                                            {isSelected && <Check size={12} className="text-white" />}
+                                        </button>
                                     )}
-                                </button>
+
+                                    {/* Main Expand Toggle */}
+                                    <button
+                                        onClick={() => !selectionMode && onToggle(unit.id)}
+                                        disabled={selectionMode}
+                                        className={cn(
+                                            "flex flex-col gap-2 overflow-hidden flex-1 text-left focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500/50 rounded-lg -m-2 p-2 transition-colors",
+                                            !selectionMode && "hover:bg-zinc-900/40"
+                                        )}
+                                        aria-expanded={isExpanded}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {!selectionMode && (
+                                                <div className="h-5 w-5 flex items-center justify-center text-zinc-500">
+                                                    {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                                </div>
+                                            )}
+                                            <Badge
+                                                variant="outline"
+                                                className={`text-[10px] font-bold px-1.5 py-0.5 uppercase tracking-wider ${unit.type === 'CODE'
+                                                    ? 'text-purple-400 border-purple-900/40 bg-purple-950/40'
+                                                    : 'text-blue-400 border-blue-900/40 bg-blue-950/40'
+                                                    }`}
+                                            >
+                                                {unit.type}
+                                            </Badge>
+                                            <span className="text-xs text-zinc-500 font-mono select-none">ID: {unit.id.slice(-4)}</span>
+                                        </div>
+
+                                        {editingUnitId === unit.id ? (
+                                            <div className="pl-8 w-full max-w-2xl space-y-2 cursor-default" onClick={(e) => e.stopPropagation()}>
+                                                <input
+                                                    value={editForm.content}
+                                                    onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
+                                                    placeholder={t('unitTitlePlaceholder')}
+                                                    className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                                                />
+                                                <textarea
+                                                    value={editForm.description}
+                                                    onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                                                    placeholder={t('descriptionPlaceholder')}
+                                                    className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded text-sm text-zinc-200 h-20 focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                                                />
+                                                <div className="flex justify-end gap-2">
+                                                    <Button size="sm" variant="ghost" onClick={handleCancelEdit} disabled={isSaving}>{tCommon('cancel')}</Button>
+                                                    <Button size="sm" onClick={handleSaveEdit} disabled={isSaving}>
+                                                        {isSaving ? <Loader2 size={14} className="animate-spin mr-2" /> : <Save size={14} className="mr-2" />}
+                                                        {t('saveChanges')}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className={selectionMode ? "" : "pl-8"}>
+                                                <p className="text-sm text-zinc-200 font-medium leading-normal">
+                                                    {unit.content}
+                                                </p>
+                                                {unit.description && (
+                                                    <p className="text-sm text-zinc-400 mt-1 line-clamp-2">
+                                                        {unit.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </button>
+                                </div>
 
                                 {/* Actions (hidden in selection mode) */}
                                 {!selectionMode && (
                                     <div className={cn(
-                                        "flex items-center gap-1 transition-all",
+                                        "flex items-center gap-1 transition-all w-full sm:w-auto justify-end",
                                         isGenerating ? 'opacity-100' : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100'
                                     )}>
                                         {/* Export Button for each Unit */}
                                         <div className="relative">
                                             <Button
                                                 variant="ghost"
-                                                size="icon"
+                                                size="sm"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setShowExportMenuId(showExportMenuId === unit.id ? null : unit.id);
                                                 }}
-                                                className="h-7 w-7 text-zinc-500 hover:text-green-400 hover:bg-green-950/20"
+                                                className="h-7 text-zinc-500 hover:text-green-400 hover:bg-green-950/20 px-2 sm:px-0 sm:w-7"
                                                 title={tExport('title')}
                                                 disabled={!!isExporting}
                                             >
                                                 {isExporting === unit.id ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                                                <span className="ml-1.5 inline sm:hidden">{tExport('title')}</span>
                                             </Button>
 
                                             {showExportMenuId === unit.id && (
@@ -479,29 +482,31 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
                                             aria-label={t('generateQuestions')}
                                         >
                                             {isGenerating ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                            <span className="hidden sm:inline">{t('generateQuestions')}</span>
+                                            <span className="inline">{t('generateQuestions')}</span>
                                         </Button>
 
                                         <Button
                                             variant="ghost"
-                                            size="icon"
+                                            size="sm"
                                             onClick={(e) => handleActionClick(e, () => handleEditClick(unit))}
-                                            className="h-7 w-7 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-950/20"
+                                            className="h-7 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-950/20 px-2 sm:px-0 sm:w-7"
                                             title={t('editUnit')}
                                             disabled={editingUnitId === unit.id}
                                         >
                                             <Edit2 size={14} />
+                                            <span className="ml-1.5 inline sm:hidden">{t('editUnit')}</span>
                                         </Button>
 
                                         <Button
                                             variant="ghost"
-                                            size="icon"
+                                            size="sm"
                                             onClick={(e) => handleActionClick(e, () => handleDeleteInit(unit.id))}
-                                            className="h-7 w-7 text-zinc-500 hover:text-red-400 hover:bg-red-950/20"
+                                            className="h-7 text-zinc-500 hover:text-red-400 hover:bg-red-950/20 px-2 sm:px-0 sm:w-7"
                                             title={t('deleteTitle')}
                                             aria-label={t('deleteTitle')}
                                         >
                                             <Trash2 size={14} />
+                                            <span className="ml-1.5 inline sm:hidden">{t('deleteTitle')}</span>
                                         </Button>
                                     </div>
                                 )}
