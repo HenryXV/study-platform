@@ -53,7 +53,7 @@ function mapQuestionToFlashCard(q: any, isReviewAhead: boolean): FlashCard {
 export async function fetchQuestions(
     userId: string,
     mode: StudyMode = 'smart',
-    limit: number = 20,
+    limit: number = 30,
     subjectFilter?: string,
     topicFilter?: string
 ): Promise<FlashCard[]> {
@@ -66,10 +66,16 @@ export async function fetchQuestions(
         let finalQuestions: any[] = [];
         const now = new Date();
 
-        // 1. Crisis Mode: Only Overdue
+        // 1. Crisis Mode: Only Overdue (Priority 1) + New (Priority 2)
         if (mode === 'crisis') {
+            // Fetch overdue questions up to limit
             const overdue = await QuestionRepository.findDue(userId, limit, now, filter);
-            return overdue.map(q => mapQuestionToFlashCard(q, false));
+
+            // ALWAYS fetch new questions up to limit (ignoring whether overdue filled the quota)
+            // Note: This intentionally may return up to 2x limit cards
+            const newCards = await QuestionRepository.findNew(userId, limit, 'desc', filter);
+
+            return [...overdue, ...newCards].map(q => mapQuestionToFlashCard(q, false));
         }
 
         // 2. Due Reviews (Priority 1)
