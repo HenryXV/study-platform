@@ -30,9 +30,10 @@ interface GeneratedUnitsListProps {
     onDelete: (unitId: string) => Promise<void>;
     onOpenSupervisor?: (unitId: string, unitContent: string, unitType: 'TEXT' | 'CODE') => void;
     onOpenEditor?: (unitId: string, questions: EditableQuestion[]) => void;
+    sourceId?: string;
 }
 
-export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, onOpenSupervisor, onOpenEditor }: GeneratedUnitsListProps) {
+export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, onOpenSupervisor, onOpenEditor, sourceId }: GeneratedUnitsListProps) {
     const router = useRouter();
     const t = useTranslations('library.generated');
     const tExport = useTranslations('library.export');
@@ -170,7 +171,7 @@ export function GeneratedUnitsList({ units, expandedUnits, onToggle, onDelete, o
 
         try {
             const result = isBulk
-                ? await exportAllUnits(undefined, format)
+                ? await exportAllUnits(sourceId, format)
                 : await exportUnitData(unitId!, format);
 
             if (result.success && result.data && result.filename && result.contentType) {

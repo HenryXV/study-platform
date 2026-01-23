@@ -335,6 +335,7 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                                                         onDelete={handleDelete}
                                                         onOpenSupervisor={handleOpenSupervisor}
                                                         onOpenEditor={handleOpenEditor}
+                                                        sourceId={source.id}
                                                     />
                                                 </div>
                                             )}

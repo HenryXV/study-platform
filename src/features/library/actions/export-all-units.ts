@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { getTranslations } from 'next-intl/server';
 import type { QuestionModel as Question } from '@/app/generated/prisma/models';
+import { requireUser } from '@/lib/auth';
 
 type ExportFormat = 'json' | 'txt' | 'csv';
 
@@ -16,9 +17,20 @@ interface ExportResult {
 
 export async function exportAllUnits(sourceId: string | undefined, format: ExportFormat): Promise<ExportResult> {
     try {
+        const userId = await requireUser();
         const t = await getTranslations('library.export');
 
-        const where = sourceId ? { sourceId } : {};
+        // Security: Ensure we only fetch units belonging to the user
+        const where: any = {
+            source: {
+                userId
+            }
+        };
+
+        // If sourceId is provided, add it to the filter (implicit ownership check via the AND with userId above)
+        if (sourceId) {
+            where.sourceId = sourceId;
+        }
 
         const units = await prisma.studyUnit.findMany({
             where,
