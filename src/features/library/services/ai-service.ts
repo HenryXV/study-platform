@@ -202,9 +202,13 @@ export async function generateQuestions(
     }
 
     // Return questions with default topics mapped to their names if not generated
+    // Only include topics if the source has a valid subjectId (topics require a subject in the schema)
+    const hasValidSubject = !!unit.source.subject?.id;
     const questionsWithTopics = output.questions.map(q => ({
         ...q,
-        topics: q.topics && q.topics.length > 0 ? q.topics : unit.source.topics.map(t => t.name)
+        topics: hasValidSubject
+            ? (q.topics && q.topics.length > 0 ? q.topics : unit.source.topics.map(t => t.name))
+            : [] // No topics when source has no subject - prevents FK constraint error
     }));
 
     return {
