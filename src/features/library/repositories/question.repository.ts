@@ -187,6 +187,8 @@ export const QuestionRepository = {
                 });
             });
             return Promise.all(createPromises);
+        }, {
+            timeout: 20000 // Increase timeout to 20s for large batches
         });
     },
 
