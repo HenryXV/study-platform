@@ -130,29 +130,47 @@ export const QuestionRepository = {
 
     async createBatch(userId: string, unitId: string, subjectId: string | null, questions: GeneratorQuestion[]) {
         return prisma.$transaction(async (tx) => {
-            const createdQuestions = [];
+            // 1. Extract all unique topics across all questions
+            const allTopics = Array.from(new Set(
+                questions.flatMap(q => q.topics || [])
+            ));
 
-            // Execute serially to support connectOrCreate safely without valid transaction race conditions
-            for (const q of questions) {
-                // Deduplicate topics to prevent "Expected X connect records, found Y" errors
+            // 2. Ensure all topics exist (upsert them all first)
+            // This prevents race conditions better than connectOrCreate for batch operations
+            if (subjectId && allTopics.length > 0) {
+                await Promise.all(allTopics.map(topicName =>
+                    tx.topic.upsert({
+                        where: {
+                            name_subjectId_userId: {
+                                name: topicName,
+                                subjectId: subjectId,
+                                userId
+                            }
+                        },
+                        create: {
+                            name: topicName,
+                            subjectId: subjectId,
+                            userId
+                        },
+                        update: {} // No-op if exists
+                    })
+                ));
+            }
+
+            // 3. Create all questions in parallel, connecting to the now-guaranteed topics
+            const createPromises = questions.map(q => {
+                // CRITICAL: Deduplicate topics per question to prevent "Expected X, found Y" errors
                 const uniqueTopics = [...new Set(q.topics || [])];
 
-                const created = await tx.question.create({
+                return tx.question.create({
                     data: {
                         userId,
                         unitId,
                         type: mapType(q.type),
                         subjectId: subjectId,
                         topics: (subjectId && uniqueTopics.length > 0) ? {
-                            connectOrCreate: uniqueTopics.map(topicName => ({
-                                where: {
-                                    name_subjectId_userId: {
-                                        name: topicName,
-                                        subjectId: subjectId,
-                                        userId
-                                    }
-                                },
-                                create: {
+                            connect: uniqueTopics.map(topicName => ({
+                                name_subjectId_userId: {
                                     name: topicName,
                                     subjectId: subjectId,
                                     userId
@@ -167,9 +185,8 @@ export const QuestionRepository = {
                         }
                     }
                 });
-                createdQuestions.push(created);
-            }
-            return createdQuestions;
+            });
+            return Promise.all(createPromises);
         });
     },
 
