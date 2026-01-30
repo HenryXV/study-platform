@@ -179,8 +179,10 @@ export async function saveRawSource(
     // 1. Parse PDF to extract text (for RAG/embeddings)
     const { text } = await parsePdf(buffer);
 
-    // 2. Upload PDF to Vercel Blob
-    const blob = await put(`sources/${userId}/${Date.now()}-${file.name}`, file, {
+    // 2. Upload PDF to Vercel Blob with randomized path
+    // Using crypto.randomUUID() instead of userId makes direct URL guessing virtually impossible
+    const randomPath = crypto.randomUUID();
+    const blob = await put(`sources/${randomPath}/${Date.now()}-${file.name}`, file, {
         access: 'public',
         contentType: 'application/pdf',
         token: process.env.SYSTEMIZER_READ_WRITE_TOKEN,

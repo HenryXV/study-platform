@@ -3,12 +3,22 @@
 import { useState } from 'react';
 
 interface PdfViewerProps {
-    url: string;
+    /** Source ID to load PDF from authenticated proxy route */
+    sourceId: string;
     title?: string;
 }
 
-export function PdfViewer({ url, title }: PdfViewerProps) {
+/**
+ * Secure PDF viewer component.
+ * 
+ * Loads PDFs through an authenticated proxy route to ensure
+ * only the owner can view their documents.
+ */
+export function PdfViewer({ sourceId, title }: PdfViewerProps) {
     const [isLoading, setIsLoading] = useState(true);
+
+    // Use the authenticated proxy route instead of direct Vercel Blob URL
+    const proxyUrl = `/api/sources/${sourceId}/pdf`;
 
     return (
         <div className="relative w-full h-full min-h-0 flex flex-col bg-zinc-950">
@@ -24,7 +34,7 @@ export function PdfViewer({ url, title }: PdfViewerProps) {
 
             {/* PDF Iframe */}
             <iframe
-                src={url}
+                src={proxyUrl}
                 title={title || 'PDF Viewer'}
                 className="flex-1 w-full h-full min-h-0 border-0 bg-zinc-900"
                 onLoad={() => setIsLoading(false)}

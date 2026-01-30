@@ -238,7 +238,7 @@ export function SourceInspector({ source }: SourceInspectorProps) {
                         </div>
                         <div className="flex-1 overflow-auto custom-scrollbar bg-zinc-950 min-h-0">
                             {source.fileUrl && viewMode === 'pdf' ? (
-                                <PdfViewer url={source.fileUrl} title={source.title} />
+                                <PdfViewer sourceId={source.id} title={source.title} />
                             ) : (
                                 <pre className="font-mono text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed max-w-none p-6">
                                     {source.bodyText}
